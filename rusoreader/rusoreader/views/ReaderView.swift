@@ -13,10 +13,12 @@ class ReaderView: UIViewController, UITextViewDelegate {
     func textView(_ textView: UITextView, editMenuForTextIn range: NSRange, suggestedActions: [UIMenuElement]) -> UIMenu? {
         let selectedRange = Range(range, in: self.textView.text)
         
-        let selectedText = self.textView.text[selectedRange!].split(separator: " ")
+        let selectedText = textView.text[selectedRange!].split(separator: " ")
         
         let lookupAction = UIAction(title: "Look Up") { action in
-            print("Let's look up this word")
+            let wordDetails = WordDetailsView()
+            wordDetails.modalPresentationStyle = .pageSheet
+            self.present(wordDetails, animated: true)
         }
         let translateSentenceAction = UIAction(title: "Translate Sentence") { action in
             print("Let's translate this sentence")
