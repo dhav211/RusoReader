@@ -1,8 +1,6 @@
 import UIKit
 
 class ReaderView: UIViewController {
-    @IBOutlet var textView: UITextView!
-    
     var text = NSMutableAttributedString(string: """
     Может быть, я когда-нибудь прилетела с другой планеты? Давно. И забыла об этом. Или меня родители пронесли контрабандой. В животе. Мне часто говорят, что я инопланетянка, но никто не может объяснить, в чем это проявляется.
     
@@ -23,15 +21,28 @@ class ReaderView: UIViewController {
     Крячко, не таясь, зашагал в сторону гаража, в котором засел пьяный отморозок, вышел на открытое пространство, поднял руки и громко выкрикнул:
 
     — Эй, Мурмыгин! Ты мужик или трусливая дешевка? Вот он я, стою на самом виду. Можешь даже выстрелить в меня. Я тебя не боюсь. Чего спрятался за пацана? Позорище! Вот, гляди, мой смартфон. Я прямо сейчас выйду в интернет и буду вести репортаж на сайте «Вкус свободы», где пасется только крутая братва. Вот! Пошла связь, отлично! Парни, я полковник полиции Крячко. Веду свой репортаж с территории гаражных боксов, находящихся в поселке Тимофеево. Здесь отличился бывший сиделец Борька Мурмыгин. Он взял в заложники ребенка, мальчонку десяти лет, и прикрывается им, как последняя дешевка. Вот! Уже пошли отклики! Авторитет с погонялом Рольф пишет: «Если этот пес позорный попадет на зону, то я лично позабочусь о том, чтобы ему оторвали яйца!» Ага, еще один авторитетный гражданин с погонялом Морж пишет: «Дай координаты, полковник. Я сейчас лично приеду и порву этого петушару на куски голыми руками!»
+    
     """,
     attributes: [
         .font: UIFont.systemFont(ofSize: 24)
     ])
     
+    var textView: UITextView!
     var selectionRange: SelectionRange?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        textView = UITextView()
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(textView)
+        
+        NSLayoutConstraint.activate([
+            textView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
+            textView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
+            textView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0),
+            textView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0)
+        ])
         
         textView.isEditable = false
         textView.isSelectable = false
@@ -39,30 +50,33 @@ class ReaderView: UIViewController {
 //        textView.isScrollEnabled = false
 //        textView.textContainerInset = .zero
 //        textView.textContainer.lineFragmentPadding = 0
+        
         textView.attributedText = text
+        // We must call the ensure layout method after we set the text so uiview will know how big the document is
+        // this will avoid the issue of the user scrolling down and the input will register as if they didn't scroll
+        textView.layoutManager.ensureLayout(forGlyphRange: NSRange(location: 0, length: textView.layoutManager.numberOfGlyphs))
         
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
-        //tapRecognizer.numberOfTapsRequired = 2
         textView.addGestureRecognizer(tapRecognizer)
     }
     
     @objc func handleTap(_ gesture: UITapGestureRecognizer) {
         if let currentSelectedRange = selectionRange {
-            text.addAttribute(.foregroundColor, value: UIColor.black, range: currentSelectedRange.wordRange)
-            text.removeAttribute(.underlineStyle, range: currentSelectedRange.sentenceRange)
-            textView.attributedText = text
+            textView.textStorage.addAttribute(.foregroundColor, value: UIColor.black, range: currentSelectedRange.wordRange)
+            textView.textStorage.removeAttribute(.underlineStyle, range: currentSelectedRange.sentenceRange)
             selectionRange = nil
         } else {
+            // Get the users gesture input location, then the text view's layout manager can convert that cgrect to a character index. We will use that character index to handle the selection range. Once the selection range has been set we will highlight the word and underline the rest of the sentence.
             let layoutManager = textView.layoutManager
-            layoutManager.ensureLayout(for: textView.textContainer)
             var location = gesture.location(in: textView)
+            location.x -= textView.textContainerInset.left
+            location.y -= textView.textContainerInset.top
             let charIndex = layoutManager.characterIndex(for: location, in: textView.textContainer, fractionOfDistanceBetweenInsertionPoints: nil)
             selectionRange = SelectionRange(text: text.string, characterIndex: charIndex)
             guard let currentRange = selectionRange else { return }
-            text.addAttribute(.foregroundColor, value: UIColor.red, range: currentRange.wordRange)
-            text.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: currentRange.sentenceRange)
-            text.addAttribute(.underlineColor, value: UIColor.red, range: currentRange.sentenceRange)
-            textView.attributedText = text
+            textView.textStorage.addAttribute(.foregroundColor, value: UIColor.red, range: currentRange.wordRange)
+            textView.textStorage.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: currentRange.sentenceRange)
+            textView.textStorage.addAttribute(.underlineColor, value: UIColor.red, range: currentRange.sentenceRange)
         }
     }
 }

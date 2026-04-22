@@ -8,6 +8,7 @@
 import UIKit
 
 class ViewController: UIViewController {
+    //var readerView : ReaderView = ReaderView()
     override func viewDidLoad() {
         super.viewDidLoad()
     }
