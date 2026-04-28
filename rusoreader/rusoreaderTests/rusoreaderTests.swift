@@ -1,10 +1,3 @@
-//
-//  rusoreaderTests.swift
-//  rusoreaderTests
-//
-//  Created by Big D on 4/9/26.
-//
-
 import XCTest
 @testable import rusoreader
 

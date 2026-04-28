@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		76DD1E692F99AF1F008A787C /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 76DD1E682F99AF1F008A787C /* GRDB */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		76DD1DF32F888F7F008A787C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				76DD1E692F99AF1F008A787C /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +130,7 @@
 			);
 			name = rusoreader;
 			packageProductDependencies = (
+				76DD1E682F99AF1F008A787C /* GRDB */,
 			);
 			productName = rusoreader;
 			productReference = 76DD1DDC2F888F7D008A787C /* rusoreader.app */;
@@ -208,6 +214,9 @@
 			);
 			mainGroup = 76DD1DD32F888F7D008A787C;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				76DD1E672F99AF1F008A787C /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 76DD1DDD2F888F7D008A787C /* Products */;
 			projectDirPath = "";
@@ -569,6 +578,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		76DD1E672F99AF1F008A787C /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		76DD1E682F99AF1F008A787C /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 76DD1E672F99AF1F008A787C /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 76DD1DD42F888F7D008A787C /* Project object */;
 }

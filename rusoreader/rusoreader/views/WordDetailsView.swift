@@ -1,12 +1,24 @@
 import UIKit
 
 class WordDetailsView: UIViewController {
+    let words: [Word]
+    
+    init(words: [Word]) {
+        self.words = words
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = .systemBackground
         
-        let sampleNoun = createSampleNoun()
+        guard let word = words.first else { return }
         
         //let scrollView = UIScrollView()
         let wordDetailsStack = UIStackView()
@@ -17,15 +29,25 @@ class WordDetailsView: UIViewController {
         wordDetailsStack.spacing = 16
         view.addSubview(wordDetailsStack)
 
-        wordDetailsStack.addArrangedSubview(createWordTitleHeader(for: sampleNoun.text))
+        wordDetailsStack.addArrangedSubview(createWordTitleHeader(for: word.bare))
         
-        if let translationStack = createTranslationSection(with: sampleNoun.translations) {
+        if let translationStack = createTranslationSection(with: word.translations) {
             wordDetailsStack.addArrangedSubview(translationStack)
         }
         
-        wordDetailsStack.addArrangedSubview(createWordInformation(for: sampleNoun))
+        wordDetailsStack.addArrangedSubview(createWordInformation(for: word))
         
-        wordDetailsStack.addArrangedSubview(createNounDeclensionTable(with: sampleNoun.wordForms))
+        switch word.type {
+        case .noun:
+            wordDetailsStack.addArrangedSubview(createGrammarTable(from: word, as: .noun))
+        case .verb:
+            wordDetailsStack.addArrangedSubview(createGrammarTable(from: word, as: .verb))
+            wordDetailsStack.addArrangedSubview(createGrammarTable(from: word, as: .verbPast))
+        case .adjective:
+            wordDetailsStack.addArrangedSubview(createGrammarTable(from: word, as: .adjective))
+        default:
+            print("You need to implement all word forms")
+        }
         
         NSLayoutConstraint.activate([
             wordDetailsStack.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
@@ -36,7 +58,18 @@ class WordDetailsView: UIViewController {
     
     /// MARK Element Creation Methods
     
-    /// Create the header for the details page, this will include the accented word and also a icon button which will add the word to the users dictionary
+    /**
+     * Creates and configures a UIStackView representing a title header for a word.
+
+    * This function uses a string word to create a stack view with a label displaying the word's name and an image indicating that it can be added to a dictionary.
+    * The stack view is horizontally arranged and has a vertical spacing of 32 points.
+
+    * - Parameters:
+        - word: A string representing the word's name.
+
+    * - Returns:
+      A configured UIStackView representing the title header for the word.
+     */
     private func createWordTitleHeader(for word: String) -> UIStackView {
         let wordStack = UIStackView()
         wordStack.axis = .horizontal
@@ -53,7 +86,18 @@ class WordDetailsView: UIViewController {
         return wordStack
     }
     
-    /// Creates the word's translations, which will be a group a labels set in a vertical stack. Can return nil if no translations exist for the word
+    /**
+     * Creates and configures a UIStackView representing a section of translations.
+
+    * This function uses an array of string translations to create a stack view with a header label and multiple translation text labels.
+    * If the input array is empty, the function returns nil.
+
+    * - Parameters:
+        - translations: An array of string translations to display in the section.
+
+    * - Returns:
+      A configured UIStackView representing the translation section, or nil if the input array is empty.
+     */
     private func createTranslationSection(with translations: [String]) -> UIStackView? {
         if translations.isEmpty {
             return nil
@@ -66,38 +110,61 @@ class WordDetailsView: UIViewController {
         translationStack.addArrangedSubview(translationHeader)
         for translation in translations {
             let translationText = UILabel()
-            translationText.text = "- " + translation
+            translationText.text = "- \(translation)"
             translationStack.addArrangedSubview(translationText)
         }
         
         return translationStack
     }
     
-    /// The word information will give the user details on the word just as it's word type, it's gender, and various other useful details on the word
-    private func createWordInformation(for word: SampleNoun) -> UILabel { // TODO this shouldn't have a SampleNoun parameter,
+    /**
+     * Creates and configures a UILabel displaying word information, such as part of speech, gender, animate, etc.
+
+    * This function uses data from a Word object to create a label that displays the word's type, attributes (e.g. noun gender, verb aspect), and ranking.
+    * The label text is generated based on the word's properties.
+
+    * - Parameters:
+        - word: A Word object containing information about the word.
+
+    * - Returns:
+      A configured UILabel displaying the word's information.
+     */
+    private func createWordInformation(for word: Word) -> UILabel {
         let informationLabel = UILabel()
-        var information = word.wordType
-        
-        // TODO a lot of this will be changed once we get the database working, we will be using enums instead of strings here, but the logic will remain
-        
-        // The word information will change depending on if it's noun, verb, adjective
-        switch word.wordType {
-        case "noun":
-            if word.gender == "f" {
-                information.append(", female")
-            } else if word.gender == "m" {
-                information.append(", male")
-            } else {
-                information.append(", neuter")
-            }
+        var information = ""
             
-            if word.animate {
-                information.append(", animate")
-            } else {
-                information.append(", inanimate")
+        // The word information will change depending on if it's noun, verb, adjective
+        switch word.type {
+        case .noun:
+            information.append("Noun")
+            if let noun = word.noun {
+                if noun.gender == Noun.Gender.female {
+                    information.append(", female")
+                } else if noun.gender == Noun.Gender.male {
+                    information.append(", male")
+                } else if noun.gender == Noun.Gender.neuter {
+                    information.append(", neuter")
+                } else {
+                    information.append(", male & female")
+                }
+                
+                if noun.animate {
+                    information.append(", animate")
+                } else {
+                    information.append(", inanimate")
+                }
             }
-        default:
-            print("Word doesn't have a word type!")
+        case .verb:
+            information.append("Verb")
+            if let verb = word.verb {
+                information.append(", \(verb.aspect.rawValue)")
+            }
+        case .adjective:
+            information.append("Adjective")
+        case .adverb:
+            information.append("Adverb")
+        case.other:
+            information.append("Other")
         }
         
         // The user wouldn't need to know the exact ranking of the word, so we can just give them a general idea what the ranking is
@@ -119,33 +186,35 @@ class WordDetailsView: UIViewController {
         return informationLabel
     }
     
-    private func createNounDeclensionTable(with wordForms: [String:String]) -> UIStackView {
+    /**
+     * Creates and configures a UIStackView representing a grammar table.
+
+    * This function uses data from a Word object and a GrammarFormTableData instance to create a table with rows and columns, where each cell contains text labels.
+    * The layout of the cells is determined by the longest row in each column.
+
+    * - Parameters:
+        - word: A Word object containing information about the grammar forms of the word.
+        - grammarTableType: An enum value indicating the type of grammar form table to create (e.g. noun, verb, adjective).
+
+    * - Returns:
+      A configured UIStackView representing the grammar table.
+     */
+    private func createGrammarTable(from word: Word, as grammarTableType: GrammarFormTableData.TableType) -> UIStackView {
         let columnStack = UIStackView()
         columnStack.axis = .vertical
         columnStack.distribution = .fill
         columnStack.spacing = 4
 
-        // TODO we should make a function that takes the wordForms and word type then returns the correct 2d array
-        let cellTexts = [
-            ["", "Singular", "Plural"],
-            ["Nominative", wordForms["ru_noun_sg_nom"], wordForms["ru_noun_pl_nom"]],
-            ["Genitive", wordForms["ru_noun_sg_gen"], wordForms["ru_noun_pl_gen"]],
-            ["Dative", wordForms["ru_noun_sg_dat"], wordForms["ru_noun_pl_dat"]],
-            ["Accusative", wordForms["ru_noun_sg_acc"], wordForms["ru_noun_pl_acc"]],
-            ["Instrumental", wordForms["ru_noun_sg_inst"], wordForms["ru_noun_pl_inst"]],
-            ["Prepositional", wordForms["ru_noun_sg_prep"], wordForms["ru_noun_pl_prep"]]
-        ]
+        let grammarFormTableData = GrammarFormTableData(wordForms: word.forms, grammarTableType: grammarTableType)
         
         // We want to find out which string is the longest in each column, this will determine which label to anchor off of
         let longestRowInColumns : [Int] = {
             var longestRows = [Int]()
-            for i in 0..<cellTexts.count {
+            for i in 0..<grammarFormTableData.forms.count {
                 var currentLongestRowIndex = 0
-                for j in 0..<cellTexts[i].count {
-                    if let currentRow = cellTexts[i][j], let longestRow = cellTexts[i][currentLongestRowIndex] {
-                        if currentRow.count > longestRow.count {
-                            currentLongestRowIndex = j
-                        }
+                for j in 0..<grammarFormTableData.forms[i].count {
+                    if grammarFormTableData.forms[i][j].text.count > grammarFormTableData.forms[i][currentLongestRowIndex].text.count {
+                        currentLongestRowIndex = j
                     }
                 }
                 longestRows.append(currentLongestRowIndex)
@@ -158,42 +227,47 @@ class WordDetailsView: UIViewController {
         // Create the the row stacks and text labels.
         // The labels will added to the stacks in the order of the cell texts 2d array
         // we are also adding the labels to their own 2d array which will be used to set the anchors
-        for row in 0..<cellTexts.count {
+        for row in 0..<grammarFormTableData.forms.count {
             let rowStack = UIStackView()
             rowStack.axis = .horizontal
             rowStack.spacing = 16
             columnStack.addArrangedSubview(rowStack)
             cells.append([])
             
-            for column in 0..<cellTexts[row].count {
-                if let text = cellTexts[row][column] {
-                    // Occasionally a word will have 2 varations for a single form, we will know about by a comma seperating the two forms
-                    let varations = text.split(separator: ",")
+            for column in 0..<grammarFormTableData.forms[row].count {
+                // Occasionally a word will have 2 varations for a single form, we will know about by a comma seperating the two forms
+                let varations = grammarFormTableData.forms[row][column].text.split(separator: ",")
+                
+                // Most will follow this path, just ignore the varations array and access the text the create the label
+                if varations.count <= 1 {
+                    let label = UILabel()
+                    label.text = getLabelTextFromCell(
+                        wordText: grammarFormTableData.forms[row][column].text,
+                        isRussianWord: grammarFormTableData.forms[row][column].isRussianWord,
+                        isAdjective: word.type == .adjective)
+                    cells[row].append(label)
+                    rowStack.addArrangedSubview(label)
+                } else {
+                    // However things will be a bit different if we have multiple varations
+                    // Lets create yet another stack to add both varations so they are on different lines
+                    let varationStack = UIStackView()
+                    varationStack.axis = .vertical
+                    var hasAddedToCells = false
                     
-                    // Most will follow this path, just ignore the varations array and access the text the create the label
-                    if varations.count <= 1 {
+                    for varation in varations {
                         let label = UILabel()
-                        label.text = text
-                        cells[row].append(label)
-                        rowStack.addArrangedSubview(label)
-                    } else {
-                        // However things will be a bit different if we have multiple varations
-                        // Lets create yet another stack to add both varations so they are on different lines
-                        let varationStack = UIStackView()
-                        varationStack.axis = .vertical
-                        var hasAddedToCells = false
-                        
-                        for varation in varations {
-                            let label = UILabel()
-                            label.text = String(varation)
-                            if !hasAddedToCells { // this just ensures only the first label is added to the cells array
-                                cells[row].append(label)
-                                hasAddedToCells.toggle()
-                            }
-                            varationStack.addArrangedSubview(label)
+                        label.text = getLabelTextFromCell(
+                            wordText: String(varation),
+                            isRussianWord: true,
+                            isAdjective: word.type == .adjective)
+                        if !hasAddedToCells { // this just ensures only the first label is added to the cells array
+                            cells[row].append(label)
+                            hasAddedToCells.toggle()
                         }
-                        rowStack.addArrangedSubview(varationStack)
+                        varationStack.addArrangedSubview(label)
                     }
+                    rowStack.addArrangedSubview(varationStack)
+                    
                 }
             }
         }
@@ -210,47 +284,51 @@ class WordDetailsView: UIViewController {
         return columnStack
     }
     
-    
-    /// MARK Temporary Data Holders - Will be removed when database is intergrated
-    private func createSampleNoun() -> SampleNoun {
-        return SampleNoun(text: "соба́ка",
-                          gender: "f",
-                          wordType: "noun",
-                          ranking: 340,
-                          animate: true,
-                          translations: ["dog", "the @ sign"],
-                          wordForms: [
-                            "ru_noun_pl_prep" : "собаках",
-                            "ru_noun_pl_inst" : "собаками",
-                            "ru_noun_pl_acc" : "собак",
-                            "ru_noun_pl_dat" : "собакам",
-                            "ru_noun_pl_gen" : "собак",
-                            "ru_noun_pl_nom" : "собаки",
-                            "ru_noun_sg_prep" : "собаке",
-                            "ru_noun_sg_inst" : "собакой,собакою",
-                            "ru_noun_sg_acc" : "собаку",
-                            "ru_noun_sg_dat" : "собаке",
-                            "ru_noun_sg_gen" : "собаки",
-                            "ru_noun_sg_nom" : "собака"
-                            ],
-                          sentences: [
-                            ("Соба́ка бежа́ла ему навстречу.", "The dog was running toward him."),
-                            ("Соба́ка побежа́ла за лисо́й.", "The dog ran after a fox."),
-                            ("Соба́ка подбежа́ла к ней.", "The dog came running to her.")
-                          ],
-                          relatedWords: ["соба́чий", "соба́читься", "пёс"])
+    /**
+     * Generates a label text from a given cell's word text based on its language and type.
+
+    * This function takes into account whether the word is a Russian word or a column/row header and whether it's an adjective, which would if it is and also long enough then we should only display the ending
+
+    * - Parameters:
+        - wordText: The original word text from the cell.
+        - isRussianWord: A boolean indicating whether the word is in Russian.
+        - isAdjective: A boolean indicating whether the word is an adjective.
+
+    * - Returns:
+      A string representing the generated label text for the cell.
+     */
+
+    private func getLabelTextFromCell(wordText: String, isRussianWord: Bool, isAdjective: Bool) -> String {
+        if isRussianWord {
+            if !isAdjective {
+                return wordText
+            } else {
+                if wordText.count > 5 { // If an adjective is longer than 5 letters then lets just display the endings
+                    return getAdjectiveEnding(for: wordText)
+                } else {
+                    return wordText
+                }
+            }
+        } else {
+            return wordText
+        }
     }
-}
+    
+    /**
+     * Extracts and returns the ending part of an adjective.
 
+    * This function uses the base form of the adjective (found using `findAdjectiveBase`) to split it into two parts: the base and the ending.
+    * It then returns only the ending part, excluding the base.
 
-private struct SampleNoun {
-    let text: String
-    let gender: String
-    let wordType: String
-    let ranking: Int
-    let animate: Bool
-    let translations: [String]
-    let wordForms: [String:String]
-    let sentences: [(String, String)]
-    let relatedWords: [String]
+    * - Parameters:
+        - adjective: The adjective from which to extract the ending part, as a `String`.
+
+    * - Returns:
+      A string representing the extracted ending part of the adjective.
+     */
+    private func getAdjectiveEnding(for adjective: String) -> String {
+        let adjectiveBase = WordUtils.findAdjectiveBase(for: adjective)
+        let baseRange = adjective.range(of: adjectiveBase)
+        return "-\(adjective[baseRange!.upperBound..<adjective.endIndex])"
+    }
 }

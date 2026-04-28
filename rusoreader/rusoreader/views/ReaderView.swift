@@ -24,16 +24,28 @@ class ReaderView: UIViewController {
     
     """,
     attributes: [
+        .foregroundColor: UIColor.label,
         .font: UIFont.systemFont(ofSize: 24)
     ])
     
     var textView: UITextView!
     var selectionRange: SelectionRange?
+    let wordRepo: WordRepository
+    
+    init(wordRepo: WordRepository) {
+        self.wordRepo = wordRepo
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        textView = UITextView()
+        textView = UITextView(usingTextLayoutManager: false)
+        textView.showsVerticalScrollIndicator = false
         textView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(textView)
         
@@ -62,7 +74,7 @@ class ReaderView: UIViewController {
     
     @objc func handleTap(_ gesture: UITapGestureRecognizer) {
         if let currentSelectedRange = selectionRange {
-            textView.textStorage.addAttribute(.foregroundColor, value: UIColor.black, range: currentSelectedRange.wordRange)
+            textView.textStorage.addAttribute(.foregroundColor, value: UIColor.label, range: currentSelectedRange.wordRange)
             textView.textStorage.removeAttribute(.underlineStyle, range: currentSelectedRange.sentenceRange)
             selectionRange = nil
         } else {
@@ -74,9 +86,22 @@ class ReaderView: UIViewController {
             let charIndex = layoutManager.characterIndex(for: location, in: textView.textContainer, fractionOfDistanceBetweenInsertionPoints: nil)
             selectionRange = SelectionRange(text: text.string, characterIndex: charIndex)
             guard let currentRange = selectionRange else { return }
-            textView.textStorage.addAttribute(.foregroundColor, value: UIColor.red, range: currentRange.wordRange)
-            textView.textStorage.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: currentRange.sentenceRange)
-            textView.textStorage.addAttribute(.underlineColor, value: UIColor.red, range: currentRange.sentenceRange)
+            
+            if let wordRange = Range(currentRange.wordRange, in: text.string) {
+                textView.textStorage.addAttribute(.foregroundColor, value: UIColor.red, range: currentRange.wordRange)
+                textView.textStorage.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: currentRange.sentenceRange)
+                textView.textStorage.addAttribute(.underlineColor, value: UIColor.red, range: currentRange.sentenceRange)
+                
+                let highlightedWord = String(text.string[wordRange])
+                let ids = wordRepo.findWordIDs(by: highlightedWord)
+                let matches = wordRepo.findMatches(by: ids)
+                
+                if !matches.isEmpty {
+                    let wordDetails = WordDetailsView(words: matches)
+                    wordDetails.modalPresentationStyle = .pageSheet
+                    self.present(wordDetails, animated: true)
+                }
+            }
         }
     }
 }
