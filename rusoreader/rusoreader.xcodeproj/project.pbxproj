@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		76DD1E692F99AF1F008A787C /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 76DD1E682F99AF1F008A787C /* GRDB */; };
+		76FD7E3C2FA4ECF600C5960E /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 76FD7E3B2FA4ECF600C5960E /* SwiftSoup */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				76DD1E692F99AF1F008A787C /* GRDB in Frameworks */,
+				76FD7E3C2FA4ECF600C5960E /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,6 +133,7 @@
 			name = rusoreader;
 			packageProductDependencies = (
 				76DD1E682F99AF1F008A787C /* GRDB */,
+				76FD7E3B2FA4ECF600C5960E /* SwiftSoup */,
 			);
 			productName = rusoreader;
 			productReference = 76DD1DDC2F888F7D008A787C /* rusoreader.app */;
@@ -216,6 +219,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				76DD1E672F99AF1F008A787C /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+				76FD7E3A2FA4ECF600C5960E /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 76DD1DDD2F888F7D008A787C /* Products */;
@@ -588,6 +592,14 @@
 				kind = branch;
 			};
 		};
+		76FD7E3A2FA4ECF600C5960E /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.13.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -595,6 +607,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 76DD1E672F99AF1F008A787C /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
+		};
+		76FD7E3B2FA4ECF600C5960E /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 76FD7E3A2FA4ECF600C5960E /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

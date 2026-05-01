@@ -20,8 +20,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         
         let dbManager = DatabaseManager()
+        let rootController = HomePageController(dbManager: dbManager)
+        let navigationController = UINavigationController(rootViewController: rootController)
+        window.rootViewController = navigationController
+        //window.rootViewController = ReaderView(wordRepo: WordRepository(queue: dbManager.queue))
         
-        window.rootViewController = ReaderView(wordRepo: WordRepository(queue: dbManager.queue))
         self.window = window
         window.makeKeyAndVisible()
     }

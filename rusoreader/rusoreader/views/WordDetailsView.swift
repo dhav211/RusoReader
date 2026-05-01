@@ -58,18 +58,13 @@ class WordDetailsView: UIViewController {
     
     /// MARK Element Creation Methods
     
-    /**
-     * Creates and configures a UIStackView representing a title header for a word.
-
-    * This function uses a string word to create a stack view with a label displaying the word's name and an image indicating that it can be added to a dictionary.
-    * The stack view is horizontally arranged and has a vertical spacing of 32 points.
-
-    * - Parameters:
-        - word: A string representing the word's name.
-
-    * - Returns:
-      A configured UIStackView representing the title header for the word.
-     */
+    /// Creates and configures a UIStackView representing a title header for a word.
+    /// 
+    /// This function uses a string word to create a stack view with a label displaying the word's name and an image indicating that it can be added to a dictionary.
+    /// The stack view is horizontally arranged and has a vertical spacing of 32 points.
+    /// - Parameters:
+    ///     - word: A string representing the word's name.
+    /// - Returns: A configured UIStackView representing the title header for the word.
     private func createWordTitleHeader(for word: String) -> UIStackView {
         let wordStack = UIStackView()
         wordStack.axis = .horizontal
@@ -86,18 +81,16 @@ class WordDetailsView: UIViewController {
         return wordStack
     }
     
-    /**
-     * Creates and configures a UIStackView representing a section of translations.
+    /// Creates and configures a UIStackView representing a section of translations.
 
-    * This function uses an array of string translations to create a stack view with a header label and multiple translation text labels.
-    * If the input array is empty, the function returns nil.
+    /// This function uses an array of string translations to create a stack view with a header label and multiple translation text labels.
+    /// If the input array is empty, the function returns nil.
 
-    * - Parameters:
-        - translations: An array of string translations to display in the section.
+    /// - Parameters:
+    ///     - translations: An array of string translations to display in the section.
 
-    * - Returns:
-      A configured UIStackView representing the translation section, or nil if the input array is empty.
-     */
+    /// - Returns:
+    ///     A configured UIStackView representing the translation section, or nil if the input array is empty.
     private func createTranslationSection(with translations: [String]) -> UIStackView? {
         if translations.isEmpty {
             return nil
@@ -117,18 +110,16 @@ class WordDetailsView: UIViewController {
         return translationStack
     }
     
-    /**
-     * Creates and configures a UILabel displaying word information, such as part of speech, gender, animate, etc.
+    /// Creates and configures a UILabel displaying word information, such as part of speech, gender, animate, etc.
 
-    * This function uses data from a Word object to create a label that displays the word's type, attributes (e.g. noun gender, verb aspect), and ranking.
-    * The label text is generated based on the word's properties.
+    ///  This function uses data from a Word object to create a label that displays the word's type, attributes (e.g. noun gender, verb aspect), and ranking.
+    ///  The label text is generated based on the word's properties.
 
-    * - Parameters:
-        - word: A Word object containing information about the word.
+    /// - Parameters:
+    ///     - word: A Word object containing information about the word.
 
-    * - Returns:
-      A configured UILabel displaying the word's information.
-     */
+    /// - Returns:
+    ///     A configured UILabel displaying the word's information.
     private func createWordInformation(for word: Word) -> UILabel {
         let informationLabel = UILabel()
         var information = ""
@@ -186,19 +177,14 @@ class WordDetailsView: UIViewController {
         return informationLabel
     }
     
-    /**
-     * Creates and configures a UIStackView representing a grammar table.
-
-    * This function uses data from a Word object and a GrammarFormTableData instance to create a table with rows and columns, where each cell contains text labels.
-    * The layout of the cells is determined by the longest row in each column.
-
-    * - Parameters:
-        - word: A Word object containing information about the grammar forms of the word.
-        - grammarTableType: An enum value indicating the type of grammar form table to create (e.g. noun, verb, adjective).
-
-    * - Returns:
-      A configured UIStackView representing the grammar table.
-     */
+    /// Creates and configures a UIStackView representing a grammar table.
+    ///
+    /// This function uses data from a Word object and a GrammarFormTableData instance to create a table with rows and columns, where each cell contains text labels.
+    /// The layout of the cells is determined by the longest row in each column.
+    /// - Parameters:
+    ///   - word: A Word object containing information about the grammar forms of the word.
+    ///   - grammarTableType: An enum value indicating the type of grammar form table to create (e.g. noun, verb, adjective).
+    /// - Returns: A configured UIStackView representing the grammar table.
     private func createGrammarTable(from word: Word, as grammarTableType: GrammarFormTableData.TableType) -> UIStackView {
         let columnStack = UIStackView()
         columnStack.axis = .vertical
@@ -284,20 +270,14 @@ class WordDetailsView: UIViewController {
         return columnStack
     }
     
-    /**
-     * Generates a label text from a given cell's word text based on its language and type.
-
-    * This function takes into account whether the word is a Russian word or a column/row header and whether it's an adjective, which would if it is and also long enough then we should only display the ending
-
-    * - Parameters:
-        - wordText: The original word text from the cell.
-        - isRussianWord: A boolean indicating whether the word is in Russian.
-        - isAdjective: A boolean indicating whether the word is an adjective.
-
-    * - Returns:
-      A string representing the generated label text for the cell.
-     */
-
+    /// Generates a label text from a given cell's word text based on its language and type.
+    ///
+    /// This function takes into account whether the word is a Russian word or a column/row header and whether it's an adjective, which would if it is and also long enough then we should only display the ending
+    /// - Parameters:
+    ///    - wordText: The original word text from the cell.
+    ///    - isRussianWord: A boolean indicating whether the word is in Russian.
+    ///    - isAdjective: A boolean indicating whether the word is an adjective.
+    /// - Returns: A string representing the generated label text for the cell.
     private func getLabelTextFromCell(wordText: String, isRussianWord: Bool, isAdjective: Bool) -> String {
         if isRussianWord {
             if !isAdjective {
@@ -314,18 +294,13 @@ class WordDetailsView: UIViewController {
         }
     }
     
-    /**
-     * Extracts and returns the ending part of an adjective.
-
-    * This function uses the base form of the adjective (found using `findAdjectiveBase`) to split it into two parts: the base and the ending.
-    * It then returns only the ending part, excluding the base.
-
-    * - Parameters:
-        - adjective: The adjective from which to extract the ending part, as a `String`.
-
-    * - Returns:
-      A string representing the extracted ending part of the adjective.
-     */
+    /// Extracts and returns the ending part of an adjective.
+    ///
+    /// This function uses the base form of the adjective (found using `findAdjectiveBase`) to split it into two parts: the base and the ending.
+    /// It then returns only the ending part, excluding the base.
+    /// - Parameters:
+    ///   - adjective: The adjective from which to extract the ending part, as a `String`.
+    /// - Returns: A string representing the extracted ending part of the adjective.
     private func getAdjectiveEnding(for adjective: String) -> String {
         let adjectiveBase = WordUtils.findAdjectiveBase(for: adjective)
         let baseRange = adjective.range(of: adjectiveBase)
