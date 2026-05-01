@@ -1,3 +1,8 @@
+/// Grammar form table data structure for displaying linguistic inflection tables.
+///
+/// This struct encapsulates complete grammatical form data for Russian nouns, verbs, and adjectives,
+/// organizing them into tabular cell layouts. Each cell contains text content with a flag indicating
+/// whether it represents an actual Russian word or is structural/metadata content.
 struct GrammarFormTableData {
     enum TableType {
         case adjective
@@ -20,6 +25,11 @@ struct GrammarFormTableData {
     
     let forms: [[Cell]]
     
+    /// Creates a grammar form table populated with cells based on the specified table type.
+    ///
+    /// - Parameters:
+    ///     - wordForms: A dictionary mapping grammar form keys to their corresponding text values.
+    ///     - grammarTableType: The type of grammatical table to generate (noun, verb, adjective, etc.).
     init(wordForms: [String:String], grammarTableType: TableType) {
         self.forms = {
             switch(grammarTableType) {

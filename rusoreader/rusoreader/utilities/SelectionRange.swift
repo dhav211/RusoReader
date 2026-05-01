@@ -1,5 +1,10 @@
 import Foundation
 
+/// Represents a range selection within a text string, defining word and sentence boundaries.
+///
+/// `SelectionRange` is used to determine the NSRange of a specific word and the NSRange of the full sentence
+/// containing a given character index. It handles various delimiters including whitespace, punctuation,
+/// and quotation marks to accurately identify text boundaries.
 struct SelectionRange {
     var wordRange: NSRange!
     var sentenceRange: NSRange!
@@ -10,7 +15,15 @@ struct SelectionRange {
     }
     
     
-    /// Finds the range of the word from the given index
+    
+    /// Determines and returns the NSRange of a word at a given character index.
+    ///
+    /// This function identifies the start and end of a word in a string by searching backwards for the first punctuation or whitespace, and forwards for the same delimiters.
+    /// It handles special cases like hyphens and ensures the NSRange reflects the actual word boundaries.
+    /// - Parameters:
+    /// - text: The string to search within.
+    /// - charIndex: The character index within the string to find the word.
+    /// - Returns: An NSRange containing the location and length of the identified word.
     private func getSelectedWordRange(from text: String, at charIndex: Int) -> NSRange {
         var currentIndex = charIndex
         var startingIndex = 0
@@ -52,6 +65,14 @@ struct SelectionRange {
         return NSRange(location: startingIndex, length: lengthCounter)
     }
     
+    /// Determines and returns the NSRange of the sentence containing a specific character.
+    ///
+    /// This function locates the beginning and end of a sentence within a string by searching backwards for sentence-ending punctuation and forwards for the sentence's conclusion.
+    /// It handles special delimiters such as quotes or dashes to ensure accurate sentence boundaries.
+    /// - Parameters:
+    ///   - text: The string to search within.
+    ///   - charIndex: The character index within the text to identify the target sentence.
+    /// - Returns: An NSRange representing the full range (location and length) of the identified sentence.
     private func getSelectedSentenceRange(from text: String, at charIndex: Int) -> NSRange {
         var startingLocation = 0
         var lengthCounter = 0
@@ -102,7 +123,15 @@ struct SelectionRange {
         return NSRange(location: startingLocation, length: lengthCounter)
     }
 
-    
+    /// Determines whether a character at a specific index is considered sentence-terminating punctuation.
+    ///
+    /// This function checks if the character at the given index is standard sentence-ending punctuation
+    /// (like ., ?, ! or a newline). It also verifies that a closing quotation mark does not immediately
+    /// follow, ensuring it is the end of a sentence and not mid-sentence quote.
+    /// - Parameters:
+    ///     - text: The string containing the text to check.
+    ///     - characterIndex: The integer index of the character within the string to check.
+    /// - Returns: A Boolean value indicating whether the character marks the end of a sentence (true) or not (false).
     private func isSentenceTerminatingPunctuation(in text: String, at characterIndex: Int) -> Bool {
         let character = text[text.index(text.startIndex, offsetBy: characterIndex)]
         if character == "." || character == "?" || character == "!" || character.isNewline { // Not all punctuation ends a sentence, such as commas
