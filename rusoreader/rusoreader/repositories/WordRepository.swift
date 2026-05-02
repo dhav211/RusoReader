@@ -7,18 +7,12 @@ class WordRepository {
         self.queue = queue
     }
     
-    /**
-     * Finds matches for given word IDs by fetching their corresponding word information and creating Word objects.
-
-    * This function relies on two other functions: `fetchWordInfos(by:in:)` to fetch word information from the database, and `createWords(from:)` to transform the fetched information into `[Word]` objects.
-
-    * - Parameters:
-        - wordIds: The IDs of words to find matches for, as an array of `[Int64]`.
-
-    * - Returns:
-      An array of `[Word]` objects representing the matched words.
-      If an error occurs during the fetch or transformation, an empty array is returned and an error message is printed.
-     */
+    /// Finds matches for given word IDs by fetching their corresponding word information and creating Word objects.
+    ///
+    /// This function relies on two other functions: `fetchWordInfos(by:in:)` to fetch word information from the database, and `createWords(from:)` to transform the fetched information into `[Word]` objects.
+    /// - Parameters:
+    ///   - wordIds: The IDs of words to find matches for, as an array of `[Int64]`.
+    /// - Returns: An array of `[Word]` objects representing the matched words. If an error occurs during the fetch or transformation, an empty array is returned and an error message is printed.
     func findMatches(by wordIds: [Int64]) -> [Word] {
         do {
             return try queue.read { db in
@@ -31,20 +25,13 @@ class WordRepository {
         }
     }
     
-    /**
-     * Fetches word information from the database using given IDs.
-
-    * This function performs a batch fetch to improve performance.
-
-    * - Parameters:
-        - ids: The IDs of words to fetch, as an array of `[Int64]`.
-
-        - db: The database instance to use for the fetch, as a `Database` object.
-
-    * - Returns:
-      An array of `[FetchedWordInfo]` objects representing the fetched word information.
-      If an error occurs during the fetch, an empty array is returned and an error message is printed.
-     */
+    /// Fetches word information from the database using given IDs.
+    ///
+    /// This function performs a batch fetch to improve performance.
+    /// - Parameters:
+    ///   - ids: The IDs of words to fetch, as an array of `[Int64]`.
+    ///   - db: The database instance to use for the fetch, as a `Database` object.
+    /// - Returns: An array of `[FetchedWordInfo]` objects representing the fetched word information. If an error occurs during the fetch, an empty array is returned and an error message is printed.
     private func fetchWordInfos(by ids: [Int64], in db: Database) -> [FetchedWordInfo] {
         do {
             let request = DatabaseWord
@@ -62,18 +49,13 @@ class WordRepository {
         }
     }
     
-    /**
-     * Finds IDs of words in the database that match a given search term.
+    /// Finds IDs of words in the database that match a given search term.
+    ///
+    /// This function performs fuzzy matching to account for variations in Cyrillic letters (e.g., "е" vs. "ё").
+    /// - Parameters:
+    ///   - bare: The search term to look up, as a lowercase string.
 
-    * This function performs fuzzy matching to account for variations in Cyrillic letters (e.g., "е" vs. "ё").
-
-    * - Parameters:
-        - bare: The search term to look up, as a lowercase string.
-
-    * - Returns:
-      An array of `[Int64]` values representing the IDs of matching words.
-      If no matches are found, an empty array is returned.
-     */
+    /// - Returns: An array of `[Int64]` values representing the IDs of matching words. If no matches are found, an empty array is returned.
     func findWordIDs(by bare: String) -> [Int64] {
         let searchTerm = bare.lowercased()
         var searches = [searchTerm]
@@ -116,16 +98,13 @@ class WordRepository {
         }
     }
     
-    /**
-     * Takes a list of `FetchedWordInfo` objects and returns a new array of `Word` objects.
-     * Each `Word` object is created by extracting relevant information from the corresponding `FetchedWordInfo`.
-     *
-     * - Parameters:
-        - wordInfos: A list of `FetchedWordInfo` objects to process.
+    /// Takes a list of `FetchedWordInfo` objects and returns a new array of `Word` objects.
+    ///
+    /// Each `Word` object is created by extracting relevant information from the corresponding `FetchedWordInfo`.
+    /// - Parameters:
+    ///   - wordInfos: A list of `FetchedWordInfo` objects to process.
 
-    - Returns:
-      An array of `[Word]` objects, where each element corresponds to a `FetchedWordInfo` in the input list.
-     */
+    /// - Returns: An array of `[Word]` objects, where each element corresponds to a `FetchedWordInfo` in the input list.
     private func createWords(from wordInfos: [FetchedWordInfo]) -> [Word] {
         var words = [Word]()
         
