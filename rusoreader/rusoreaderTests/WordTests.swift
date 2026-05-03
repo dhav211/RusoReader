@@ -12,8 +12,8 @@ final class WordTests: XCTestCase {
     }
 
     func testFindAdjectiveBase() throws {
-        XCTAssert(WordUtils.findAdjectiveBase(adjective: "Уникальный") == "Уникальн")
-        XCTAssert(WordUtils.findAdjectiveBase(adjective: "холодному") == "холодн")
+        XCTAssert(WordUtils.findAdjectiveBase(for: "Уникальный") == "Уникальн")
+        XCTAssert(WordUtils.findAdjectiveBase(for: "холодному") == "холодн")
         
     }
 

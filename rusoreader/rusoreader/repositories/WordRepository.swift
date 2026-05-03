@@ -54,7 +54,6 @@ class WordRepository {
     /// This function performs fuzzy matching to account for variations in Cyrillic letters (e.g., "е" vs. "ё").
     /// - Parameters:
     ///   - bare: The search term to look up, as a lowercase string.
-
     /// - Returns: An array of `[Int64]` values representing the IDs of matching words. If no matches are found, an empty array is returned.
     func findWordIDs(by bare: String) -> [Int64] {
         let searchTerm = bare.lowercased()
