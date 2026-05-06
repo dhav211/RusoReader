@@ -6,7 +6,7 @@ final class WordFetchingTests: XCTestCase {
     
     override func setUpWithError() throws {
         let databaseManager = DatabaseManager()
-        wordRepo = WordRepository(queue: databaseManager.queue)
+        wordRepo = WordRepository(databaseManager: databaseManager)
     }
 
     override func tearDownWithError() throws {

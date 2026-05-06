@@ -1,10 +1,10 @@
 import GRDB
 
 class WordRepository {
-    let queue: DatabaseQueue
+    let databaseManager: DatabaseManager
     
-    init(queue: DatabaseQueue) {
-        self.queue = queue
+    init(databaseManager: DatabaseManager) {
+        self.databaseManager = databaseManager
     }
     
     /// Finds matches for given word IDs by fetching their corresponding word information and creating Word objects.
@@ -15,7 +15,7 @@ class WordRepository {
     /// - Returns: An array of `[Word]` objects representing the matched words. If an error occurs during the fetch or transformation, an empty array is returned and an error message is printed.
     func findMatches(by wordIds: [Int64]) -> [Word] {
         do {
-            return try queue.read { db in
+            return try databaseManager.wordQueue.read { db in
                 let wordInfos = fetchWordInfos(by: wordIds, in: db)
                 return createWords(from: wordInfos)
             }
@@ -73,7 +73,7 @@ class WordRepository {
         }
         
         do {
-            return try queue.read { db in
+            return try databaseManager.wordQueue.read { db in
                 let wordFormIds = try DatabaseWordForm
                     .select(DatabaseWordForm.Columns.wordId, as: Int64.self)
                     .filter(searches.contains(DatabaseWordForm.Columns.bare))

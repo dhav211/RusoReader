@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		764CE70D2FA7BFB700120238 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 764CE70C2FA7BFB700120238 /* ZIPFoundation */; };
 		76DD1E692F99AF1F008A787C /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 76DD1E682F99AF1F008A787C /* GRDB */; };
 		76FD7E3C2FA4ECF600C5960E /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 76FD7E3B2FA4ECF600C5960E /* SwiftSoup */; };
 /* End PBXBuildFile section */
@@ -72,6 +73,7 @@
 			files = (
 				76DD1E692F99AF1F008A787C /* GRDB in Frameworks */,
 				76FD7E3C2FA4ECF600C5960E /* SwiftSoup in Frameworks */,
+				764CE70D2FA7BFB700120238 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,6 +136,7 @@
 			packageProductDependencies = (
 				76DD1E682F99AF1F008A787C /* GRDB */,
 				76FD7E3B2FA4ECF600C5960E /* SwiftSoup */,
+				764CE70C2FA7BFB700120238 /* ZIPFoundation */,
 			);
 			productName = rusoreader;
 			productReference = 76DD1DDC2F888F7D008A787C /* rusoreader.app */;
@@ -220,6 +223,7 @@
 			packageReferences = (
 				76DD1E672F99AF1F008A787C /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 				76FD7E3A2FA4ECF600C5960E /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+				764CE70B2FA7BFB700120238 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 76DD1DDD2F888F7D008A787C /* Products */;
@@ -584,6 +588,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		764CE70B2FA7BFB700120238 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.20;
+			};
+		};
 		76DD1E672F99AF1F008A787C /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
@@ -603,6 +615,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		764CE70C2FA7BFB700120238 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 764CE70B2FA7BFB700120238 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
 		76DD1E682F99AF1F008A787C /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 76DD1E672F99AF1F008A787C /* XCRemoteSwiftPackageReference "GRDB.swift" */;
