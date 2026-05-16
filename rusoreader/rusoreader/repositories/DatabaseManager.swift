@@ -8,8 +8,8 @@ final class DatabaseManager {
     init(userDataQueue: DatabaseQueue?) {
         do {
             // The words DB is read-only so we can just grab it from the app bundle
-            if let wordUrl = Bundle.main.url(forResource: "words", withExtension: "db") {
-                self.wordQueue = try DatabaseQueue(path: wordUrl.path())
+            if let wordDatabaseUrl = Bundle.main.url(forResource: "words", withExtension: "db") {
+                self.wordQueue = try DatabaseQueue(path: wordDatabaseUrl.path())
             }
 
             if let queue = userDataQueue {
@@ -101,10 +101,16 @@ final class DatabaseManager {
                     chaptersTable.column("name", .text)
                     chaptersTable.column("index", .integer)
                     chaptersTable.column("current_user_progress", .integer)
-                    chaptersTable.column("url", .text)
+                    chaptersTable.column("text", .text)
                     chaptersTable.column("book_id", .integer)
                     
                     chaptersTable.foreignKey(["book_id"], references: "books", columns: ["id"], onDelete: .cascade)
+                }
+            }
+            
+            migrator.registerMigration("remove file url from book") { db in
+                try db.alter(table: "books") { booksTable in
+                    booksTable.drop(column: "file_url")
                 }
             }
             

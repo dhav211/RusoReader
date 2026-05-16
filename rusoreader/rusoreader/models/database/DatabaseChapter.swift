@@ -5,8 +5,25 @@ struct DatabaseChapter : Codable, Identifiable, MutablePersistableRecord {
     var name: String
     var index: Int64
     var current_user_progress: Int64
-    var url: String
+    var text: String
     var book_id: Int64
+    
+    init(id: Int64? = nil, name: String, index: Int64, current_user_progress: Int64, text: String, book_id: Int64) {
+        self.id = id
+        self.name = name
+        self.index = index
+        self.current_user_progress = current_user_progress
+        self.text = text
+        self.book_id = book_id
+    }
+    
+    init(name: String, index: Int64, text: String) {
+        self.init(id: nil, name: name, index: index, current_user_progress: 0, text: text, book_id: 0)
+    }
+    
+    mutating func didInsert(_ inserted: InsertionSuccess) {
+        self.id = inserted.rowID
+    }
 }
 
 extension DatabaseChapter : FetchableRecord, TableRecord {

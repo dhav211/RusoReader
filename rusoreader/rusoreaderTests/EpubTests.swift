@@ -5,53 +5,53 @@ import GRDB
 final class EpubTests: XCTestCase {
     var databaseManager: DatabaseManager!
     var bookRepo: BookRepository!
+    var testDirectory: URL!
+    var fileStore: FileStore!
+    var fileManager: FileManager!
     
     override func setUpWithError() throws {
         let queue = try DatabaseQueue()
+        fileManager = FileManager()
         databaseManager = DatabaseManager(userDataQueue: queue)
-        bookRepo = BookRepository(databaseManager: databaseManager)
+        testDirectory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try? FileManager.default.createDirectory(at: testDirectory, withIntermediateDirectories: true)
+        fileStore = FileStore(directory: testDirectory)
+        bookRepo = BookRepository(databaseManager: databaseManager, fileStore: fileStore)
     }
 
     override func tearDownWithError() throws {
         databaseManager = nil
+        bookRepo = nil
+        try? fileManager.removeItem(at: testDirectory)
+        fileStore = nil
+        testDirectory = nil
+        fileManager = nil
     }
-
-    func testAddingBookToDB() throws {
-        var book = DatabaseBook(name: "Harry Potter", file_url: "file://path/to/book.epub", cover_image_url: "file://path/to/image.png", current_chapter: 0, isbn: "978-5-08-004546-2", uuid: "4a2b9ca9-b0d8-11e3-b4aa-0025905a0812")
-        
-        databaseManager.userDataQueue.inDatabase { db in
-            do {
-                try book.insert(db)
-            } catch {
-                return XCTFail("Couldn't insert book into database. \(error)")
-            }
-        }
-
-        var chapters = [DatabaseChapter]()
-        if let bookId = book.id {
-            chapters.append(DatabaseChapter(id: nil, name: "Chapter 1", index: 1, current_user_progress: 0, url: "", book_id: bookId))
-            chapters.append(DatabaseChapter(id: nil, name: "Chapter 2", index: 2, current_user_progress: 0, url: "", book_id: bookId))
-            chapters.append(DatabaseChapter(id: nil, name: "Chapter 3", index: 3, current_user_progress: 0, url: "", book_id: bookId))
-            chapters.append(DatabaseChapter(id: nil, name: "Chapter 4", index: 4, current_user_progress: 0, url: "", book_id: bookId))
+    
+    func testSaveEpubToDB() throws {
+        let parser = EpubParser()
+        if let chekhovBookURL = Bundle.main.url(forResource: "chekhov", withExtension: "epub") {
+            let book = parser.parse(from: chekhovBookURL)
             
-            databaseManager.userDataQueue.inDatabase { db in
-                do {
-                    for var chapter in chapters {
-                        try chapter.insert(db)
-                    }
-                } catch {
-                    return XCTFail("Couldn't insert chapter into database. \(error)")
-                }
-            }
+            XCTAssert(book?.chapters.count == 13)
+            XCTAssert(book?.book.title == "Лошадиная фамилия. Рассказы и водевили")
+            
+            let _ = bookRepo.saveBook(parsedBook: book!)
+            let fetchedBook = bookRepo.findBooksBy(title: "Лошадиная фамилия. Рассказы и водевили").first!
+            
+            XCTAssert(fetchedBook.chapters.count == 13)
         }
         
-        let books = bookRepo.findBooksBy(title: "Harry Potter")
+        if let wizardBookURL = Bundle.main.url(forResource: "wizard", withExtension: "epub") {
+            let book = parser.parse(from: wizardBookURL)
+            
+            let _ = bookRepo.saveBook(parsedBook: book!)
+            if let fetchedBook = bookRepo.findBooksBy(title: "Волшебник Изумрудного города (с иллюстрациями) иг-1").first {
+                XCTAssert(fetchedBook.name == "Волшебник Изумрудного города (с иллюстрациями) иг-1")
+            } else {
+                XCTFail()
+            }
         
-        XCTAssert(books.count == 1)
-        
-        if let firstBook = books.first {
-            XCTAssert(firstBook.name == "Harry Potter")
-            XCTAssert(firstBook.chapters.count == 4)
         }
     }
 

@@ -36,6 +36,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		764CE71E2FAC07E100120238 /* Exceptions for "rusoreader" folder in "rusoreaderTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				resources/chekhov.epub,
+				resources/wizard.epub,
+			);
+			target = 76DD1DF12F888F7F008A787C /* rusoreaderTests */;
+		};
 		76DD1E042F888F7F008A787C /* Exceptions for "rusoreader" folder in "rusoreader" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -50,6 +58,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				76DD1E042F888F7F008A787C /* Exceptions for "rusoreader" folder in "rusoreader" target */,
+				764CE71E2FAC07E100120238 /* Exceptions for "rusoreader" folder in "rusoreaderTests" target */,
 			);
 			path = rusoreader;
 			sourceTree = "<group>";
