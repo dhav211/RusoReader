@@ -68,6 +68,7 @@ final class DatabaseManager {
                 try db.create(table: "books") { booksTable in
                     booksTable.primaryKey("id", .integer)
                     booksTable.column("name", .text).notNull()
+                    booksTable.column("author", .text)
                     booksTable.column("file_url", .text).notNull()
                     booksTable.column("cover_image_url", .text)
                     booksTable.column("current_chapter", .integer).notNull()

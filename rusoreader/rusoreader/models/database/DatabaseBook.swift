@@ -4,6 +4,7 @@ import Foundation
 struct DatabaseBook : Codable, Identifiable, MutablePersistableRecord {
     var id: Int64?
     var name: String
+    var author: String
     var cover_image_url: String?
     var current_chapter: Int64
     var isbn: String?
@@ -11,9 +12,10 @@ struct DatabaseBook : Codable, Identifiable, MutablePersistableRecord {
     var date_last_opened: Date
     var date_created: Date
     
-    init(id: Int64? = nil, name: String, cover_image_url: String?, current_chapter: Int64, isbn: String?, uuid: String?) {
+    init(id: Int64? = nil, name: String, author: String, cover_image_url: String?, current_chapter: Int64, isbn: String?, uuid: String?) {
         self.id = nil
         self.name = name
+        self.author = author
         self.cover_image_url = cover_image_url
         self.current_chapter = current_chapter
         self.isbn = isbn
@@ -23,7 +25,7 @@ struct DatabaseBook : Codable, Identifiable, MutablePersistableRecord {
     }
     
     init(name: String, isbn: String?, uuid: String?) {
-        self.init(id: nil, name: name, cover_image_url: nil, current_chapter: 0, isbn: isbn, uuid: uuid)
+        self.init(id: nil, name: name, author: "", cover_image_url: nil, current_chapter: 0, isbn: isbn, uuid: uuid)
     }
     
     mutating func didInsert(_ inserted: InsertionSuccess) {

@@ -48,10 +48,28 @@ final class EpubTests: XCTestCase {
             let _ = bookRepo.saveBook(parsedBook: book!)
             if let fetchedBook = bookRepo.findBooksBy(title: "Волшебник Изумрудного города (с иллюстрациями) иг-1").first {
                 XCTAssert(fetchedBook.name == "Волшебник Изумрудного города (с иллюстрациями) иг-1")
+                XCTAssert(fetchedBook.author == "Александр Мелентьевич Волков")
             } else {
                 XCTFail()
             }
         
+        }
+    }
+    
+    func testBookLinks() throws {
+        try testSaveEpubToDB()
+        
+        let links = bookRepo.getAllBookLinks()
+        
+        XCTAssert(links.isEmpty == false)
+    }
+    
+    func testFindBookById() throws {
+        try testSaveEpubToDB()
+        if let book = bookRepo.findBookBy(by: 1) {
+            XCTAssert(book.name == "Лошадиная фамилия. Рассказы и водевили")
+        } else {
+            XCTFail()
         }
     }
 
