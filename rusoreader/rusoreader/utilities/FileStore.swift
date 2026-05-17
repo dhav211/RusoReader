@@ -8,14 +8,9 @@ final class FileStore {
         self.directory = directory
     }
     
-    func save(data: Data, fileName: String) throws -> URL {
-        do {
-            let fileURL = directory.appendingPathComponent(fileName)
-            try data.write(to: fileURL)
-            return fileURL
-        } catch {
-            throw FileStoreError.savingError(message: "Error saving data: \(error)")
-        }
+    func save(data: Data, fileName: String) throws {
+        let fileURL = directory.appendingPathComponent(fileName)
+        try data.write(to: fileURL)
     }
     
     func load(fileName: String) throws -> Data {

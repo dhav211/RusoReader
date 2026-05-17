@@ -54,6 +54,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		764CE7282FB8B9D000120238 /* view_controllers */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = view_controllers;
+			sourceTree = "<group>";
+		};
 		76DD1DDE2F888F7D008A787C /* rusoreader */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -106,6 +111,7 @@
 		76DD1DD32F888F7D008A787C = {
 			isa = PBXGroup;
 			children = (
+				764CE7282FB8B9D000120238 /* view_controllers */,
 				76DD1DDE2F888F7D008A787C /* rusoreader */,
 				76DD1DF52F888F7F008A787C /* rusoreaderTests */,
 				76DD1DFF2F888F7F008A787C /* rusoreaderUITests */,
@@ -139,6 +145,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				764CE7282FB8B9D000120238 /* view_controllers */,
 				76DD1DDE2F888F7D008A787C /* rusoreader */,
 			);
 			name = rusoreader;

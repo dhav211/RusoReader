@@ -6,5 +6,5 @@ struct BookLink  {
     let bookId: Int
     let title: String
     let author: String
-    let coverImageURL: URL?
+    let coverImageURL: String
 }

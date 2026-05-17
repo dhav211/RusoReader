@@ -68,7 +68,6 @@ final class DatabaseManager {
                 try db.create(table: "books") { booksTable in
                     booksTable.primaryKey("id", .integer)
                     booksTable.column("name", .text).notNull()
-                    booksTable.column("author", .text)
                     booksTable.column("file_url", .text).notNull()
                     booksTable.column("cover_image_url", .text)
                     booksTable.column("current_chapter", .integer).notNull()
@@ -114,6 +113,14 @@ final class DatabaseManager {
                     booksTable.drop(column: "file_url")
                 }
             }
+            
+            migrator.registerMigration("add author to books") { db in
+                try db.alter(table: "books") { booksTable in
+                    booksTable.add(column: "author", .text)
+                }
+            }
+            
+            print(queue.path)
             
             try migrator.migrate(queue)
         } catch {

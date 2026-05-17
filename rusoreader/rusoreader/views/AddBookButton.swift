@@ -9,6 +9,7 @@ class AddBookButton : UIButton {
     
     init() {
         super.init(frame: .zero)
+        translatesAutoresizingMaskIntoConstraints = false
         setTitle("Add Book", for: .normal)
         setTitleColor(.label, for: .normal)
         addTarget(self, action: #selector(handleTap), for: .touchUpInside)

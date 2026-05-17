@@ -5,23 +5,31 @@ class BookRepository {
     let databaseManager: DatabaseManager
     let fileStore: FileStore
     
-    init(databaseManager: DatabaseManager, fileStore: FileStore) {
+    init(databaseManager: DatabaseManager, fileStore: FileStore = FileStore(directory: .documentsDirectory)) {
         self.databaseManager = databaseManager
         self.fileStore = fileStore
     }
     
+    /// Once a book has been parsed we can save it to the database for retrieval
+    /// - Parameter parsedBook: The output from the EbookParser, this will contain the book and the chapters
+    /// - Returns: A complete book object, this return will be useful for opening a book immediately after the user as added it
     func saveBook(parsedBook: ParsedBook) -> Book? {
         do {
             return try databaseManager.userDataQueue.write { db in
-                let coverImageUrl: URL? = try {
+                // We are creating a url to the saved cover image, this is a different url from the cover image in the epub. If there is no cover image in the book we will just skip past it, the cover image isn't required
+                let coverImageUrl: String = try {
                     if let coverImage = parsedBook.book.coverImage {
-                        return try fileStore.save(data: coverImage, fileName: "\(parsedBook.book.title.replacingOccurrences(of: " ", with: "-").lowercased())-cover-image\(parsedBook.book.coverImageFileType)")
+                        let fileName = "\(parsedBook.book.isbn)-cover-image\(parsedBook.book.coverImageFileType)"
+                        try fileStore.save(data: coverImage, fileName: fileName)
+                        return fileName
                     } else {
-                        return nil
+                        return ""
                     }
                 }()
                 
-                var book = DatabaseBook(name: parsedBook.book.title, author: parsedBook.book.author, cover_image_url: coverImageUrl?.path() ?? "", current_chapter: 1, isbn: parsedBook.book.isbn, uuid: parsedBook.book.uuid)
+                // The rest of this method is saving the parsed book into the database. The book needs to be inserted first so the chapters can get the generated ID for foreign keys
+                
+                var book = DatabaseBook(name: parsedBook.book.title, author: parsedBook.book.author, cover_image_url: coverImageUrl, current_chapter: 1, isbn: parsedBook.book.isbn, uuid: parsedBook.book.uuid)
                 
                 try book.insert(db)
                 
@@ -34,12 +42,15 @@ class BookRepository {
                 
                 return createBook(from: FetchedBookInfo(book: book, chapters: chapters))
             }
-        } catch {
+        } catch { // if any issues arise while save, let just return nil so we can handle it later in the view controller
             print("Error saving book: \(error)")
             return nil
         }
     }
     
+    /// Find a collection of books with the same title, this method is possibly never used. It was created for my testing of accessing books
+    /// - Parameter title: The title of the book(s) you wish the find
+    /// - Returns: An array of books from the database, will return an empty array if nothing is found
     func findBooksBy(title: String) -> [Book] {
         do {
             return try databaseManager.userDataQueue.read { db in
@@ -60,7 +71,7 @@ class BookRepository {
     
     /// Find a specific book by its ID
     /// - Parameter id: The ID of the book we are looking for
-    /// - Returns: The book object with all chapters, ready to be read by the user
+    /// - Returns: The book object with all chapters, ready to be read by the user. Will return nil if nothing is found.
     func findBookBy(by id: Int) -> Book? {
         do {
             return try databaseManager.userDataQueue.read { db in
@@ -88,13 +99,14 @@ class BookRepository {
                 
                 var links = [BookLink]()
                 
+                // Loop through every row creating the book links which will be returned
                 while let row = try rows.next() {
                     links.append(BookLink(
                         bookId: row["id"] ?? 0,
                         title: row["name"] ?? "",
                         author: row["author"] ?? "",
-                        coverImageURL: URL(string: row["cover_image_url"] ?? ""))
-                    )
+                        coverImageURL: row["cover_image_url"] ?? ""
+                    ))
                 }
                 
                 return links

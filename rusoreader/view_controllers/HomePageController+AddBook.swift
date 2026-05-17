@@ -12,8 +12,10 @@ extension HomePageController : UIDocumentPickerDelegate, AddBookButtonDelegate {
         for url in urls {
             if url.startAccessingSecurityScopedResource() {
                 defer { url.stopAccessingSecurityScopedResource() }
-                let fileStore = FileStore(directory: .documentsDirectory)
                 let epubParser = EpubParser()
+                if let parsedBook = epubParser.parse(from: url), let book = bookRepo.saveBook(parsedBook: parsedBook) {
+                    print(book.name)
+                }
             }
         }
     }
