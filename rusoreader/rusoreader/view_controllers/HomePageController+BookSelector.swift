@@ -3,7 +3,7 @@ import UIKit
 extension HomePageController: BookSelectorDelegate {
     func didTapBook(id: Int) {
         if let book = bookRepo.findBookBy(by: id) {
-            print("lets open \(book.name) in the reader")
+            navigationController?.pushViewController(ReaderViewController(book: book, wordRepo: WordRepository(databaseManager: dbManager)), animated: true)
         }
     }
     

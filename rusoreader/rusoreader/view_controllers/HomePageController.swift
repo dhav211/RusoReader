@@ -45,6 +45,6 @@ class HomePageController: UIViewController {
     }
     
     @objc func pushReaderView() {
-        navigationController?.pushViewController(ReaderView(wordRepo: WordRepository(databaseManager: dbManager)), animated: true)
+        //navigationController?.pushViewController(ReaderViewController(wordRepo: WordRepository(databaseManager: dbManager)), animated: true)
     }
 }
