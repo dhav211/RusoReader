@@ -1,7 +1,7 @@
 import UIKit
 
 protocol ReaderViewDelegate: AnyObject {
-    func didClickText(text: String, gesture: UITapGestureRecognizer)
+    func didClickText(at location: CGPoint)
 }
 
 class ReaderView: UITextView {
@@ -31,6 +31,7 @@ class ReaderView: UITextView {
     }
     
     func loadText(text: String) {
+        contentOffset = .zero
         attributedText = NSMutableAttributedString(string: text,
                                                    attributes: [
                                                         .foregroundColor: UIColor.label,
@@ -40,6 +41,6 @@ class ReaderView: UITextView {
     }
     
     @objc func handleTap(_ gesture: UITapGestureRecognizer) {
-        readerDelegate?.didClickText(text: text, gesture: gesture)
+        readerDelegate?.didClickText(at: gesture.location(in: self))
     }
 }

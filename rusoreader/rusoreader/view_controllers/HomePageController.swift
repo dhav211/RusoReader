@@ -43,8 +43,4 @@ class HomePageController: UIViewController {
             addBookButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -4.0)
         ])
     }
-    
-    @objc func pushReaderView() {
-        //navigationController?.pushViewController(ReaderViewController(wordRepo: WordRepository(databaseManager: dbManager)), animated: true)
-    }
 }
