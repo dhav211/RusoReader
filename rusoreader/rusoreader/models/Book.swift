@@ -1,6 +1,7 @@
 import Foundation
 
 struct Book {
+    var id: Int
     var name: String
     var author: String
     var chapters: [Chapter]
@@ -11,7 +12,8 @@ struct Book {
     var dateLastOpened: Date
     var dateCreated: Date
     
-    init(name: String, author: String, chapters: [Chapter], coverImageUrl: String?, currentChapter: Int, isbn: String? = nil, uuid: String? = nil, dateLastOpened: Date, dateCreated: Date) {
+    init(id: Int, name: String, author: String, chapters: [Chapter], coverImageUrl: String?, currentChapter: Int, isbn: String? = nil, uuid: String? = nil, dateLastOpened: Date, dateCreated: Date) {
+        self.id = id
         self.name = name
         self.author = author
         self.chapters = chapters

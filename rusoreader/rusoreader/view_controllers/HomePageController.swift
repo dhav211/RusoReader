@@ -4,6 +4,7 @@ class HomePageController: UIViewController {
     let dbManager: DatabaseManager
     let bookRepo: BookRepository
     lazy var bookSelector: BookSelector = BookSelector(bookRepo: BookRepository(databaseManager: dbManager, fileStore: FileStore(directory: .documentsDirectory)))
+    var isOnHomePage = true
     
     init(dbManager: DatabaseManager) {
         self.dbManager = dbManager

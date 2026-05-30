@@ -4,8 +4,17 @@ import UIKit
 final class FileStore {
     let directory: URL
     
-    init(directory: URL) {
-        self.directory = directory
+    init(directory: URL? = nil) {
+        // If there isn't a suppled directory URL we will set it as the documents directory by default
+        if let dir = directory {
+            self.directory = dir
+        } else {
+            guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+                fatalError("Document Directory not found")
+            }
+            
+            self.directory = documentDirectory
+        }
     }
     
     func save(data: Data, fileName: String) throws {
@@ -14,27 +23,13 @@ final class FileStore {
     }
     
     func load(fileName: String) throws -> Data {
-        do {
-            let fileUrl = directory.appendingPathComponent(fileName)
-            return try Data(contentsOf: fileUrl)
-        } catch {
-            throw FileStoreError.loadingError
-        }
+        let fileUrl = directory.appendingPathComponent(fileName)
+        return try Data(contentsOf: fileUrl)
     }
     
     func deleteItem(fileName: String) throws {
-        do {
-            let fileUrl = directory.appendingPathComponent(fileName)
-            let fileManager = FileManager()
-            try fileManager.removeItem(at: fileUrl)
-        } catch {
-            throw FileStoreError.deletionError
-        }
-    }    
-}
-
-enum FileStoreError : Error {
-    case savingError(message: String)
-    case loadingError
-    case deletionError
+        let fileUrl = directory.appendingPathComponent(fileName)
+        let fileManager = FileManager()
+        try fileManager.removeItem(at: fileUrl)
+    }
 }

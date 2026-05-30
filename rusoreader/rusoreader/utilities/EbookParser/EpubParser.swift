@@ -130,8 +130,6 @@ final class EpubParser : EbookParser {
             }
         } catch EpubParsingError.failedToFindCoverImage(let message) {
             print("Error finding cover image url: \(message)")
-        } catch FileStoreError.savingError(let message) {
-            print("Error saving cover image: \(message)")
         }
         return nil
     }

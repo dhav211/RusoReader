@@ -7,16 +7,22 @@ class ReaderViewController: UIViewController, ReaderViewDelegate, TableOfContent
     var selectionRange: SelectionRange?
     var lastOffsetY: CGFloat = 0.0
     var currentChapter: Int
+    var onClose : (() -> Void)?
     
-    init(book: Book, wordRepo: WordRepository) {
+    init(book: Book, wordRepo: WordRepository, onClose: @escaping (() -> Void)) {
         self.book = book
         self.wordRepo = wordRepo
         self.currentChapter = book.currentChapter
+        self.onClose = onClose
         super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        onClose?()
     }
     
     override func viewDidLoad() {
@@ -88,7 +94,6 @@ class ReaderViewController: UIViewController, ReaderViewDelegate, TableOfContent
                     let wordDetails = WordDetailsView(words: matches)
                     wordDetails.modalPresentationStyle = .pageSheet
                     self.present(wordDetails, animated: true)
-                    
                 }
             }
         }

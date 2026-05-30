@@ -5,7 +5,7 @@ import GRDB
 final class EpubTests: XCTestCase {
     var databaseManager: DatabaseManager!
     var bookRepo: BookRepository!
-    var testDirectory: URL!
+    var testDirectory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     var fileStore: FileStore!
     var fileManager: FileManager!
     
@@ -13,7 +13,6 @@ final class EpubTests: XCTestCase {
         let queue = try DatabaseQueue()
         fileManager = FileManager()
         databaseManager = DatabaseManager(userDataQueue: queue)
-        testDirectory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try? FileManager.default.createDirectory(at: testDirectory, withIntermediateDirectories: true)
         fileStore = FileStore(directory: testDirectory)
         bookRepo = BookRepository(databaseManager: databaseManager, fileStore: fileStore)
@@ -24,7 +23,6 @@ final class EpubTests: XCTestCase {
         bookRepo = nil
         try? fileManager.removeItem(at: testDirectory)
         fileStore = nil
-        testDirectory = nil
         fileManager = nil
     }
     
@@ -73,6 +71,51 @@ final class EpubTests: XCTestCase {
         }
     }
 
+    func testDeleteBook() throws {
+        let parser = EpubParser()
+        if let chekhovBookURL = Bundle.main.url(forResource: "chekhov", withExtension: "epub") {
+            let book = parser.parse(from: chekhovBookURL)
+            
+            let _ = bookRepo.saveBook(parsedBook: book!)
+        }
+        
+        let book = bookRepo.findBookBy(by: 1)
+        
+        try bookRepo.removeBook(by: book!.id)
+        
+        if bookRepo.findBookBy(by: 1) != nil {
+            XCTFail()
+        }
+        
+        do {
+            let _ = try fileStore.load(fileName: book?.coverImageUrl ?? "")
+            XCTFail()
+        } catch {
+            print("No book found at ID 1, it's been deleted")
+        }
+    }
+    
+    func testUpdateBook() throws {
+        let parser = EpubParser()
+        if let chekhovBookURL = Bundle.main.url(forResource: "chekhov", withExtension: "epub") {
+            let book = parser.parse(from: chekhovBookURL)
+            let _ = bookRepo.saveBook(parsedBook: book!)
+            
+            if let foundBook = bookRepo.findBookBy(by: 1) {
+                do {
+                    try bookRepo.updateBookInformation(by: foundBook.id, title: "Changed Title", author: nil)
+                } catch {
+                    XCTFail()
+                }
+            }
+            
+            if let updatedFoundBook = bookRepo.findBookBy(by: 1) {
+                XCTAssert(updatedFoundBook.author == "Антон Павлович Чехов")
+                XCTAssert(updatedFoundBook.name == "Changed Title")
+            }
+        }
+    }
+    
     func testPerformanceExample() throws {
         // This is an example of a performance test case.
         self.measure {

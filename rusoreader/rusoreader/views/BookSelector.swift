@@ -5,14 +5,14 @@ protocol BookSelectorDelegate : AnyObject {
     func didLongPressBook(id: Int)
 }
 
-class BookSelector : UIScrollView, ReadBookCardDelegate {
+class BookSelector : UIScrollView, BookCardDelegate {
     let bookCollection: UIStackView
-    var bookCards: [ReadBookCard]
+    var bookCards: [BookCard]
     weak var selectorDelegate: BookSelectorDelegate?
     
     init(bookRepo: BookRepository) {
         self.bookCollection = UIStackView()
-        self.bookCards = [ReadBookCard]()
+        self.bookCards = [BookCard]()
         super.init(frame: .zero)
         
         translatesAutoresizingMaskIntoConstraints = false
@@ -38,11 +38,7 @@ class BookSelector : UIScrollView, ReadBookCardDelegate {
         }
         
         for bookLink in bookLinks {
-            let bookCard = ReadBookCard(bookLink: bookLink)
-            bookCollection.addArrangedSubview(bookCard)
-            bookCard.buildBookCard()
-            bookCard.delegate = self
-            bookCards.append(bookCard)
+            addBook(bookLink: bookLink)
         }
     }
     
@@ -50,11 +46,36 @@ class BookSelector : UIScrollView, ReadBookCardDelegate {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func didClickReadBook(readBookCard: ReadBookCard) {
+    func addBook(bookLink: BookLink) {
+        let bookCard = BookCard(bookLink: bookLink, size: CGSize(width: 300, height: 200))
+        bookCard.delegate = self
+        bookCollection.addArrangedSubview(bookCard)
+        bookCards.append(bookCard)
+    }
+    
+    func removeBook(by id: Int) {
+        guard let index = bookCards.firstIndex(where: { $0.bookId == id}) else { return }
+        bookCards[index].removeFromSuperview()
+        bookCards.remove(at: index)
+    }
+    
+    func updateBook(by id: Int, author: String?, title: String?) {
+        guard let card = bookCards.filter({ $0.bookId == id }).first else { return }
+        
+        if let updatedAuthor = author {
+            card.updateAuthor(newAuthor: updatedAuthor)
+        }
+        
+        if let updatedTitle = title {
+            card.updateTitle(newTitle: updatedTitle)
+        }
+    }
+    
+    func didClickReadBook(readBookCard: BookCard) {
         selectorDelegate?.didTapBook(id: readBookCard.bookId)
     }
     
-    func didLongPressReadBook(readBookCard: ReadBookCard) {
+    func didLongPressReadBook(readBookCard: BookCard) {
         selectorDelegate?.didLongPressBook(id: readBookCard.bookId)
     }
     

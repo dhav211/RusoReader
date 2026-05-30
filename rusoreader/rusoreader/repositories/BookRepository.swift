@@ -1,6 +1,17 @@
 import GRDB
 import Foundation
 
+enum BookRepositoryError: Error, LocalizedError {
+    case notFound(id: Int)
+    
+    var errorDescription: String? {
+        switch self {
+        case .notFound(let id):
+            return "Book with id \(id) was not found"
+        }
+    }
+}
+
 class BookRepository {
     let databaseManager: DatabaseManager
     let fileStore: FileStore
@@ -13,8 +24,7 @@ class BookRepository {
     /// Once a book has been parsed we can save it to the database for retrieval
     /// - Parameter parsedBook: The output from the EbookParser, this will contain the book and the chapters
     /// - Returns: A complete book object, this return will be useful for opening a book immediately after the user as added it
-    func saveBook(parsedBook: ParsedBook) -> Book? {
-        do {
+    func saveBook(parsedBook: ParsedBook) throws -> BookLink {
             return try databaseManager.userDataQueue.write { db in
                 // We are creating a url to the saved cover image, this is a different url from the cover image in the epub. If there is no cover image in the book we will just skip past it, the cover image isn't required
                 let coverImageUrl: String = try {
@@ -40,12 +50,8 @@ class BookRepository {
                     chapters.append(chapter)
                 }
                 
-                return createBook(from: FetchedBookInfo(book: book, chapters: chapters))
+                return BookLink(bookId: Int(book.id ?? 0), title: book.name, author: book.author, coverImageURL: book.cover_image_url ?? "")
             }
-        } catch { // if any issues arise while save, let just return nil so we can handle it later in the view controller
-            print("Error saving book: \(error)")
-            return nil
-        }
     }
     
     /// Find a collection of books with the same title, this method is possibly never used. It was created for my testing of accessing books
@@ -72,21 +78,16 @@ class BookRepository {
     /// Find a specific book by its ID
     /// - Parameter id: The ID of the book we are looking for
     /// - Returns: The book object with all chapters, ready to be read by the user. Will return nil if nothing is found.
-    func findBookBy(by id: Int) -> Book? {
-        do {
-            return try databaseManager.userDataQueue.read { db in
-                let request = DatabaseBook
-                    .filter(id: Int64(id))
-                    .including(all: DatabaseBook.chapters)
-                    .asRequest(of: FetchedBookInfo.self)
-                
-                guard let fetchedBook = try FetchedBookInfo.fetchOne(db, request) else { return nil }
-                
-                return createBook(from: fetchedBook)
-            }
-        } catch {
-            print("Failed to find book by id: \(error)")
-            return nil
+    func findBookBy(by id: Int) throws -> Book? {
+        return try databaseManager.userDataQueue.read { db in
+            let request = DatabaseBook
+                .filter(id: Int64(id))
+                .including(all: DatabaseBook.chapters)
+                .asRequest(of: FetchedBookInfo.self)
+            
+            guard let fetchedBook = try FetchedBookInfo.fetchOne(db, request) else { throw BookRepositoryError.notFound(id: id) }
+            
+            return createBook(from: fetchedBook)
         }
     }
     
@@ -117,6 +118,48 @@ class BookRepository {
         }
     }
     
+    /// Removes a book from the database and deletes the associated cover image from the filesystem
+    /// - Parameter id: Id of the book to remove
+    func removeBook(by id: Int) throws {
+        try databaseManager.userDataQueue.write { db in
+            guard let bookToRemove = try DatabaseBook
+                .filter(id: Int64(id))
+                .including(all: DatabaseBook.chapters)
+                .fetchOne(db)
+            else { throw BookRepositoryError.notFound(id: id) }
+            
+            if let coverImage = bookToRemove.cover_image_url {
+                try fileStore.deleteItem(fileName: coverImage)
+            }
+            
+            try bookToRemove.delete(db)
+        }
+    }
+    
+    /// Change either the name or author of the book
+    /// - Parameters:
+    ///   - id: The ID of the book to update
+    ///   - title: The new title for the book
+    ///   - author: The new author for the book
+    func updateBookInformation(by id: Int, title: String?, author: String?) throws {
+        try databaseManager.userDataQueue.write { db in
+            guard var bookToUpdate = try DatabaseBook
+                .filter(id: Int64(id))
+                .fetchOne(db)
+            else { return }
+            
+            if let updatedTitle = title {
+                bookToUpdate.name = updatedTitle
+            }
+            
+            if let updatedAuthor = author {
+                bookToUpdate.author = updatedAuthor
+            }
+            
+            try bookToUpdate.update(db)
+        }
+    }
+    
     /// Convert the fetched book information, which is more or less a join table of the book and chapters, into an actual book object that can be read by the user
     /// - Parameter fetchBookInfo: The book and chapter information that was fetched from the database
     /// - Returns: A complete book object that will be used in the reader view
@@ -131,6 +174,7 @@ class BookRepository {
         }
         
         return Book(
+            id: Int(fetchBookInfo.book.id ?? 0),
             name: fetchBookInfo.book.name,
             author: fetchBookInfo.book.author,
             chapters: chapters,
