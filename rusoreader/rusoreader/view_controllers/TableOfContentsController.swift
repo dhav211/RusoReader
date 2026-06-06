@@ -47,7 +47,8 @@ class TableOfContentsController : UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // Delegate is sent to the ReaderViewController, which will hold all the information for book including chapters
-        delegate?.chapterTitleClicked(at: indexPath.row)
-        dismiss(animated: true)
+        dismiss(animated: true) {
+            self.delegate?.chapterTitleClicked(at: indexPath.row)
+        }
     }
 }

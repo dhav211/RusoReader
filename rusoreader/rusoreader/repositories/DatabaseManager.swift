@@ -10,7 +10,6 @@ final class DatabaseManager {
             // The words DB is read-only so we can just grab it from the app bundle
             if let wordDatabaseUrl = Bundle.main.url(forResource: "words", withExtension: "db") {
                 self.wordQueue = try DatabaseQueue(path: wordDatabaseUrl.path())
-                runWordDataMigrations(on: self.wordQueue)
             }
 
             if let queue = userDataQueue {
@@ -58,20 +57,21 @@ final class DatabaseManager {
         }
     }
     
-    private func runWordDataMigrations(on queue: DatabaseQueue) {
-        do {
-            var migrator = DatabaseMigrator()
-            
-            migrator.registerMigration("add indices to word_forms and words") { db in
-                try db.create(indexOn: "word_forms", columns: ["form_bare"])
-                try db.create(indexOn: "words", columns: ["id"])
-            }
-            
-            try migrator.migrate(queue)
-        } catch {
-            print("Failed to run migrations on Words DB: \(error)")
-        }
-    }
+    // TODO create the indices in a python script
+//    private func runWordDataMigrations(on queue: DatabaseQueue) {
+//        do {
+//            var migrator = DatabaseMigrator()
+//            
+//            migrator.registerMigration("add indices to word_forms and words") { db in
+//                try db.create(indexOn: "word_forms", columns: ["form_bare"])
+//                try db.create(indexOn: "words", columns: ["id"])
+//            }
+//            
+//            try migrator.migrate(queue)
+//        } catch {
+//            print("Failed to run migrations on Words DB: \(error)")
+//        }
+//    }
     
     private func runUserDataMigrations(on queue: DatabaseQueue) {
         do {
