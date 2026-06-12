@@ -3,19 +3,32 @@ import UIKit
 extension HomePageController : EditBookViewDelegate {
     func didDeleteBook(id: Int) {
         do {
-            try bookRepo.removeBook(by: id)
+            if let book = bookService.getBook(by: id) {
+                try bookService.removeBook(book: book)
+            }
             dismiss(animated: true)
-            bookSelector.removeBook(by: id)
+            bookSelector.refresh()
         } catch {
+            
+            // TODO display ui alert saying there was an issue deleting the book
             print(error)
         }
     }
     
     func didSave(id: Int, author: String?, title: String?) {
         do {
-            try bookRepo.updateBookInformation(by: id, title: title, author: author)
+            if var book = bookService.getBook(by: id) {
+                if let newAuthor = author {
+                    book.author = newAuthor
+                }
+                if let newTitle = title {
+                    book.author = newTitle
+                }
+                try bookService.update(book: book)
+            }
+            
             dismiss(animated: true)
-            bookSelector.updateBook(by: id, author: author, title: title)
+            bookSelector.refresh()
         } catch {
             print()
             // Display a UI Alert Controller letting the user know the the update failed

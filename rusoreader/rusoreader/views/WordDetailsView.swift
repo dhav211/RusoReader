@@ -2,9 +2,11 @@ import UIKit
 
 class WordDetailsView: UIViewController {
     let words: [Word]
+    let viewModel: WordDetailsViewModel
     
-    init(words: [Word]) {
+    init(words: [Word], viewModel: WordDetailsViewModel) {
         self.words = words
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -35,7 +37,7 @@ class WordDetailsView: UIViewController {
             wordDetailsStack.addArrangedSubview(translationStack)
         }
         
-        wordDetailsStack.addArrangedSubview(createWordInformation(for: word))
+        wordDetailsStack.addArrangedSubview(createInformationStack(for: word))
         
         switch word.type {
         case .noun:
@@ -81,6 +83,22 @@ class WordDetailsView: UIViewController {
         return wordStack
     }
     
+    private func createInformationStack(for word: Word) -> UIStackView {
+        let informationStack = UIStackView()
+        informationStack.axis = .vertical
+        informationStack.alignment = .center
+        
+        let informationLabel = UILabel()
+        informationLabel.text = viewModel.getWordInformation(word: word)
+        informationStack.addArrangedSubview(informationLabel)
+        
+        let rankingLabel = UILabel()
+        rankingLabel.text = viewModel.getRankingTitle(ranking: word.ranking)
+        informationStack.addArrangedSubview(rankingLabel)
+        
+        return informationStack
+    }
+    
     /// Creates and configures a UIStackView representing a section of translations.
 
     /// This function uses an array of string translations to create a stack view with a header label and multiple translation text labels.
@@ -110,73 +128,6 @@ class WordDetailsView: UIViewController {
         return translationStack
     }
     
-    /// Creates and configures a UILabel displaying word information, such as part of speech, gender, animate, etc.
-
-    ///  This function uses data from a Word object to create a label that displays the word's type, attributes (e.g. noun gender, verb aspect), and ranking.
-    ///  The label text is generated based on the word's properties.
-
-    /// - Parameters:
-    ///     - word: A Word object containing information about the word.
-
-    /// - Returns:
-    ///     A configured UILabel displaying the word's information.
-    private func createWordInformation(for word: Word) -> UILabel {
-        let informationLabel = UILabel()
-        var information = ""
-            
-        // The word information will change depending on if it's noun, verb, adjective
-        switch word.type {
-        case .noun:
-            information.append("Noun")
-            if let noun = word.noun {
-                if noun.gender == Noun.Gender.female {
-                    information.append(", female")
-                } else if noun.gender == Noun.Gender.male {
-                    information.append(", male")
-                } else if noun.gender == Noun.Gender.neuter {
-                    information.append(", neuter")
-                } else {
-                    information.append(", male & female")
-                }
-                
-                if noun.animate {
-                    information.append(", animate")
-                } else {
-                    information.append(", inanimate")
-                }
-            }
-        case .verb:
-            information.append("Verb")
-            if let verb = word.verb {
-                information.append(", \(verb.aspect.rawValue)")
-            }
-        case .adjective:
-            information.append("Adjective")
-        case .adverb:
-            information.append("Adverb")
-        case.other:
-            information.append("Other")
-        }
-        
-        // The user wouldn't need to know the exact ranking of the word, so we can just give them a general idea what the ranking is
-        if word.ranking >= 0 && word.ranking <= 10 {
-            information.append(", Top 10")
-        } else if word.ranking > 10 && word.ranking <= 100 {
-            information.append(", Top 100")
-        } else if word.ranking > 100 && word.ranking <= 10_000 {
-            let rankingMultipler : Int = word.ranking / 500
-            information.append(", Top \((rankingMultipler + 1) * 500)")
-        } else if word.ranking > 10_000 && word.ranking <= 50_000 {
-            let rankingMultipler : Int = word.ranking / 5000
-            information.append(", Top \((rankingMultipler + 1) * 5000)")
-        } else if word.ranking > 50_000 {
-            information.append(", Very rarely used")
-        }
-        
-        informationLabel.text = information
-        return informationLabel
-    }
-    
     /// Creates and configures a UIStackView representing a grammar table.
     ///
     /// This function uses data from a Word object and a GrammarFormTableData instance to create a table with rows and columns, where each cell contains text labels.
@@ -194,20 +145,9 @@ class WordDetailsView: UIViewController {
         let grammarFormTableData = GrammarFormTableData(wordForms: word.forms, grammarTableType: grammarTableType)
         
         // We want to find out which string is the longest in each column, this will determine which label to anchor off of
-        let longestRowInColumns : [Int] = {
-            var longestRows = [Int]()
-            for i in 0..<grammarFormTableData.forms.count {
-                var currentLongestRowIndex = 0
-                for j in 0..<grammarFormTableData.forms[i].count {
-                    if grammarFormTableData.forms[i][j].text.count > grammarFormTableData.forms[i][currentLongestRowIndex].text.count {
-                        currentLongestRowIndex = j
-                    }
-                }
-                longestRows.append(currentLongestRowIndex)
-            }
-            return longestRows
-        }()
+        let longestRowInColumns = viewModel.getLongestRows(grammarFormTableData: grammarFormTableData)
         
+        // We are holding all the labels so we can compare them the the longestRowInColumns array to see which label is the biggest, then we use that as a width anchor for getting centering
         var cells = [[UILabel]]()
 
         // Create the the row stacks and text labels.
@@ -221,39 +161,31 @@ class WordDetailsView: UIViewController {
             cells.append([])
             
             for column in 0..<grammarFormTableData.forms[row].count {
-                // Occasionally a word will have 2 varations for a single form, we will know about by a comma seperating the two forms
-                let varations = grammarFormTableData.forms[row][column].text.split(separator: ",")
+                let varationStack = UIStackView()
+                varationStack.axis = .vertical
+                rowStack.addArrangedSubview(varationStack)
                 
-                // Most will follow this path, just ignore the varations array and access the text the create the label
-                if varations.count <= 1 {
+                // Create the labels based on the possible variations of the word form, most words will consist of a single varation but there are predictable exceptions
+                let varationsLabels = viewModel.getWordFormVariations(
+                    for: grammarFormTableData.forms[row][column],
+                    isAdjective: word.type == .adjective
+                ).map { varation in
                     let label = UILabel()
-                    label.text = getLabelTextFromCell(
-                        wordText: grammarFormTableData.forms[row][column].text,
-                        isRussianWord: grammarFormTableData.forms[row][column].isRussianWord,
-                        isAdjective: word.type == .adjective)
+                    label.text = varation
+                    label.adjustsFontSizeToFitWidth = true
+                    return label
+                }
+                
+                if varationsLabels.isEmpty { // there will be no variations for the top left corner of the grid, but an empty label is still required for anchoring
+                    let label = UILabel()
                     cells[row].append(label)
-                    rowStack.addArrangedSubview(label)
-                } else {
-                    // However things will be a bit different if we have multiple varations
-                    // Lets create yet another stack to add both varations so they are on different lines
-                    let varationStack = UIStackView()
-                    varationStack.axis = .vertical
-                    var hasAddedToCells = false
-                    
-                    for varation in varations {
-                        let label = UILabel()
-                        label.text = getLabelTextFromCell(
-                            wordText: String(varation),
-                            isRussianWord: true,
-                            isAdjective: word.type == .adjective)
-                        if !hasAddedToCells { // this just ensures only the first label is added to the cells array
-                            cells[row].append(label)
-                            hasAddedToCells.toggle()
-                        }
-                        varationStack.addArrangedSubview(label)
-                    }
-                    rowStack.addArrangedSubview(varationStack)
-                    
+                    varationStack.addArrangedSubview(label)
+                } else if let firstVariation = varationsLabels.first { // the first variation is always added as the to cells array for anchoring
+                    cells[row].append(firstVariation)
+                }
+                
+                for label in varationsLabels {
+                    varationStack.addArrangedSubview(label)
                 }
             }
         }

@@ -21,6 +21,10 @@ class ParagraphView: UITextView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    deinit {
+        print("paragraph deinit")
+    }
+    
     func removeHighlight(selectionRange: SelectionRange) {
         textStorage.addAttribute(.foregroundColor, value: UIColor.label, range: selectionRange.wordRange)
         textStorage.removeAttribute(.underlineStyle, range: selectionRange.sentenceRange)

@@ -24,7 +24,7 @@ class BookRepository {
     /// Once a book has been parsed we can save it to the database for retrieval
     /// - Parameter parsedBook: The output from the EbookParser, this will contain the book and the chapters
     /// - Returns: A complete book object, this return will be useful for opening a book immediately after the user as added it
-    func saveBook(parsedBook: ParsedBook) throws -> BookLink {
+    func saveBook(parsedBook: ParsedBook) throws {
             return try databaseManager.userDataQueue.write { db in
                 // We are creating a url to the saved cover image, this is a different url from the cover image in the epub. If there is no cover image in the book we will just skip past it, the cover image isn't required
                 let coverImageUrl: String = try {
@@ -39,18 +39,16 @@ class BookRepository {
                 
                 // The rest of this method is saving the parsed book into the database. The book needs to be inserted first so the chapters can get the generated ID for foreign keys
                 
-                var book = DatabaseBook(name: parsedBook.book.title, author: parsedBook.book.author, cover_image_url: coverImageUrl, current_chapter: 1, isbn: parsedBook.book.isbn, uuid: parsedBook.book.uuid)
+                var book = DatabaseBook(name: parsedBook.book.title, author: parsedBook.book.author, cover_image_url: coverImageUrl, current_chapter: 0, isbn: parsedBook.book.isbn, uuid: parsedBook.book.uuid)
                 
                 try book.insert(db)
                 
                 var chapters = [DatabaseChapter]()
                 for parsedChapter in parsedBook.chapters {
-                    var chapter = DatabaseChapter(name: parsedChapter.title, index: Int64(parsedChapter.index), current_user_progress: 0, text: parsedChapter.text, book_id: book.id ?? 0)
+                    var chapter = DatabaseChapter(name: parsedChapter.title, position: Int64(parsedChapter.index), current_user_progress: 0, text: parsedChapter.text, book_id: book.id ?? 0)
                     try chapter.insert(db)
                     chapters.append(chapter)
                 }
-                
-                return BookLink(bookId: Int(book.id ?? 0), title: book.name, author: book.author, coverImageURL: book.cover_image_url ?? "")
             }
     }
     
@@ -80,14 +78,17 @@ class BookRepository {
     /// - Returns: The book object with all chapters, ready to be read by the user. Will return nil if nothing is found.
     func findBookBy(by id: Int) throws -> Book? {
         return try databaseManager.userDataQueue.read { db in
-            let request = DatabaseBook
-                .filter(id: Int64(id))
-                .including(all: DatabaseBook.chapters)
-                .asRequest(of: FetchedBookInfo.self)
+            guard let fetchedBook = try DatabaseBook.fetchOne(db, id: Int64(id)) else { throw BookRepositoryError.notFound(id: id) }
             
-            guard let fetchedBook = try FetchedBookInfo.fetchOne(db, request) else { throw BookRepositoryError.notFound(id: id) }
-            
-            return createBook(from: fetchedBook)
+            return Book(
+                id: Int(fetchedBook.id ?? 0),
+                name: fetchedBook.name,
+                author: fetchedBook.author,
+                coverImageUrl: fetchedBook.cover_image_url,
+                currentChapter: Int(fetchedBook.current_chapter),
+                dateLastOpened: fetchedBook.date_last_opened,
+                dateCreated: fetchedBook.date_created
+            )
         }
     }
     
@@ -136,6 +137,19 @@ class BookRepository {
         }
     }
     
+    func updateCurrentChapter(by id: Int, chapter: Int) throws {
+        try databaseManager.userDataQueue.write { db in
+            guard var bookToUpdate = try DatabaseBook
+                .filter(id: Int64(id))
+                .fetchOne(db)
+            else { return }
+            
+            bookToUpdate.current_chapter = Int64(chapter)
+            
+            try bookToUpdate.update(db)
+        }
+    }
+    
     /// Change either the name or author of the book
     /// - Parameters:
     ///   - id: The ID of the book to update
@@ -148,11 +162,11 @@ class BookRepository {
                 .fetchOne(db)
             else { return }
             
-            if let updatedTitle = title {
+            if let updatedTitle = title, bookToUpdate.name != updatedTitle {
                 bookToUpdate.name = updatedTitle
             }
             
-            if let updatedAuthor = author {
+            if let updatedAuthor = author, bookToUpdate.author != updatedAuthor {
                 bookToUpdate.author = updatedAuthor
             }
             
@@ -167,7 +181,7 @@ class BookRepository {
         let chapters = fetchBookInfo.chapters.map { dbChapter in
             return Chapter(
                 name: dbChapter.name,
-                index: Int(dbChapter.index),
+                index: Int(dbChapter.position),
                 currentUserProgress: Int(dbChapter.current_user_progress),
                 text: dbChapter.text
             )
@@ -177,10 +191,67 @@ class BookRepository {
             id: Int(fetchBookInfo.book.id ?? 0),
             name: fetchBookInfo.book.name,
             author: fetchBookInfo.book.author,
-            chapters: chapters,
             coverImageUrl: fetchBookInfo.book.cover_image_url,
             currentChapter: Int(fetchBookInfo.book.current_chapter),
             dateLastOpened: fetchBookInfo.book.date_last_opened,
             dateCreated: fetchBookInfo.book.date_created)
+    }
+    
+    func fetchTableOfContentIndices(by bookId: Int) throws -> [TableOfContentIndex] {
+        return try databaseManager.userDataQueue.read { db in
+            let rows = try Row.fetchCursor(db, sql: "SELECT id, name, position FROM chapters WHERE book_id = ?", arguments: [bookId])
+            
+            var indices = [TableOfContentIndex]()
+            
+            // Loop through every row creating the table of content indices
+            while let row = try rows.next() {
+                indices.append(TableOfContentIndex(title: row["name"] ?? "", index: row["position"] ?? 0, id: row["id"] ?? 0))
+            }
+            
+            return indices
+        }
+    }
+
+    func fetchChapter(from bookId: Int, at index: Int) throws -> Chapter? {
+        return try databaseManager.userDataQueue.read { db -> Chapter? in
+            guard let dbChapter = try DatabaseChapter
+                .filter(DatabaseChapter.Columns.bookId == bookId)
+                .filter(DatabaseChapter.Columns.position == index)
+                .fetchOne(db)
+            else { return nil }
+            
+            return Chapter(name: dbChapter.name, index: index, currentUserProgress: Int(dbChapter.current_user_progress), text: dbChapter.text)
+        }
+    }
+    
+    func updateChapterProgress(from bookId: Int, at chapterIndex: Int, to updatedProgress: Int) {
+        do {
+            try databaseManager.userDataQueue.write { db in
+                guard var dbChapter = try DatabaseChapter
+                    .filter(DatabaseChapter.Columns.bookId == bookId)
+                    .filter(DatabaseChapter.Columns.position == chapterIndex)
+                    .fetchOne(db)
+                else { return }
+                dbChapter.current_user_progress = Int64(updatedProgress)
+                try dbChapter.save(db)
+            }
+        } catch {
+            print("Error updating chapter progress: \(error)")
+        }
+    }
+    
+    func fetchCurrentChaptersProgress(from bookId: Int, at chapterIndex: Int) -> Int {
+        do {
+            return try databaseManager.userDataQueue.read { db in
+                return try DatabaseChapter
+                    .filter(DatabaseChapter.Columns.bookId == bookId)
+                    .filter(DatabaseChapter.Columns.position == chapterIndex)
+                    .select(DatabaseChapter.Columns.currentProgress, as: Int.self)
+                    .fetchOne(db) ?? 0
+            }
+        } catch {
+            print("Error fetching chapter's current progress: \(error)")
+            return 0
+        }
     }
 }

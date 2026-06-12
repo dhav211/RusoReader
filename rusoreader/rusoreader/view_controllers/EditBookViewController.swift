@@ -30,10 +30,13 @@ class EditBookViewController : UIViewController {
     }
     
     override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(false)
         delegate?.didClose()
     }
     
     override func viewDidLoad() {
+        super.viewDidLoad()
+        
         view.backgroundColor = .systemBackground
         
         // Set the navigation bar buttons with their associated methods

@@ -145,7 +145,7 @@ final class EpubParser : EbookParser {
             let parsedToc = try SwiftSoup.parse(tableOfContentsText)
             var chapters = [String:ChapterDetails]()
             let navPoints = try parsedToc.getElementsByTag("navPoint")
-            var currentIndex = 1
+            var currentIndex = 0
             
             for navPoint in navPoints {
                 guard let title = try navPoint.getElementsByTag("navLabel").first()?

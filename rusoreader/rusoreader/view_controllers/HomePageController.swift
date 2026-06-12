@@ -1,14 +1,14 @@
 import UIKit
 
-class HomePageController: UIViewController {
-    let dbManager: DatabaseManager
-    let bookRepo: BookRepository
-    lazy var bookSelector: BookSelector = BookSelector(bookRepo: BookRepository(databaseManager: dbManager, fileStore: FileStore(directory: .documentsDirectory)))
+class HomePageController: UIViewController, UIDocumentPickerDelegate {
+    let bookService: BookService
+    let wordService: WordService
+    lazy var bookSelector: BookSelector = BookSelector(bookService: bookService)
     var isOnHomePage = true
     
-    init(dbManager: DatabaseManager) {
-        self.dbManager = dbManager
-        self.bookRepo = BookRepository(databaseManager: dbManager)
+    init(wordService: WordService, bookService: BookService) {
+        self.wordService = wordService
+        self.bookService = bookService
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -29,8 +29,12 @@ class HomePageController: UIViewController {
         view.addSubview(bookSelector)
         bookSelector.selectorDelegate = self
         
-        let addBookButton = AddBookButton()
-        addBookButton.delegate = self
+        let addBookButton = UIButton()
+        addBookButton.translatesAutoresizingMaskIntoConstraints = false
+        addBookButton.setTitle("Add Book", for: .normal)
+        addBookButton.setTitleColor(.label, for: .normal)
+        addBookButton.addTarget(self, action: #selector(addBookButtonTapped), for: .touchUpInside)
+
         view.addSubview(addBookButton)
         
         NSLayoutConstraint.activate([
@@ -43,5 +47,29 @@ class HomePageController: UIViewController {
             addBookButton.topAnchor.constraint(equalTo: bookSelector.bottomAnchor),
             addBookButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -4.0)
         ])
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        isOnHomePage = true
+    }
+    
+    @objc func addBookButtonTapped() {
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.epub])
+        picker.delegate = self
+        picker.allowsMultipleSelection = false
+        present(picker, animated: true)
+    }
+    
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        do {
+            for url in urls {
+                try bookService.parseBook(from: url)
+            }
+        } catch {
+            print("Failed to parse book: \(error)")
+            // TODO display an alert message letting the user know there was an issue parsing the book
+        }
+        
+        bookSelector.refresh()
     }
 }

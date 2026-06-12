@@ -6,14 +6,14 @@ protocol TableOfContentsDelegate: AnyObject {
 
 /// A modal which contains the table of contents for a book, the user will be able to choose a chapter and the text will be displayed in the ReaderView
 class TableOfContentsController : UITableViewController {
-    let chapters: [String]
+    let indices: [TableOfContentIndex]
     
     weak var delegate: TableOfContentsDelegate?
     
-    init(chapters: [Chapter]) {
+    init(indices: [TableOfContentIndex]) {
         // Sort the chapters by the index of the chapter, this their logical order, not whatever unordered aray GRDB gave us
-        self.chapters = chapters.sorted { $0.index < $1.index }.map { chapter in
-            return chapter.name
+        self.indices = indices.sorted { $0.index < $1.index }.map { i in
+            return i
         }
         
         super.init(style: .plain)
@@ -28,7 +28,7 @@ class TableOfContentsController : UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return chapters.count
+        return indices.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -36,8 +36,8 @@ class TableOfContentsController : UITableViewController {
         var content = cell.defaultContentConfiguration()
         
         // Set the cell text as the chapter title at this index row
-        if chapters.count > indexPath.row {
-            content.text = chapters[indexPath.row]
+        if indices.count > indexPath.row {
+            content.text = indices[indexPath.row].title
         }
         
         cell.contentConfiguration = content

@@ -14,6 +14,7 @@ final class DatabaseManager {
 
             if let queue = userDataQueue {
                 self.userDataQueue = queue
+                print(self.userDataQueue.path)
                 runUserDataMigrations(on: self.userDataQueue)
             }
         } catch {
@@ -129,6 +130,12 @@ final class DatabaseManager {
             migrator.registerMigration("add author to books") { db in
                 try db.alter(table: "books") { booksTable in
                     booksTable.add(column: "author", .text)
+                }
+            }
+            
+            migrator.registerMigration("change chapter index to position") { db in
+                try db.alter(table: "chapters") { chaptersTable in
+                    chaptersTable.rename(column: "index", to: "position")
                 }
             }
             

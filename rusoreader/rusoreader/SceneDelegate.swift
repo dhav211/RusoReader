@@ -1,10 +1,3 @@
-//
-//  SceneDelegate.swift
-//  rusoreader
-//
-//  Created by Big D on 4/9/26.
-//
-
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -20,7 +13,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         
         let dbManager = DatabaseManager()
-        let rootController = HomePageController(dbManager: dbManager)
+        
+        let wordRepo = WordRepository(databaseManager: dbManager)
+        let bookRepo = BookRepository(databaseManager: dbManager, fileStore: FileStore(directory: .documentsDirectory))
+        
+        let wordService = WordService(wordRepo: wordRepo)
+        let bookService = BookService(bookRepo: bookRepo)
+        
+        let rootController = HomePageController(wordService: wordService, bookService: bookService)
+        
         let navigationController = UINavigationController(rootViewController: rootController)
         window.rootViewController = navigationController
         //window.rootViewController = ReaderView(wordRepo: WordRepository(queue: dbManager.queue))

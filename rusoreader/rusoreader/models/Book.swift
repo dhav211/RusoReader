@@ -4,7 +4,6 @@ struct Book {
     var id: Int
     var name: String
     var author: String
-    var chapters: [Chapter]
     var coverImageUrl: String?
     var currentChapter: Int
     var isbn: String?
@@ -12,11 +11,10 @@ struct Book {
     var dateLastOpened: Date
     var dateCreated: Date
     
-    init(id: Int, name: String, author: String, chapters: [Chapter], coverImageUrl: String?, currentChapter: Int, isbn: String? = nil, uuid: String? = nil, dateLastOpened: Date, dateCreated: Date) {
+    init(id: Int, name: String, author: String, coverImageUrl: String?, currentChapter: Int, isbn: String? = nil, uuid: String? = nil, dateLastOpened: Date, dateCreated: Date) {
         self.id = id
         self.name = name
         self.author = author
-        self.chapters = chapters
         self.coverImageUrl = coverImageUrl
         self.currentChapter = currentChapter
         self.isbn = isbn
