@@ -1,8 +1,28 @@
 class WordDetailsViewModel {
+    private let word: Word
+    
+    init(word: Word) {
+        self.word = word
+    }
+    
+    func getWordType() -> Word.WordType {
+        return word.type
+    }
+    
+    func getWordText() -> String {
+        return word.bare
+    }
+    
+    func getTranslations() -> [String] {
+        return word.translations.map { translation in
+            return "- \(translation)"
+        }
+    }
+    
     /// Word information will change depending on its part of speech (noun, verb, etc), wether it's animate or inanimate, etc
     /// - Parameter word: The word we will get the information for
     /// - Returns: A string value which has been creating by checking variables in the word object
-    func getWordInformation(word: Word) -> String {
+    func getWordInformation() -> String {
         var information = ""
         
         switch word.type {
@@ -44,20 +64,24 @@ class WordDetailsViewModel {
     /// Get easy to read ranking for the user to see
     /// - Parameter ranking: The total value ranking of the word, could be something like 23503, which isn't completely useful to a user
     /// - Returns: A string value which converts 23503 to Top 25000
-    func getRankingTitle(ranking: Int) -> String {
-        if ranking >= 0 && ranking <= 10 {
+    func getRankingTitle() -> String {
+        if word.ranking >= 0 && word.ranking <= 10 {
             return "Top 10"
-        } else if ranking > 10 && ranking <= 100 {
+        } else if word.ranking > 10 && word.ranking <= 100 {
             return "Top 100"
-        } else if ranking > 100 && ranking <= 10_000 {
-            let rankingMultipler : Int = ranking / 500
+        } else if word.ranking > 100 && word.ranking <= 10_000 {
+            let rankingMultipler : Int = word.ranking / 500
             return "Top \((rankingMultipler + 1) * 500)"
-        } else if ranking > 10_000 && ranking <= 50_000 {
-            let rankingMultipler : Int = ranking / 5000
+        } else if word.ranking > 10_000 && word.ranking <= 50_000 {
+            let rankingMultipler : Int = word.ranking / 5000
             return "Top \((rankingMultipler + 1) * 5000)"
         } else {
             return "Very rarely used"
         }
+    }
+    
+    func createGrammarFormTableData(grammarTableType: GrammarFormTableData.TableType) -> GrammarFormTableData{
+        return GrammarFormTableData(wordForms: word.forms, grammarTableType: grammarTableType)
     }
     
     func getLongestRows(grammarFormTableData: GrammarFormTableData) -> [Int] {
@@ -81,11 +105,10 @@ class WordDetailsViewModel {
     /// The database can contain multiple varations of a single word form. When they are retrieved from the database they are concatenated with a comma. This wil split them and present them in a string form that will be easy to read for the user
     /// - Parameters:
     ///   - rowCellData: A simple struct which contains the text of the word and wether or not its a word form
-    ///   - isAdjective: There are many variations of adjectives, most of them repeating, if the word is too long we will just show the ending so the screen isn't terribly cluttered
     /// - Returns: An array of strings which contain the presentable form of the word
-    func getWordFormVariations(for rowCellData: GrammarFormTableData.Cell, isAdjective: Bool) -> [String] {
+    func getWordFormVariations(for rowCellData: GrammarFormTableData.Cell) -> [String] {
         return rowCellData.text.split(separator: ",").map { varation in
-            return getLabelTextFromCell(wordText: String(varation), isRussianWord: rowCellData.isRussianWord, isAdjective: isAdjective)
+            return getLabelTextFromCell(wordText: String(varation), isRussianWord: rowCellData.isRussianWord, isAdjective: word.type == .adjective)
         }
     }
     

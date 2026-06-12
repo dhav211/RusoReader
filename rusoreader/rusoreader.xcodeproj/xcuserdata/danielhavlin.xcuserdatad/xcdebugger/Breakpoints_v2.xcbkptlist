@@ -7,22 +7,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "092F8183-E4A6-4709-9E38-F9F8484EA5FC"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "rusoreader/views/WordDetailsView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "156"
-            endingLineNumber = "156"
-            landmarkName = "createGrammarTable(from:as:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "472EBCC9-4BE0-4E6F-A951-A6E4B3D4C3D9"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -401,22 +385,6 @@
             startingLineNumber = "45"
             endingLineNumber = "45"
             landmarkName = "fetchWordInfos(by:in:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "C1C24C15-877A-42A2-B359-40017FA097C4"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "rusoreader/views/WordDetailsView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "144"
-            endingLineNumber = "144"
-            landmarkName = "createGrammarTable(from:as:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1191,32 +1159,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "07D5B5A5-E02B-4D8A-AC4E-07732E09A8FB"
+            uuid = "AFA2533B-166D-442A-9ACE-16F1791FAF2B"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "rusoreader/views/WordDetailsView.swift"
+            filePath = "rusoreader/views/GrammarTable.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "197"
-            endingLineNumber = "197"
-            landmarkName = "createGrammarTable(from:as:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "41D065BB-3342-46D5-A619-E40F3AF92B1F"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "rusoreader/views/WordDetailsView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "164"
-            endingLineNumber = "164"
-            landmarkName = "createGrammarTable(from:as:)"
+            startingLineNumber = "69"
+            endingLineNumber = "69"
+            landmarkName = "createRows(rows:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

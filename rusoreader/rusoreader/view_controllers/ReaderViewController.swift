@@ -105,9 +105,9 @@ class ReaderViewController: UITableViewController, ParagraphCellViewDelegate, Ta
             let matches = wordService.findMatches(from: highlightedWord)
             
             // If we have matches we can open the modal to show the details on the word
-            if !matches.isEmpty {
-                let wordDetailsViewModel = WordDetailsViewModel()
-                let wordDetails = WordDetailsView(words: matches, viewModel: wordDetailsViewModel)
+            if !matches.isEmpty, let firstWord = matches.first {
+                let wordDetailsViewModel = WordDetailsViewModel(word: firstWord)
+                let wordDetails = WordDetailsView(viewModel: wordDetailsViewModel)
                 wordDetails.modalPresentationStyle = .pageSheet
                 self.present(wordDetails, animated: true)
             }
