@@ -11,7 +11,7 @@ final class DatabaseManager {
             if let wordDatabaseUrl = Bundle.main.url(forResource: "words", withExtension: "db") {
                 self.wordQueue = try DatabaseQueue(path: wordDatabaseUrl.path())
             }
-
+            print(self.wordQueue.path)
             if let queue = userDataQueue {
                 self.userDataQueue = queue
                 print(self.userDataQueue.path)

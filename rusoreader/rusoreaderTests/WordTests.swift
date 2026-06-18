@@ -2,9 +2,14 @@ import XCTest
 @testable import rusoreader
 
 final class WordTests: XCTestCase {
-
+    private var wordService: WordService!
+    private var databaseManager: DatabaseManager!
+    private var wordRepo: WordRepository!
+    
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        databaseManager = DatabaseManager()
+        wordRepo = WordRepository(databaseManager: databaseManager)
+        wordService = WordService(wordRepo: wordRepo)
     }
 
     override func tearDownWithError() throws {
@@ -12,17 +17,26 @@ final class WordTests: XCTestCase {
     }
 
     func testFindAdjectiveBase() throws {
-        XCTAssert(WordUtils.findAdjectiveBase(for: "Уникальный") == "Уникальн")
-        XCTAssert(WordUtils.findAdjectiveBase(for: "холодному") == "холодн")
+        XCTAssert(wordService.findAdjectiveBase(for: "Уникальный") == "Уникальн")
+        XCTAssert(wordService.findAdjectiveBase(for: "холодному") == "холодн")
         
     }
 
     func testIsVowel() throws {
-        XCTAssert(CyrillicUtils.isVowel(letter: "а") == true)
-        XCTAssert(CyrillicUtils.isVowel(letter: "А") == true)
-        XCTAssert(CyrillicUtils.isVowel(letter: "н") == false)
-        XCTAssert(CyrillicUtils.isVowel(letter: "е") == true)
-        XCTAssert(CyrillicUtils.isVowel(letter: "a") == false) // That's an latin a
+        XCTAssert(wordService.isVowel(letter: "а") == true)
+        XCTAssert(wordService.isVowel(letter: "А") == true)
+        XCTAssert(wordService.isVowel(letter: "н") == false)
+        XCTAssert(wordService.isVowel(letter: "е") == true)
+        XCTAssert(wordService.isVowel(letter: "a") == false) // That's an latin a
+    }
+    
+    func testReplaceVowelWithStressed() throws {
+        XCTAssert(wordService.addStress(to: "сказа'в") == "сказа́в")
+        XCTAssert(wordService.addStress(to: "ск'азав") == "сказав")
+        XCTAssert(wordService.addStress(to: "сказав") == "сказав")
+        XCTAssert(wordService.addStress(to: "сказа'") == "сказа́")
+        XCTAssert(wordService.addStress(to: "ска'за'в") == "сказав")
+        XCTAssert(wordService.addStress(to: "до'мик") == "до́мик")
     }
 }
 

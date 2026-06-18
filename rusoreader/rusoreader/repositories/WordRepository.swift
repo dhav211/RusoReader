@@ -127,9 +127,9 @@ class WordRepository {
             var forms = [String:String]()
             for form in wordInfo.wordForms {
                 if forms[form.form_type] != nil {
-                    forms[form.form_type]?.append(",\(form.form_bare)")
+                    forms[form.form_type]?.append(",\(form.form)")
                 } else {
-                    forms[form.form_type] = form.form_bare
+                    forms[form.form_type] = form.form
                 }
             }
             
