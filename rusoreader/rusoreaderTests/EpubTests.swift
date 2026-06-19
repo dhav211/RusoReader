@@ -84,11 +84,11 @@ final class EpubTests: XCTestCase {
         
         try bookRepo.removeBook(by: book!.id)
         
-        if try bookRepo.findBookBy(by: 1) != nil {
-            XCTFail()
-        }
-        
         do {
+            if try bookRepo.findBookBy(by: 1) != nil {
+                XCTFail()
+            }
+            
             let _ = try fileStore.load(fileName: book?.coverImageUrl ?? "")
             XCTFail()
         } catch {

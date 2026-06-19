@@ -1,24 +1,19 @@
 import UIKit
 
 class ReaderViewController: UITableViewController, ParagraphCellViewDelegate, TableOfContentsDelegate {
-    private var book: Book
-    private let wordService: WordService
-    private let bookService: BookService
-    private let tableOfContentIndices: [TableOfContentIndex]
     private var previousParagraph: PreviousParagraph?
-    private var paragraphs = [String]()
     private var shouldScroll: Bool = true
-    private var chapterProgressToUpdate: Int = 0
+    private let viewModel: ReaderViewModel
     
-    init(book: Book, wordService: WordService, bookService: BookService) {
-        self.book = book
-        self.wordService = wordService
-        self.bookService = bookService
-        self.tableOfContentIndices = self.bookService.getTableOfContentIndices(for: book)
+    init(viewModel: ReaderViewModel) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
         
-        if let chapter = bookService.getChapter(from: book, at: book.currentChapter) {
-                setParagraphs(from: chapter.text)
+        do {
+            try viewModel.setChapter(to: viewModel.currentChapter)
+        } catch {
+            // TODO create a UI Alert controller for displaying error messages, then on confirm it should dismiss this controller
+            print(error.localizedDescription)
         }
     }
     
@@ -27,17 +22,17 @@ class ReaderViewController: UITableViewController, ParagraphCellViewDelegate, Ta
     }
     
     override func viewDidDisappear(_ animated: Bool) {
-        bookService.updateProgressOnCurrentChapter(from: book, to: chapterProgressToUpdate)
+        viewModel.commitProgress()
     }
     
     override func viewDidLoad() {
         view.backgroundColor = .systemBackground
     
         tableView.separatorStyle = .none
-        tableView.register(ParagraphCellView.self, forCellReuseIdentifier: "paragraph")
+        tableView.register(ParagraphCellView.self, forCellReuseIdentifier: ParagraphCellView.reuseID)
         
         // There may be a chance there are no indices in the table of contents, if there are then show the button
-        if !tableOfContentIndices.isEmpty {
+        if viewModel.hasTableOfContents() {
             navigationItem.rightBarButtonItem = UIBarButtonItem(
                 image: UIImage(systemName: "list.bullet"),
                 style: .plain,
@@ -48,29 +43,29 @@ class ReaderViewController: UITableViewController, ParagraphCellViewDelegate, Ta
     }
     
     override func viewDidLayoutSubviews() {
-        if shouldScroll && !paragraphs.isEmpty {
+        if shouldScroll && !viewModel.paragraphs.isEmpty {
             shouldScroll = false
             tableView.scrollToRow(
-                at: IndexPath(row: bookService.getProgressOnCurrentChapter(from: book), section: 0), at: .top,
+                at: IndexPath(row: viewModel.currentProgress, section: 0), at: .top,
                 animated: false
             )
         }
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return paragraphs.count
+        return viewModel.paragraphs.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ParagraphCellView.reuseID) as! ParagraphCellView
-        cell.setText(with: paragraphs[indexPath.row])
+        cell.setText(with: viewModel.paragraphs[indexPath.row])
         cell.delegate = self
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if indexPath.row < paragraphs.count - 1 {
-            chapterProgressToUpdate = indexPath.row + 1
+        if indexPath.row < viewModel.paragraphs.count - 1 {
+            viewModel.updateProgress(to: indexPath.row + 1)
         }
     }
     
@@ -101,12 +96,8 @@ class ReaderViewController: UITableViewController, ParagraphCellViewDelegate, Ta
         if let wordRange = Range(selectionRange.wordRange, in: textView.text) {
             textView.highlightSelection(selectionRange: selectionRange)
             
-            let highlightedWord = String(textView.text[wordRange])
-            let matches = wordService.findMatches(from: highlightedWord)
-            
             // If we have matches we can open the modal to show the details on the word
-            if !matches.isEmpty, let firstWord = matches.first {
-                let wordDetailsViewModel = WordDetailsViewModel(word: firstWord, wordService: wordService)
+            if let wordDetailsViewModel = viewModel.buildWordDetailsViewModel(for: String(textView.text[wordRange])) {
                 let wordDetails = WordDetailsView(viewModel: wordDetailsViewModel)
                 wordDetails.modalPresentationStyle = .pageSheet
                 self.present(wordDetails, animated: true)
@@ -118,8 +109,8 @@ class ReaderViewController: UITableViewController, ParagraphCellViewDelegate, Ta
     
     /// A simple modal sheet for the table of contents
     @objc private func openTableOfContents() {
-        bookService.updateProgressOnCurrentChapter(from: book, to: chapterProgressToUpdate)
-        let tableOfContents = TableOfContentsController(indices: tableOfContentIndices)
+        viewModel.commitProgress()
+        let tableOfContents = TableOfContentsController(indices: viewModel.tableOfContentIndices)
         tableOfContents.modalPresentationStyle = .pageSheet
         tableOfContents.delegate = self
         self.present(tableOfContents, animated: true)
@@ -128,21 +119,14 @@ class ReaderViewController: UITableViewController, ParagraphCellViewDelegate, Ta
     /// Set the reader view's text with the selected chapter's text, this will also be a point to reset any possible values the reader view has accumluated
     /// - Parameter index: Index of the chapter the user is trying to open
     func chapterTitleClicked(at index: Int) {
-        if let chapter = bookService.getChapter(from: book, at: index) {
-            shouldScroll = true
-            setParagraphs(from: chapter.text)
-            tableView.reloadData()
+        do {
+            try viewModel.setChapter(to: index)
+            shouldScroll = true // We toggle this bool so when the viewDidLayoutSubviews is called the scroll view will scroll to the top for new chapter
             previousParagraph = nil
-            book.currentChapter = chapter.index
-            bookService.updateCurrentChapter(for: book, to: index)
-        } else {
-            // TODO show an alert saying the chapter wasn't found
-        }
-    }
-    
-    private func setParagraphs(from chapterText: String) {
-        paragraphs = chapterText.split(separator: "\n").map { paragraph in
-            return String(paragraph)
+            tableView.reloadData()
+        } catch {
+            // TODO create a UI Alert controller for displaying error messages, then on confirm it should dismiss this controller
+            print(error.localizedDescription)
         }
     }
     

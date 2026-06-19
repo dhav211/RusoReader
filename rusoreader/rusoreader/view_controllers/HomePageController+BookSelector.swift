@@ -8,8 +8,9 @@ extension HomePageController: BookSelectorDelegate {
         
         if let book = bookService.getBook(by: id) {
             isOnHomePage = false
+            let readerViewModel = ReaderViewModel(wordService: wordService, bookService: bookService, book: book)
             navigationController?.pushViewController(
-                ReaderViewController(book: book, wordService: wordService, bookService: bookService),
+                ReaderViewController(viewModel: readerViewModel),
                 animated: true
             )
         }
