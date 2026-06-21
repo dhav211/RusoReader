@@ -5,6 +5,14 @@ struct Noun {
     let indeclinable: Bool
     let plurality: Plurality
     
+    init(gender: Gender, partner: String, animate: Bool, indeclinable: Bool, plurality: Plurality) {
+        self.gender = gender
+        self.partner = partner
+        self.animate = animate
+        self.indeclinable = indeclinable
+        self.plurality = plurality
+    }
+    
     init(dbNoun: DatabaseNoun) {
         self.gender = {
             switch dbNoun.gender {

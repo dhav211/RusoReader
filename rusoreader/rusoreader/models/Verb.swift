@@ -2,6 +2,11 @@ struct Verb {
     let aspect: Aspect
     let partners: [String]
     
+    init(aspect: Aspect, partners: [String]) {
+        self.aspect = aspect
+        self.partners = partners
+    }
+    
     init(dbVerb: DatabaseVerb) {
         self.aspect = Aspect(rawValue: dbVerb.aspect) ?? Aspect.both
         self.partners = dbVerb.partner.split(separator: ";").map { partner in
