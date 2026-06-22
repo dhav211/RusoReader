@@ -57,7 +57,7 @@ class WordDetailsViewModel {
         case .adverb:
             information.append("Adverb")
         case.other:
-            information.append("Other")
+            break
         }
         
         return information
@@ -73,10 +73,12 @@ class WordDetailsViewModel {
             return "Top 100"
         } else if word.ranking > 100 && word.ranking <= 10_000 {
             let rankingMultipler : Int = word.ranking / 500
-            return "Top \((rankingMultipler + 1) * 500)"
+            let isEdgePosition: Bool = word.ranking % 500 == 0 ? true : false
+            return "Top \((rankingMultipler + (isEdgePosition ? 0 : 1)) * 500)"
         } else if word.ranking > 10_000 && word.ranking <= 50_000 {
             let rankingMultipler : Int = word.ranking / 5000
-            return "Top \((rankingMultipler + 1) * 5000)"
+            let isEdgePosition: Bool = word.ranking % 5000 == 0 ? true : false
+            return "Top \((rankingMultipler + (isEdgePosition ? 0 : 1)) * 5000)"
         } else {
             return "Very rarely used"
         }

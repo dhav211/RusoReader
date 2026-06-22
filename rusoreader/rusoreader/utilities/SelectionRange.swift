@@ -5,7 +5,7 @@ import Foundation
 /// `SelectionRange` is used to determine the NSRange of a specific word and the NSRange of the full sentence
 /// containing a given character index. It handles various delimiters including whitespace, punctuation,
 /// and quotation marks to accurately identify text boundaries.
-struct SelectionRange {
+struct SelectionRange : Hashable {
     var wordRange: NSRange!
     var sentenceRange: NSRange!
     
@@ -13,8 +13,6 @@ struct SelectionRange {
         self.wordRange = getSelectedWordRange(from: text, at: characterIndex)
         self.sentenceRange = getSelectedSentenceRange(from: text, at: characterIndex)
     }
-    
-    
     
     /// Determines and returns the NSRange of a word at a given character index.
     ///

@@ -1,13 +1,11 @@
 import UIKit
 
-protocol ParagraphCellViewDelegate: AnyObject {
-    func didClickText(in paragraphView: ParagraphView, at location: CGPoint)
-}
-
 class ParagraphCellView : UITableViewCell {
     private let paragraphView: ParagraphView
     static let reuseID = "paragraph"
-    weak var delegate: ParagraphCellViewDelegate?
+    private var index = 0
+    
+    var onTextClicked: ((ParagraphView, CGPoint, Int) -> Void)?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         paragraphView = ParagraphView()
@@ -30,11 +28,27 @@ class ParagraphCellView : UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func highlightWord(at selectionRange: SelectionRange) {
+        paragraphView.highlightSelection(selectionRange: selectionRange)
+    }
+    
     func setText(with text: String) {
         paragraphView.text = text
     }
     
+    func getText() -> String {
+        return paragraphView.text
+    }
+    
+    func setIndex(to value: Int) {
+        index = value
+    }
+    
+    func getIndex() -> Int {
+        return index
+    }
+    
     @objc func handleTap(_ gesture: UITapGestureRecognizer) {
-        delegate?.didClickText(in: paragraphView, at: gesture.location(in: self))
+        onTextClicked?(paragraphView, gesture.location(in: self), index)
     }
 }

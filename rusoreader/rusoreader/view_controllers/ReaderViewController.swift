@@ -1,7 +1,8 @@
 import UIKit
 
-class ReaderViewController: UITableViewController, ParagraphCellViewDelegate, TableOfContentsDelegate {
-    private var previousParagraph: PreviousParagraph?
+class ReaderViewController: UITableViewController, TableOfContentsDelegate {
+    private var selections = [Int:Set<SelectionRange>]()
+    private var currentSelections = Set<CurrentSelectionRange>()
     private var shouldScroll: Bool = true
     private let viewModel: ReaderViewModel
     
@@ -59,11 +60,34 @@ class ReaderViewController: UITableViewController, ParagraphCellViewDelegate, Ta
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ParagraphCellView.reuseID) as! ParagraphCellView
         cell.setText(with: viewModel.paragraphs[indexPath.row])
-        cell.delegate = self
+        cell.setIndex(to: indexPath.row)
+        cell.onTextClicked = { [weak self] paragraphView, location, index in
+            self?.textClicked(in: paragraphView, at: location, from: index)
+        }
+        
+        // If the index can be found in the selections dictionary that means there are words we can underline, lets do that here
+        if let selectionsAtIndex = selections[indexPath.row] {
+            for selection in selectionsAtIndex {
+                cell.highlightWord(at: selection)
+            }
+        }
+        
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        // Remove any selections associated with the paragraph that is exiting the table and add them to the dictionary for later highlighting when cell comes back on
+        for currentSelection in currentSelections {
+            if currentSelection.index == indexPath.row {
+                if selections[indexPath.row] == nil {
+                    selections[indexPath.row] = Set<SelectionRange>()
+                }
+                selections[indexPath.row]?.insert(currentSelection.selectionRange)
+            }
+        }
+        
+        currentSelections = currentSelections.filter { $0.index != indexPath.row }
+        
         if indexPath.row < viewModel.paragraphs.count - 1 {
             viewModel.updateProgress(to: indexPath.row + 1)
         }
@@ -71,12 +95,7 @@ class ReaderViewController: UITableViewController, ParagraphCellViewDelegate, Ta
     
     /// Takes a gesture location and uses it to find the tapped word and ultimately select the bounds of the entire sentence. Once this is finished word will be searched in the repository and then the WordDetailsView modal will pop up onto the screen.
     /// - Parameter location: The location on the screen where the user tapped, will be used to select the word.
-    func didClickText(in textView: ParagraphView, at location: CGPoint) {
-        // If there already something highlighted, just clear that out
-        if let previous = previousParagraph {
-            previous.paragraph.removeHighlight(selectionRange: previous.selectionRange)
-            previousParagraph = nil
-        }
+    func textClicked(in textView: ParagraphView, at location: CGPoint, from index: Int) {
         // Get the users gesture input location, then the text view's layout manager can convert that cgrect to a character index. We will use that character index to handle the selection range. Once the selection range has been set we will highlight the word and underline the rest of the sentence.
         let layoutManager = textView.layoutManager
         
@@ -102,8 +121,9 @@ class ReaderViewController: UITableViewController, ParagraphCellViewDelegate, Ta
                 wordDetails.modalPresentationStyle = .pageSheet
                 self.present(wordDetails, animated: true)
             }
-            // The passed in paragraph view and the selection range as the previous paragraph, so when this function runs again we can remove the highlights
-            previousParagraph = PreviousParagraph(paragraph: textView, selectionRange: selectionRange)
+            
+            // We are adding this selection so we can keep track of which words are highlighted
+            currentSelections.insert(CurrentSelectionRange(index: index, selectionRange: selectionRange))
         }
     }
     
@@ -122,7 +142,8 @@ class ReaderViewController: UITableViewController, ParagraphCellViewDelegate, Ta
         do {
             try viewModel.setChapter(to: index)
             shouldScroll = true // We toggle this bool so when the viewDidLayoutSubviews is called the scroll view will scroll to the top for new chapter
-            previousParagraph = nil
+            selections = [Int:Set<SelectionRange>]()
+            currentSelections = Set<CurrentSelectionRange>()
             tableView.reloadData()
         } catch {
             // TODO create a UI Alert controller for displaying error messages, then on confirm it should dismiss this controller
@@ -142,9 +163,8 @@ class ReaderViewController: UITableViewController, ParagraphCellViewDelegate, Ta
         return false
     }
     
-    /// Holds the data used to remove any highlighting from the text when the user clicks
-    private struct PreviousParagraph {
-        let paragraph: ParagraphView
+    private struct CurrentSelectionRange : Hashable {
+        let index: Int
         let selectionRange: SelectionRange
     }
 }

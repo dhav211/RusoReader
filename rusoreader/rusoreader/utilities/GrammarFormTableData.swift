@@ -51,7 +51,7 @@ struct GrammarFormTableData {
                          Cell(text: wordForms["ru_noun_pl_gen"] ?? "", isRussianWord: true)
                     ],
                     [
-                        Cell(text: "Genitive", isRussianWord: false),
+                        Cell(text: "Dative", isRussianWord: false),
                         Cell(text: wordForms["ru_noun_sg_dat"] ?? "", isRussianWord: true),
                         Cell(text: wordForms["ru_noun_pl_dat"] ?? "", isRussianWord: true)
                     ],

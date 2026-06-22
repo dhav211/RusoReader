@@ -27,8 +27,8 @@ class ParagraphView: UITextView {
     }
     
     func highlightSelection(selectionRange: SelectionRange) {
-        textStorage.addAttribute(.foregroundColor, value: UIColor.red, range: selectionRange.wordRange)
-        textStorage.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: selectionRange.sentenceRange)
-        textStorage.addAttribute(.underlineColor, value: UIColor.red, range: selectionRange.sentenceRange)
+        //textStorage.addAttribute(.foregroundColor, value: UIColor.red, range: selectionRange.wordRange)
+        textStorage.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: selectionRange.wordRange)
+        textStorage.addAttribute(.underlineColor, value: UIColor.blue, range: selectionRange.wordRange)
     }
 }
