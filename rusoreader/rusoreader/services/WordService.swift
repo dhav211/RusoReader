@@ -1,8 +1,10 @@
 class WordService {
     private let wordRepo: WordRepository
+    private let sentenceRepo: SentenceRepository
     
-    init(wordRepo: WordRepository) {
+    init(wordRepo: WordRepository, sentenceRepo: SentenceRepository) {
         self.wordRepo = wordRepo
+        self.sentenceRepo = sentenceRepo
     }
     
     /// Find any word objects from a word form, for example the word form собаки would return the base form of собака
@@ -11,6 +13,13 @@ class WordService {
     func findMatches(from wordForm: String) -> [Word] {
         let ids = wordRepo.findWordIDs(by: wordForm)
         return wordRepo.findMatches(by: ids)
+    }
+    
+    /// Returns a maximum of 25 random sentences which contain the word owned by this word id
+    /// - Parameter wordId: The id of the word we are getting sentences
+    /// - Returns: A max limit of 25 random sentences containing the given word id
+    func findSentences(by wordId: Int) -> [Sentence] {
+        return sentenceRepo.findSentences(by: wordId)
     }
     
     /// Finds the base form of an adjective by removing its suffix.

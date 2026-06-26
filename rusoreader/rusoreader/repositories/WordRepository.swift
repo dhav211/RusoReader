@@ -135,6 +135,7 @@ class WordRepository {
             
             words.append(
                 Word(
+                    id: Int(wordInfo.word.id),
                     bare: wordInfo.word.bare,
                     accented: wordInfo.word.accented,
                     type: wordType,

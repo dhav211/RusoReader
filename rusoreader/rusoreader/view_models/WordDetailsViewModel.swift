@@ -21,6 +21,19 @@ class WordDetailsViewModel {
         }
     }
     
+    func getSentences() -> [Sentence] {
+        var sentences = wordService.findSentences(by: word.id)
+        return wordService.findSentences(by: word.id)
+    }
+    
+    func addStressToSentence(sentence: String) -> String {
+        return sentence
+            .split(separator: " ")
+            .map { word in
+                return wordService.addStress(to: String(word))
+            }.joined(separator: " ")
+    }
+    
     /// Word information will change depending on its part of speech (noun, verb, etc), wether it's animate or inanimate, etc
     /// - Parameter word: The word we will get the information for
     /// - Returns: A string value which has been creating by checking variables in the word object

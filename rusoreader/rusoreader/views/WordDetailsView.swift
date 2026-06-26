@@ -18,14 +18,19 @@ class WordDetailsView: UIViewController {
         
         view.backgroundColor = .systemBackground
         
-        //let scrollView = UIScrollView()
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.showsHorizontalScrollIndicator = false
+
+        view.addSubview(scrollView)
+        
         let wordDetailsStack = UIStackView()
         wordDetailsStack.axis = .vertical
         wordDetailsStack.distribution = .fillProportionally
         wordDetailsStack.alignment = .center
         wordDetailsStack.translatesAutoresizingMaskIntoConstraints = false
         wordDetailsStack.spacing = 16
-        view.addSubview(wordDetailsStack)
+        scrollView.addSubview(wordDetailsStack)
 
         wordDetailsStack.addArrangedSubview(createWordTitleHeader())
         
@@ -47,10 +52,19 @@ class WordDetailsView: UIViewController {
             print("You need to implement all word forms")
         }
         
+        if let sentenceStack = createSentenceSection() {
+            wordDetailsStack.addArrangedSubview(sentenceStack)
+        }
+        
         NSLayoutConstraint.activate([
-            wordDetailsStack.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
-            wordDetailsStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0),
-            wordDetailsStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0)
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
+            wordDetailsStack.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 0),
+            wordDetailsStack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: 0),
+            wordDetailsStack.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
+            wordDetailsStack.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
         ])
     }
     
@@ -122,4 +136,22 @@ class WordDetailsView: UIViewController {
         return translationStack
     }
 
+    private func createSentenceSection() -> UIStackView? {
+        let sentences = viewModel.getSentences()
+        if !sentences.isEmpty {
+            let sentenceStack = UIStackView()
+            sentenceStack.spacing = 8
+            sentenceStack.axis = .vertical
+            
+            for sentence in sentences {
+                if !sentence.translation.isEmpty && !sentence.text.isEmpty {
+                    sentenceStack.addArrangedSubview(SentenceView(russianText: viewModel.addStressToSentence(sentence: sentence.text), englishText: sentence.translation))
+                }
+            }
+            
+            return sentenceStack
+        } else {
+            return nil
+        }
+    }
 }

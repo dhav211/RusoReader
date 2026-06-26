@@ -15,9 +15,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let dbManager = DatabaseManager()
         
         let wordRepo = WordRepository(databaseManager: dbManager)
+        let sentenceRepo = SentenceRepository(databaseManager: dbManager)
         let bookRepo = BookRepository(databaseManager: dbManager, fileStore: FileStore(directory: .documentsDirectory))
         
-        let wordService = WordService(wordRepo: wordRepo)
+        let wordService = WordService(wordRepo: wordRepo, sentenceRepo: sentenceRepo)
         let bookService = BookService(bookRepo: bookRepo)
         
         let rootController = HomePageController(wordService: wordService, bookService: bookService)

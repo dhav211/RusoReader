@@ -1,27 +1,89 @@
 import XCTest
 @testable import rusoreader
 
-final class WordInformationTests: XCTestCase {
+final class WordsDetailsViewModelTests: XCTestCase {
     var databaseManager: DatabaseManager!
     var wordRepo: WordRepository!
     var wordService: WordService!
+    var sentenceRepo: SentenceRepository!
     
     override func setUpWithError() throws {
         databaseManager = DatabaseManager()
         wordRepo = WordRepository(databaseManager: databaseManager)
-        wordService = WordService(wordRepo: wordRepo)
+        sentenceRepo = SentenceRepository(databaseManager: databaseManager)
+        wordService = WordService(wordRepo: wordRepo, sentenceRepo: sentenceRepo)
     }
-
+    
     override func tearDownWithError() throws {
         databaseManager = nil
         wordRepo = nil
+        sentenceRepo = nil
         wordService = nil
     }
-
+    
+    func testAddStressToSentence() throws {
+        let word = Word(
+            id: 0,
+            bare: "",
+            accented: "",
+            type: .noun,
+            level: "",
+            ranking: 1,
+            noun: Noun(gender: .female, partner: "", animate: true, indeclinable: false, plurality: .neither),
+            verb: nil,
+            forms: [String:String](),
+            translations: [String]()
+        )
+        
+        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        
+        let stressed = sut.addStressToSentence(sentence: "В шка'фу виси'т оде'жда.")
+        XCTAssert(stressed == "В шка́фу виси́т оде́жда.")
+    }
+    
+    func testAddStressToOneWordSentence() throws {
+        let word = Word(
+            id: 0,
+            bare: "",
+            accented: "",
+            type: .noun,
+            level: "",
+            ranking: 1,
+            noun: Noun(gender: .female, partner: "", animate: true, indeclinable: false, plurality: .neither),
+            verb: nil,
+            forms: [String:String](),
+            translations: [String]()
+        )
+        
+        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let stressed = sut.addStressToSentence(sentence: "оде'жда.")
+        XCTAssert(stressed == "оде́жда.")
+    }
+    
+    func testNoStressInSentence() throws {
+        let word = Word(
+            id: 0,
+            bare: "",
+            accented: "",
+            type: .noun,
+            level: "",
+            ranking: 1,
+            noun: Noun(gender: .female, partner: "", animate: true, indeclinable: false, plurality: .neither),
+            verb: nil,
+            forms: [String:String](),
+            translations: [String]()
+        )
+        
+        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let stressed = sut.addStressToSentence(sentence: "На заводе")
+        XCTAssert(stressed == "На заводе")
+    }
+    
     // MARK: - Noun tests
     
-    func testNounFemaleAnimate() {
+    func testNounFemaleAnimate() throws {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .noun,
@@ -37,8 +99,9 @@ final class WordInformationTests: XCTestCase {
         XCTAssertEqual(sut.getWordInformation(), "Noun, female, animate")
     }
 
-    func testNounFemaleInanimate() {
+    func testNounFemaleInanimate() throws {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .noun,
@@ -54,8 +117,9 @@ final class WordInformationTests: XCTestCase {
         XCTAssertEqual(sut.getWordInformation(), "Noun, female, inanimate")
     }
 
-    func testNounMaleAnimate() {
+    func testNounMaleAnimate() throws {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .noun,
@@ -73,6 +137,7 @@ final class WordInformationTests: XCTestCase {
 
     func testNounMaleInanimate() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .noun,
@@ -90,6 +155,7 @@ final class WordInformationTests: XCTestCase {
 
     func testNounNeuterAnimate() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .noun,
@@ -107,6 +173,7 @@ final class WordInformationTests: XCTestCase {
 
     func testNounNeuterInanimate() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .noun,
@@ -124,6 +191,7 @@ final class WordInformationTests: XCTestCase {
 
     func testNounBothGenderAnimate() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .noun,
@@ -141,6 +209,7 @@ final class WordInformationTests: XCTestCase {
 
     func testNounBothGenderInanimate() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .noun,
@@ -158,6 +227,7 @@ final class WordInformationTests: XCTestCase {
 
     func testAllNilButHasNounType() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .noun,
@@ -177,6 +247,7 @@ final class WordInformationTests: XCTestCase {
 
     func testVerb_withPerfectiveAspect() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .verb,
@@ -194,6 +265,7 @@ final class WordInformationTests: XCTestCase {
 
     func testVerb_withImperfectiveAspect() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .verb,
@@ -212,6 +284,7 @@ final class WordInformationTests: XCTestCase {
     /// When `word.type == .verb` but `word.verb` is nil, only "Verb" should be appended.
     func testVerb_withNilVerbDetails_returnsOnlyVerb() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .verb,
@@ -231,6 +304,7 @@ final class WordInformationTests: XCTestCase {
 
     func testAdjective() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .adjective,
@@ -248,6 +322,7 @@ final class WordInformationTests: XCTestCase {
 
     func testAdverb() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .adverb,
@@ -265,6 +340,7 @@ final class WordInformationTests: XCTestCase {
 
     func testOther() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -284,6 +360,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_zero_returnsTop10() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -300,6 +377,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_ten_returnsTop10() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -318,6 +396,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_eleven_returnsTop100() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -334,6 +413,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_oneHundred_returnsTop100() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -352,6 +432,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_oneHundredOne_returnsTop500() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -368,6 +449,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_fourNinetyNine_returnsTop500() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -384,6 +466,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_exactlyFiveHundred_returnsTop1000() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -400,6 +483,7 @@ final class WordInformationTests: XCTestCase {
     
     func testRanking_exactlyOneThousand_returnsTop1000() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -416,6 +500,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_documentedExample_returnsTop25000() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -432,6 +517,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_nineNineNineNine_returnsTop10000() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -448,6 +534,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_exactlyTenThousand_returnsTop10500() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -466,6 +553,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_tenThousandOne_returnsTop15000() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -482,6 +570,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_exactlyFifteenThousand_returnsTop20000() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -498,6 +587,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_fortyNineNineNineNine_returnsTop50000() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -514,6 +604,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_exactlyFiftyThousand_returnsTop55000() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -532,6 +623,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_fiftyThousandOne_returnsVeryRarelyUsed() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -548,6 +640,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_negativeOne_returnsVeryRarelyUsed() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -564,6 +657,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_largeNegative_returnsVeryRarelyUsed() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -580,6 +674,7 @@ final class WordInformationTests: XCTestCase {
  
     func testRanking_veryLargePositive_returnsVeryRarelyUsed() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .other,
@@ -595,6 +690,7 @@ final class WordInformationTests: XCTestCase {
     }
     func testNounTableLabelCellsOutrankActualRussianWords() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .noun,
@@ -625,6 +721,7 @@ final class WordInformationTests: XCTestCase {
 
     func testVerbTablePronounLabelsUsuallyLoseButOneWins() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .verb,
@@ -649,6 +746,7 @@ final class WordInformationTests: XCTestCase {
 
     func testVerbPastTableLabelsWinEveryRow() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .verb,
@@ -672,6 +770,7 @@ final class WordInformationTests: XCTestCase {
 
     func testVerbImperativeTableWordsBeatShortLabels() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .verb,
@@ -693,6 +792,7 @@ final class WordInformationTests: XCTestCase {
 
     func testNounTable_missingWordForms_defaultsToEmptyCellsNoCrash() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .verb,
@@ -711,6 +811,7 @@ final class WordInformationTests: XCTestCase {
 
     func testVerbParticiples_unhandledTypeFallsThroughToPlaceholder() {
         let word = Word(
+            id: 0,
             bare: "",
             accented: "",
             type: .verb,

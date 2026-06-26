@@ -1,4 +1,5 @@
 struct Word {
+    let id: Int
     let bare: String
     let accented: String
     let type: WordType
@@ -9,7 +10,8 @@ struct Word {
     let forms: [String:String]
     let translations: [String]
     
-    init(bare: String, accented: String, type: WordType, level: String, ranking: Int, noun: Noun?, verb: Verb?, forms: [String:String], translations: [String]) {
+    init(id: Int, bare: String, accented: String, type: WordType, level: String, ranking: Int, noun: Noun?, verb: Verb?, forms: [String:String], translations: [String]) {
+        self.id = id
         self.bare = bare
         self.accented = accented
         self.type = type
