@@ -37,6 +37,14 @@ class GrammarTable: UIStackView {
                     cells[row].append(firstVariation)
                 }
             }
+            
+            // puts a simple separator between each rows, the first separator will be darker
+            if row < grammarFormTableData.forms.count - 1 { // ensure we don't a separator at the bottom of the table
+                let separator = UIView()
+                separator.backgroundColor = row > 0 ? .separator : .label
+                separator.heightAnchor.constraint(equalToConstant: 0.5).isActive = true
+                addArrangedSubview(separator)
+            }
         }
         
         setWidthAnchors(cells: cells)
