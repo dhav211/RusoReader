@@ -6,12 +6,13 @@ final class WordTests: XCTestCase {
     private var databaseManager: DatabaseManager!
     private var wordRepo: WordRepository!
     private var sentenceRepo: SentenceRepository!
+    private var dictionaryRepo: DictionaryRepository!
     
     override func setUpWithError() throws {
         databaseManager = DatabaseManager()
         wordRepo = WordRepository(databaseManager: databaseManager)
         sentenceRepo = SentenceRepository(databaseManager: databaseManager)
-        wordService = WordService(wordRepo: wordRepo, sentenceRepo: sentenceRepo)
+        wordService = WordService(wordRepo: wordRepo, sentenceRepo: sentenceRepo, dictionaryRepo: dictionaryRepo)
     }
 
     override func tearDownWithError() throws {

@@ -1,10 +1,12 @@
 class WordService {
     private let wordRepo: WordRepository
     private let sentenceRepo: SentenceRepository
+    private let dictionaryRepo: DictionaryRepository
     
-    init(wordRepo: WordRepository, sentenceRepo: SentenceRepository) {
+    init(wordRepo: WordRepository, sentenceRepo: SentenceRepository, dictionaryRepo: DictionaryRepository) {
         self.wordRepo = wordRepo
         self.sentenceRepo = sentenceRepo
+        self.dictionaryRepo = dictionaryRepo
     }
     
     /// Find any word objects from a word form, for example the word form собаки would return the base form of собака
@@ -84,5 +86,9 @@ class WordService {
         wordWithStressMark.remove(at: updatedAccentIndex)
         
         return wordWithStressMark
+    }
+    
+    func addWordToUserDictionary(word: Word) {
+        dictionaryRepo.addWord(by: word.id)
     }
 }

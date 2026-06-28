@@ -58,22 +58,6 @@ final class DatabaseManager {
         }
     }
     
-    // TODO create the indices in a python script
-//    private func runWordDataMigrations(on queue: DatabaseQueue) {
-//        do {
-//            var migrator = DatabaseMigrator()
-//            
-//            migrator.registerMigration("add indices to word_forms and words") { db in
-//                try db.create(indexOn: "word_forms", columns: ["form_bare"])
-//                try db.create(indexOn: "words", columns: ["id"])
-//            }
-//            
-//            try migrator.migrate(queue)
-//        } catch {
-//            print("Failed to run migrations on Words DB: \(error)")
-//        }
-//    }
-    
     private func runUserDataMigrations(on queue: DatabaseQueue) {
         do {
             var migrator = DatabaseMigrator()
@@ -136,6 +120,23 @@ final class DatabaseManager {
             migrator.registerMigration("change chapter index to position") { db in
                 try db.alter(table: "chapters") { chaptersTable in
                     chaptersTable.rename(column: "index", to: "position")
+                }
+            }
+            
+            migrator.registerMigration("create dictionary") { db in
+                try db.create(table: "user_dictionary") { dictionaryTable in
+                    dictionaryTable.primaryKey("id", .integer)
+                    dictionaryTable.column("score", .integer).notNull()
+                    dictionaryTable.column("first_seen", .date).notNull()
+                    dictionaryTable.column("last_seen", .date).notNull()
+                    dictionaryTable.column("due_date", .date)
+                }
+            }
+            
+            migrator.registerMigration("adds times clicked and times appeared") { db in
+                try db.alter(table: "user_dictionary") { dictionaryTable in
+                    dictionaryTable.add(column: "times_clicked", .integer).notNull()
+                    dictionaryTable.add(column: "times_appeared", .integer).notNull()
                 }
             }
             

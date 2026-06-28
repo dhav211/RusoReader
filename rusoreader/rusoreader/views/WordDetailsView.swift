@@ -16,6 +16,8 @@ class WordDetailsView: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        viewModel.addWordToDictionary()
+        
         view.backgroundColor = .systemBackground
         
         let scrollView = UIScrollView()

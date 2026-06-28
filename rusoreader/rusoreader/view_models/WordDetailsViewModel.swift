@@ -26,6 +26,10 @@ class WordDetailsViewModel {
         return wordService.findSentences(by: word.id)
     }
     
+    func addWordToDictionary() {
+        wordService.addWordToUserDictionary(word: word)
+    }
+    
     func addStressToSentence(sentence: String) -> String {
         return sentence
             .split(separator: " ")
