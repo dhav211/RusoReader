@@ -22,7 +22,6 @@ class WordDetailsViewModel {
     }
     
     func getSentences() -> [Sentence] {
-        var sentences = wordService.findSentences(by: word.id)
         return wordService.findSentences(by: word.id)
     }
     
