@@ -21,8 +21,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let wordService = WordService(wordRepo: wordRepo, sentenceRepo: sentenceRepo, dictionaryRepo: dictionaryRepo)
         let bookService = BookService(bookRepo: bookRepo)
+        let dictionaryService = DictionaryService(dictionaryRepo: dictionaryRepo, wordService: wordService)
+        let sentenceService = SentenceService(sentenceRepo: sentenceRepo, wordRepo: wordRepo, wordService: wordService)
         
-        let rootController = HomePageController(wordService: wordService, bookService: bookService)
+        let rootController = HomePageController(wordService: wordService, bookService: bookService, dictionaryService: dictionaryService, sentenceService: sentenceService)
         
         let navigationController = UINavigationController(rootViewController: rootController)
         window.rootViewController = navigationController

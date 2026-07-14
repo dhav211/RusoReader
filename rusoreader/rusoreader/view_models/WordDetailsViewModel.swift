@@ -1,10 +1,12 @@
 class WordDetailsViewModel {
     private let word: Word
     private let wordService: WordService
+    private let sentenceService: SentenceService
     
-    init(word: Word, wordService: WordService) {
+    init(word: Word, wordService: WordService, sentenceService: SentenceService) {
         self.word = word
         self.wordService = wordService
+        self.sentenceService = sentenceService
     }
     
     func getWordType() -> Word.WordType {

@@ -5,7 +5,7 @@ struct DictionaryEntry {
     let firstSeen: Date
     let lastSeen: Date
     let dueForReview: Date?
-    let score: Int
+    let score: Float
     let timesClicked: Int
     let timesAppeared: Int
 }

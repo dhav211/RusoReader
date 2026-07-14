@@ -17,6 +17,10 @@ class WordService {
         return wordRepo.findMatches(by: ids)
     }
     
+    func findMatches(from ids: [Int]) -> [Word] {
+        return wordRepo.findMatches(by: ids.map { return Int64($0)})
+    }
+    
     /// Returns a maximum of 25 random sentences which contain the word owned by this word id
     /// - Parameter wordId: The id of the word we are getting sentences
     /// - Returns: A max limit of 25 random sentences containing the given word id
@@ -88,6 +92,8 @@ class WordService {
         return wordWithStressMark
     }
     
+    /// Adds the word to the dictionary, which will be used to remember what words users clicked so they can be quizzed on them in exercises
+    /// - Parameter word: The word which the user will be quizzed on in future exercises
     func addWordToUserDictionary(word: Word) {
         dictionaryRepo.addWord(by: word.id)
     }

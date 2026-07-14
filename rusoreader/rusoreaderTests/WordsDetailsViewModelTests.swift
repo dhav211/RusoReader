@@ -7,6 +7,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
     var wordService: WordService!
     var sentenceRepo: SentenceRepository!
     var dictionaryRepo: DictionaryRepository!
+    var sentenceService: SentenceService!
     
     override func setUpWithError() throws {
         databaseManager = DatabaseManager()
@@ -14,6 +15,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
         sentenceRepo = SentenceRepository(databaseManager: databaseManager)
         dictionaryRepo = DictionaryRepository(databaseManager: databaseManager)
         wordService = WordService(wordRepo: wordRepo, sentenceRepo: sentenceRepo, dictionaryRepo: dictionaryRepo)
+        sentenceService = SentenceService(sentenceRepo: sentenceRepo, wordRepo: wordRepo, wordService: wordService)
     }
     
     override func tearDownWithError() throws {
@@ -21,6 +23,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
         wordRepo = nil
         sentenceRepo = nil
         wordService = nil
+        sentenceService = nil
     }
     
     func testAddStressToSentence() throws {
@@ -37,7 +40,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             translations: [String]()
         )
         
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         
         let stressed = sut.addStressToSentence(sentence: "В шка'фу виси'т оде'жда.")
         XCTAssert(stressed == "В шка́фу виси́т оде́жда.")
@@ -57,7 +60,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             translations: [String]()
         )
         
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         let stressed = sut.addStressToSentence(sentence: "оде'жда.")
         XCTAssert(stressed == "оде́жда.")
     }
@@ -76,7 +79,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             translations: [String]()
         )
         
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         let stressed = sut.addStressToSentence(sentence: "На заводе")
         XCTAssert(stressed == "На заводе")
     }
@@ -96,7 +99,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
 
         XCTAssertEqual(sut.getWordInformation(), "Noun, female, animate")
     }
@@ -114,7 +117,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
 
         XCTAssertEqual(sut.getWordInformation(), "Noun, female, inanimate")
     }
@@ -132,7 +135,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
 
         XCTAssertEqual(sut.getWordInformation(), "Noun, male, animate")
     }
@@ -150,7 +153,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
 
         XCTAssertEqual(sut.getWordInformation(), "Noun, male, inanimate")
     }
@@ -168,7 +171,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
 
         XCTAssertEqual(sut.getWordInformation(), "Noun, neuter, animate")
     }
@@ -186,7 +189,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
 
         XCTAssertEqual(sut.getWordInformation(), "Noun, neuter, inanimate")
     }
@@ -204,7 +207,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
 
         XCTAssertEqual(sut.getWordInformation(), "Noun, male & female, animate")
     }
@@ -222,7 +225,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
 
         XCTAssertEqual(sut.getWordInformation(), "Noun, male & female, inanimate")
     }
@@ -240,7 +243,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
 
         XCTAssertEqual(sut.getWordInformation(), "Noun")
     }
@@ -260,7 +263,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
 
         XCTAssertEqual(sut.getWordInformation(), "Verb, perfective")
     }
@@ -278,7 +281,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
 
         XCTAssertEqual(sut.getWordInformation(), "Verb, imperfective")
     }
@@ -297,7 +300,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
 
         XCTAssertEqual(sut.getWordInformation(), "Verb")
     }
@@ -317,7 +320,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
 
         XCTAssertEqual(sut.getWordInformation(), "Adjective")
     }
@@ -335,7 +338,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
 
         XCTAssertEqual(sut.getWordInformation(), "Adverb")
     }
@@ -353,7 +356,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
 
         XCTAssertEqual(sut.getWordInformation(), "")
     }
@@ -373,7 +376,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Top 10")
     }
  
@@ -390,7 +393,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Top 10")
     }
  
@@ -409,7 +412,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Top 100")
     }
  
@@ -426,7 +429,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Top 100")
     }
  
@@ -445,7 +448,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Top 500")
     }
  
@@ -462,7 +465,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Top 500")
     }
  
@@ -479,7 +482,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Top 500")
     }
     
@@ -496,7 +499,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Top 1000")
     }
  
@@ -513,7 +516,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Top 25000")
     }
  
@@ -530,7 +533,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Top 10000")
     }
  
@@ -547,7 +550,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Top 10000")
     }
  
@@ -566,7 +569,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Top 15000")
     }
  
@@ -583,7 +586,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Top 15000")
     }
  
@@ -600,7 +603,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Top 50000")
     }
  
@@ -617,7 +620,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Top 50000")
     }
  
@@ -636,7 +639,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Very rarely used")
     }
  
@@ -653,7 +656,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Very rarely used")
     }
  
@@ -670,7 +673,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Very rarely used")
     }
  
@@ -687,7 +690,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [String:String](),
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         XCTAssertEqual(sut.getRankingTitle(), "Very rarely used")
     }
     func testNounTableLabelCellsOutrankActualRussianWords() {
@@ -716,7 +719,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ],
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         let data = sut.createGrammarFormTableData(grammarTableType: .noun)
         XCTAssertEqual(sut.getLongestRows(grammarFormTableData: data), [1, 0, 0, 0, 0, 0, 0])
     }
@@ -741,7 +744,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ],
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         let data = sut.createGrammarFormTableData(grammarTableType: .verb)
         XCTAssertEqual(sut.getLongestRows(grammarFormTableData: data), [1, 1, 0, 1, 1, 1])
     }
@@ -764,7 +767,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ],
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         let data = sut.createGrammarFormTableData(grammarTableType: .verbPast)
  
         XCTAssertEqual(sut.getLongestRows(grammarFormTableData: data), [0, 0, 0, 0])
@@ -786,7 +789,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ],
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         let data = sut.createGrammarFormTableData(grammarTableType: .verbImperative)
  
         XCTAssertEqual(sut.getLongestRows(grammarFormTableData: data), [1, 1])
@@ -805,7 +808,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             forms: [:],
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         let data = sut.createGrammarFormTableData(grammarTableType: .noun)
  
         XCTAssertEqual(sut.getLongestRows(grammarFormTableData: data), [1, 0, 0, 0, 0, 0, 0])
@@ -826,7 +829,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ],
             translations: [String]()
         )
-        let sut = WordDetailsViewModel(word: word, wordService: wordService)
+        let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
         let data = sut.createGrammarFormTableData(grammarTableType: .verbParticiples)
  
         XCTAssertEqual(sut.getLongestRows(grammarFormTableData: data), [0])

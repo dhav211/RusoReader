@@ -12,6 +12,7 @@ final class WordTests: XCTestCase {
         databaseManager = DatabaseManager()
         wordRepo = WordRepository(databaseManager: databaseManager)
         sentenceRepo = SentenceRepository(databaseManager: databaseManager)
+        dictionaryRepo = DictionaryRepository(databaseManager: databaseManager)
         wordService = WordService(wordRepo: wordRepo, sentenceRepo: sentenceRepo, dictionaryRepo: dictionaryRepo)
     }
 
@@ -40,6 +41,18 @@ final class WordTests: XCTestCase {
         XCTAssert(wordService.addStress(to: "сказа'") == "сказа́")
         XCTAssert(wordService.addStress(to: "ска'за'в") == "сказав")
         XCTAssert(wordService.addStress(to: "до'мик") == "до́мик")
+    }
+    
+    func testFindByIDs() throws {
+        let expectedWords = ["весь", "человек", "видеть", "женщина"]
+        let words = wordService.findMatches(from: [12, 34, 94, 169])
+        XCTAssert(words.count == 4)
+        
+        for expectedWord in expectedWords {
+            if !words.contains(where: {$0.bare == expectedWord}) {
+                XCTFail("The returned words from the database didn't contain the expected word \(expectedWord)")
+            }
+        }
     }
 }
 

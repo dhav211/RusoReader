@@ -64,12 +64,15 @@ class DictionaryRepository {
             
             try databaseManager.userDataQueue.write { db in
                 if var previousEntry = try getDatabaseEntry(by: Int64(wordId), from: db) {
-                    try increaseTimesClicked(for: &previousEntry, from: db)
-                    try increaseScore(for: &previousEntry, from: db)
+                    previousEntry.times_clicked += 1
+                    if previousEntry.times_clicked > 3 {
+                        previousEntry.score += 1.0
+                    }
+                    try previousEntry.update(db)
                 } else {
                     var newEntry = DatabaseDictionaryWord(
                         id: Int64(wordId),
-                        score: 3,
+                        score: 3.0,
                         times_clicked: 1,
                         times_appeared: 0,
                         first_seen: Date.now,
@@ -95,7 +98,7 @@ class DictionaryRepository {
                         firstSeen: dbEntry.first_seen,
                         lastSeen: dbEntry.last_seen,
                         dueForReview: dbEntry.due_date,
-                        score: Int(dbEntry.score),
+                        score: Float(dbEntry.score),
                         timesClicked: Int(dbEntry.times_clicked),
                         timesAppeared: Int(dbEntry.times_appeared)
                     )
@@ -118,7 +121,7 @@ class DictionaryRepository {
                         firstSeen: dbEntry.first_seen,
                         lastSeen: dbEntry.last_seen,
                         dueForReview: dbEntry.due_date,
-                        score: Int(dbEntry.score),
+                        score: Float(dbEntry.score),
                         timesClicked: Int(dbEntry.times_clicked),
                         timesAppeared: Int(dbEntry.times_appeared)
                     )
@@ -145,6 +148,22 @@ class DictionaryRepository {
         }
     }
     
+    func updateScore(for wordId: Int, by amount: Double) {
+        do {
+            try databaseManager.userDataQueue.write { db in
+                if var entry = try getDatabaseEntry(by: Int64(wordId), from: db) {
+                    entry.score += amount
+                    
+                    if entry.score < 0 { entry.score = 0 }
+                    
+                    try entry.update(db)
+                }
+            }
+        } catch {
+            print("Error: \(error)")
+        }
+    }
+    
     private func getDatabaseEntry(by wordId: Int64, from db: Database) throws -> DatabaseDictionaryWord? {
         return try DatabaseDictionaryWord.fetchOne(db, id: wordId)
     }
@@ -156,7 +175,7 @@ class DictionaryRepository {
                 firstSeen: dbEntry.first_seen,
                 lastSeen: dbEntry.last_seen,
                 dueForReview: dbEntry.due_date,
-                score: Int(dbEntry.score),
+                score: Float(dbEntry.score),
                 timesClicked: 1,
                 timesAppeared: 0
             )
@@ -169,17 +188,5 @@ class DictionaryRepository {
             return true
         }
         return false
-    }
-    
-    private func increaseTimesClicked(for word: inout DatabaseDictionaryWord, from db: Database) throws {
-        word.times_clicked += 1
-        try word.update(db)
-    }
-    
-    private func increaseScore(for word: inout DatabaseDictionaryWord, from db: Database) throws {
-        if word.times_clicked > 3 {
-            word.score += 1
-            try word.update(db)
-        }
     }
 }

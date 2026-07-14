@@ -50,4 +50,48 @@ final class WordFetchingTests: XCTestCase {
         
         XCTAssert(matches.count == 1)
     }
+    
+    func testFindAllFormsOfчеловек() throws {
+        let sut = wordRepo.findUniqueWordForms(for: 34)
+        let expected = ["людей","люди","людьми","людям","людях","человек","человека","человекам","человеками","человеках","человеке","человеки","человеков","человеком","человеку"]
+        
+        for word in sut {
+            if !expected.contains(word) {
+                XCTFail("\(word) not found in expected words")
+            }
+        }
+    }
+    
+    func testFindAllFormsOfчеловекWithStress() throws {
+        let sut = wordRepo.findUniqueStressedWordForms(for: 34)
+        let expected = [
+            "челове'к",
+            "челове'ка",
+            "челове'ку",
+            "челове'ком",
+            "челове'ке",
+            "лю'ди",
+            "челове'ки",
+            "люде'й",
+            "челове'ков",
+            "лю'дям",
+            "челове'кам",
+            "людьми'",
+            "челове'ками",
+            "лю'дях",
+            "челове'ках"
+        ]
+        
+        for word in sut {
+            if !expected.contains(word) {
+                XCTFail("\(word) not found in expected words")
+            }
+        }
+    }
+    
+    func testFindAllFormsOfNoWord() throws {
+        let sut = wordRepo.findUniqueWordForms(for: Int.max)
+        
+        XCTAssert(sut.count == 0)
+    }
 }

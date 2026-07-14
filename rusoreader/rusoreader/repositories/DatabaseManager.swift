@@ -140,6 +140,13 @@ final class DatabaseManager {
                 }
             }
             
+            migrator.registerMigration("change score to float") { db in
+                try db.alter(table: "user_dictionary") { dictionaryTable in
+                    dictionaryTable.drop(column: "score")
+                    dictionaryTable.add(column: "score", .double).notNull()
+                }
+            }
+            
             try migrator.migrate(queue)
         } catch {
             print("Failed to run migrations on UserData DB: \(error)")

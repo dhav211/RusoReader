@@ -3,7 +3,7 @@ import Foundation
 
 struct DatabaseDictionaryWord : Codable, Identifiable, MutablePersistableRecord {
     var id: Int64 // The id is the same as the word_id it is associated with
-    var score: Int64
+    var score: Double
     var times_clicked: Int64
     var times_appeared: Int64
     var first_seen: Date

@@ -11,13 +11,15 @@ struct ChapterLoadError: LocalizedError {
 class ReaderViewModel {
     private let wordService: WordService
     private let bookService: BookService
+    private let sentenceService: SentenceService
     private let book: Book
     private var chapterProgressToUpdate = 0
     private(set) var paragraphs = [String]()
     
-    init(wordService: WordService, bookService: BookService, book: Book) {
+    init(wordService: WordService, bookService: BookService, sentenceService: SentenceService, book: Book) {
         self.wordService = wordService
         self.bookService = bookService
+        self.sentenceService = sentenceService
         self.book = book
     }
     
@@ -60,6 +62,6 @@ class ReaderViewModel {
     func buildWordDetailsViewModel(for word: String) -> WordDetailsViewModel? {
         // TODO this shouldn't just get the first match but eventually this will load a page vew controller for the user to swipe through
         guard let matches = wordService.findMatches(from: word).first else { return nil }
-        return WordDetailsViewModel(word: matches, wordService: wordService)
+        return WordDetailsViewModel(word: matches, wordService: wordService, sentenceService: sentenceService)
     }
 }

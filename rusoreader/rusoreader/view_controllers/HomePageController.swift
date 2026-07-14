@@ -3,12 +3,16 @@ import UIKit
 class HomePageController: UIViewController, UIDocumentPickerDelegate {
     let bookService: BookService
     let wordService: WordService
+    let dictionaryService: DictionaryService
+    let sentenceService: SentenceService
     lazy var bookSelector: BookSelector = BookSelector(bookService: bookService)
     var isOnHomePage = true
     
-    init(wordService: WordService, bookService: BookService) {
+    init(wordService: WordService, bookService: BookService, dictionaryService: DictionaryService, sentenceService: SentenceService) {
         self.wordService = wordService
         self.bookService = bookService
+        self.dictionaryService = dictionaryService
+        self.sentenceService = sentenceService
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -37,6 +41,13 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
 
         view.addSubview(addBookButton)
         
+        let reviewWordsButton = UIButton()
+        reviewWordsButton.translatesAutoresizingMaskIntoConstraints = false
+        reviewWordsButton.setTitle("Review Words", for: .normal)
+        reviewWordsButton.setTitleColor(.label, for: .normal)
+        reviewWordsButton.addTarget(self, action: #selector(reviewWordsButtonTapped), for: .touchUpInside)
+        view.addSubview(reviewWordsButton)
+        
         NSLayoutConstraint.activate([
             libraryLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             libraryLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -45,7 +56,9 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
             bookSelector.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bookSelector.heightAnchor.constraint(equalToConstant: 275),
             addBookButton.topAnchor.constraint(equalTo: bookSelector.bottomAnchor),
-            addBookButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -4.0)
+            addBookButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -4.0),
+            reviewWordsButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            reviewWordsButton.topAnchor.constraint(equalTo: addBookButton.bottomAnchor, constant: 5)
         ])
     }
     
@@ -58,6 +71,14 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
         picker.delegate = self
         picker.allowsMultipleSelection = false
         present(picker, animated: true)
+    }
+    
+    @objc func reviewWordsButtonTapped() {
+        isOnHomePage = false
+        navigationController?.pushViewController(
+            ExerciseController(dictionaryService: dictionaryService, wordService: wordService, sentenceService: sentenceService),
+            animated: true
+        )
     }
     
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
