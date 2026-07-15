@@ -28,12 +28,12 @@ struct Noun {
         }()
         
         self.partner = dbNoun.partner
-        self.animate = dbNoun.animate
-        self.indeclinable = dbNoun.indeclinable
+        self.animate = dbNoun.animate.value
+        self.indeclinable = dbNoun.indeclinable.value
         self.plurality = {
-            if dbNoun.sg_only {
+            if dbNoun.sg_only.value {
                 return Plurality.singularOnly
-            } else if dbNoun.pl_only {
+            } else if dbNoun.pl_only.value {
                 return Plurality.pluralOnly
             } else {
                 return Plurality.neither
