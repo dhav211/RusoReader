@@ -97,4 +97,19 @@ class WordService {
     func addWordToUserDictionary(word: Word) {
         dictionaryRepo.addWord(by: word.id)
     }
+    
+    /// Removes all punctuation from the give word except a apostrophe, as we use that marking stress in our dictionary
+    /// - Parameter word: The word that may contain punctuation
+    /// - Returns: The give word with any possible punctuation removed
+    func removePunctuation(from word: String) -> String {
+        var wordWithoutPunct = ""
+        
+        for c in word {
+            if c == "'" || !c.isPunctuation {
+                wordWithoutPunct.append(c)
+            }
+        }
+        
+        return wordWithoutPunct
+    }
 }

@@ -171,15 +171,22 @@ class WordRepository {
     
     /// Find all forms with stress marks of a word by it's ID
     /// - Parameter wordId: The ID of a word
+    /// - Parameter accentedBaseForm: The accented form of the word, will be used to compare if infinitive is in the word form which for verbs it's often not
     /// - Returns: An array of strings which hold all the unique forms of the word
-    func findUniqueStressedWordForms(for wordId: Int) -> [String] {
+    func findUniqueStressedWordForms(accentedBaseForm: String, wordId: Int) -> [String] {
         do {
             return try databaseManager.wordQueue.read { db in
-                return try DatabaseWordForm
+                var uniqueForms = try DatabaseWordForm
                     .filter { $0.wordId == Int64(wordId) }
                     .distinct()
                     .fetchAll(db)
                     .map { return $0.form }
+                
+                if !uniqueForms.contains(accentedBaseForm) {
+                    uniqueForms.append(accentedBaseForm)
+                }
+                
+                return uniqueForms
             }
         } catch {
             print("Error: \(error)")

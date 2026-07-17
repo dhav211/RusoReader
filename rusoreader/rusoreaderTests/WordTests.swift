@@ -54,5 +54,20 @@ final class WordTests: XCTestCase {
             }
         }
     }
+    
+    func testRemoveCommaFromWord() throws {
+        let sut = wordService.removePunctuation(from: "дьявола,")
+        XCTAssert(sut == "дьявола")
+    }
+
+    func testRemoveCommaFromWordWithStress() throws {
+        let sut = wordService.removePunctuation(from: "дья'вола,")
+        XCTAssert(sut == "дья'вола")
+    }
+    
+    func testRemoveCommaFromWordWithBuiltinStress() throws {
+        let sut = wordService.removePunctuation(from: "дья́вола,")
+        XCTAssert(sut == "дья́вола")
+    }
 }
 

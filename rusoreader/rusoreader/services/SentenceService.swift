@@ -18,7 +18,7 @@ class SentenceService {
     }
     
     func findSingleSentence(by wordId: Int) -> Sentence? {
-        if let sentence = findSentences(by: wordId).first {
+        if let sentence = sentenceRepo.findSentencesWithLengthLimit(by: wordId, with: 175).shuffled().first {
             return sentence
         }
         
@@ -33,7 +33,7 @@ class SentenceService {
     func getRange(of word: Word, in sentence: String) -> NSRange? {
         let wordForms = wordRepo
             .findWordIDs(by: word.bare)
-            .map { return wordRepo.findUniqueStressedWordForms(for: Int($0))}
+            .map { return wordRepo.findUniqueStressedWordForms(accentedBaseForm: word.accented, wordId: Int($0))}
             .joined()
         
         return findRange(wordForms: Array(wordForms), sentence: sentence)
@@ -47,7 +47,7 @@ class SentenceService {
     func getRangeWithStress(of word: Word, in sentence: String) -> NSRange? {
         let wordForms = wordRepo
             .findWordIDs(by: word.bare)
-            .map { return wordRepo.findUniqueStressedWordForms(for: Int($0))}
+            .map { return wordRepo.findUniqueStressedWordForms(accentedBaseForm: word.accented, wordId: Int($0))}
             .joined()
             .map { return wordService.addStress(to: $0)}
         
@@ -55,10 +55,20 @@ class SentenceService {
     }
     
     private func findRange(wordForms: [String], sentence: String) -> NSRange? {
+        let words = sentence.lowercased().split(separator: " ").map { word in
+            return wordService.removePunctuation(from: String(word))
+        }
+        let lowercased = sentence.lowercased()
+        
         for wordForm in wordForms {
-            if sentence.lowercased().contains(wordForm), let range = sentence.lowercased().range(of: wordForm) {
-                let range = NSRange(range, in: sentence.lowercased())
-                return NSRange(location: range.location, length: range.length + 1)
+            if lowercased.contains(wordForm) {
+                for word in words {
+                    if word == wordForm {
+                        guard let range = lowercased.range(of: wordForm) else { return nil }
+                        let nsRange = NSRange(range, in: lowercased)
+                        return NSRange(location: nsRange.location, length: nsRange.length)
+                    }
+                }
             }
         }
         

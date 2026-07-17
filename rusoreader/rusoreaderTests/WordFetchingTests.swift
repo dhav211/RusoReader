@@ -63,7 +63,7 @@ final class WordFetchingTests: XCTestCase {
     }
     
     func testFindAllFormsOfчеловекWithStress() throws {
-        let sut = wordRepo.findUniqueStressedWordForms(for: 34)
+        let sut = wordRepo.findUniqueStressedWordForms(accentedBaseForm: "челове'к", wordId: 34)
         let expected = [
             "челове'к",
             "челове'ка",

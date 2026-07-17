@@ -1310,9 +1310,9 @@
             filePath = "rusoreader/repositories/SentenceRepository.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "20"
-            endingLineNumber = "20"
-            landmarkName = "findSentences(by:)"
+            startingLineNumber = "23"
+            endingLineNumber = "23"
+            landmarkName = "findSentences(by:sentenceLimit:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1650,6 +1650,70 @@
             endingLineNumber = "21"
             landmarkName = "nextExercise"
             landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "E21F746D-D207-483A-9C7D-C25BA0B4205D"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "rusoreaderTests/SentenceTests.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "109"
+            endingLineNumber = "109"
+            landmarkName = "testGetLocationOfVerbInInfintiveForm()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "453FECDD-59D2-435F-B9D7-2A9205573641"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "rusoreader/services/SentenceService.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "63"
+            endingLineNumber = "63"
+            landmarkName = "findRange(wordForms:sentence:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "9DDBAA5B-830F-43AA-B339-7889A7B81237"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "rusoreader/services/SentenceService.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "64"
+            endingLineNumber = "64"
+            landmarkName = "findRange(wordForms:sentence:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "CFD50FB8-6AD1-405D-B5BD-A0F5B8D241B1"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "rusoreaderTests/SentenceTests.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "119"
+            endingLineNumber = "119"
+            landmarkName = "testGetLocationOfVerb&#x411;&#x443;&#x434;&#x44c;()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
