@@ -22,7 +22,7 @@ extension HomePageController : EditBookViewDelegate {
                     book.author = newAuthor
                 }
                 if let newTitle = title {
-                    book.author = newTitle
+                    book.name = newTitle
                 }
                 try bookService.update(book: book)
             }
@@ -30,7 +30,7 @@ extension HomePageController : EditBookViewDelegate {
             dismiss(animated: true)
             bookSelector.refresh()
         } catch {
-            print()
+            print(error)
             // Display a UI Alert Controller letting the user know the the update failed
         }
     }
