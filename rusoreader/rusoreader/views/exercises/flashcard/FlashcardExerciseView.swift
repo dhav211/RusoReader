@@ -77,25 +77,6 @@ class FlashcardExerciseView : UIViewController, Exercise {
         ])
     }
     
-    func reset() {        
-        isFlipped = false
-        
-        back.removeFromSuperview()
-        rating.removeFromSuperview()
-        card.addSubview(front)
-        
-        NSLayoutConstraint.activate([
-            card.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
-            card.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
-            card.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.7),
-            card.heightAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.7),
-            front.topAnchor.constraint(equalTo: card.topAnchor),
-            front.bottomAnchor.constraint(equalTo: card.bottomAnchor),
-            front.leadingAnchor.constraint(equalTo: card.leadingAnchor),
-            front.trailingAnchor.constraint(equalTo: card.trailingAnchor)
-        ])
-    }
-    
     private func flipCard() {
         if isFlipped {
             return
