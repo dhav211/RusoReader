@@ -1,18 +1,18 @@
 import UIKit
 
+protocol HomepageDelegate : AnyObject {
+    func onOpenReviewWordsTapped()
+}
+
 class HomePageController: UIViewController, UIDocumentPickerDelegate {
-    let bookService: BookService
-    let wordService: WordService
-    let dictionaryService: DictionaryService
-    let sentenceService: SentenceService
-    lazy var bookSelector: BookSelector = BookSelector(bookService: bookService)
-    var isOnHomePage = true
+    private let bookSelector: BookSelectorViewController
+    private let viewModel: HomePageViewModel
     
-    init(wordService: WordService, bookService: BookService, dictionaryService: DictionaryService, sentenceService: SentenceService) {
-        self.wordService = wordService
-        self.bookService = bookService
-        self.dictionaryService = dictionaryService
-        self.sentenceService = sentenceService
+    weak var delegate: HomepageDelegate?
+    
+    init(viewModel: HomePageViewModel) {
+        self.viewModel = viewModel
+        self.bookSelector = viewModel.createBookSelector()
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -30,8 +30,8 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
         libraryLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(libraryLabel)
         
-        view.addSubview(bookSelector)
-        bookSelector.selectorDelegate = self
+        addChild(bookSelector)
+        view.addSubview(bookSelector.view)
         
         let addBookButton = UIButton()
         addBookButton.translatesAutoresizingMaskIntoConstraints = false
@@ -51,19 +51,19 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
         NSLayoutConstraint.activate([
             libraryLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             libraryLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            bookSelector.topAnchor.constraint(equalTo: libraryLabel.topAnchor),
-            bookSelector.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            bookSelector.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bookSelector.heightAnchor.constraint(equalToConstant: 275),
-            addBookButton.topAnchor.constraint(equalTo: bookSelector.bottomAnchor),
+            bookSelector.view.topAnchor.constraint(equalTo: libraryLabel.topAnchor),
+            bookSelector.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bookSelector.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bookSelector.view.heightAnchor.constraint(equalToConstant: 275),
+            addBookButton.topAnchor.constraint(equalTo: bookSelector.view.bottomAnchor),
             addBookButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -4.0),
             reviewWordsButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             reviewWordsButton.topAnchor.constraint(equalTo: addBookButton.bottomAnchor, constant: 5)
         ])
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        isOnHomePage = true
+    func setBookSelectorDelegate(appCoordinator: AppCoordinator) {
+        bookSelector.selectorDelegate = appCoordinator
     }
     
     @objc func addBookButtonTapped() {
@@ -74,18 +74,12 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
     }
     
     @objc func reviewWordsButtonTapped() {
-        isOnHomePage = false
-        navigationController?.pushViewController(
-            ExerciseController(dictionaryService: dictionaryService, wordService: wordService, sentenceService: sentenceService),
-            animated: true
-        )
+        delegate?.onOpenReviewWordsTapped()
     }
     
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         do {
-            for url in urls {
-                try bookService.parseBook(from: url)
-            }
+            try viewModel.parseBooks(from: urls)
         } catch {
             print("Failed to parse book: \(error)")
             // TODO display an alert message letting the user know there was an issue parsing the book

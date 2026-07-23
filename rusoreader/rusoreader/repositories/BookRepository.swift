@@ -152,23 +152,16 @@ class BookRepository {
     
     /// Change either the name or author of the book
     /// - Parameters:
-    ///   - id: The ID of the book to update
-    ///   - title: The new title for the book
-    ///   - author: The new author for the book
-    func updateBookInformation(by id: Int, title: String?, author: String?) throws {
+    ///   - book: A book object with updated values
+    func updateBookInformation(book: Book) throws {
         try databaseManager.userDataQueue.write { db in
             guard var bookToUpdate = try DatabaseBook
-                .filter(id: Int64(id))
+                .filter(id: Int64(book.id))
                 .fetchOne(db)
             else { return }
             
-            if let updatedTitle = title, bookToUpdate.name != updatedTitle {
-                bookToUpdate.name = updatedTitle
-            }
-            
-            if let updatedAuthor = author, bookToUpdate.author != updatedAuthor {
-                bookToUpdate.author = updatedAuthor
-            }
+            bookToUpdate.author = book.author
+            bookToUpdate.name = book.name
             
             try bookToUpdate.update(db)
         }

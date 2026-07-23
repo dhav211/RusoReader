@@ -1,8 +1,8 @@
 import UIKit
 
 protocol BookCardDelegate : AnyObject {
-    func didClickReadBook(readBookCard: BookCard)
-    func didLongPressReadBook(readBookCard: BookCard)
+    func didClickReadBook(id: Int)
+    func didLongPressReadBook(id: Int)
 }
 
 class BookCard : UIView {
@@ -124,10 +124,10 @@ class BookCard : UIView {
     }
     
     @objc func handleTap() {
-        delegate?.didClickReadBook(readBookCard: self)
+        delegate?.didClickReadBook(id: bookId)
     }
     
     @objc func handleLongTouch() {
-        delegate?.didLongPressReadBook(readBookCard: self)
+        delegate?.didLongPressReadBook(id: bookId)
     }
 }

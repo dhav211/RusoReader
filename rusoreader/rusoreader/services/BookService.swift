@@ -37,7 +37,7 @@ class BookService {
     }
 
     func update(book: Book) throws {
-        try bookRepo.updateBookInformation(by: book.id, title: book.name, author: book.author)
+        try bookRepo.updateBookInformation(book: book)
     }
     
     func getTableOfContentIndices(for book: Book) -> [TableOfContentIndex] {

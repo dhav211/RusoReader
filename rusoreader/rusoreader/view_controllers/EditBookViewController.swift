@@ -1,26 +1,16 @@
 import UIKit
 
-protocol EditBookViewDelegate : AnyObject {
-    func didDeleteBook(id: Int)
-    func didSave(id: Int, author: String?, title: String?)
-    func didClose()
-}
-
 class EditBookViewController : UIViewController {
-    let bookTitle: String
-    let bookAuthor: String
-    let bookId: Int
-    let titleField: LabeledTextField
-    let authorField: LabeledTextField
+    private let viewModel: EditBookViewModel
+    private let titleField: LabeledTextField
+    private let authorField: LabeledTextField
+    private var onClose: () -> Void
     
-    weak var delegate: EditBookViewDelegate?
-    
-    init(bookTitle: String, bookAuthor: String, bookId: Int) {
-        self.bookTitle = bookTitle
-        self.bookAuthor = bookAuthor
-        self.bookId = bookId
-        self.authorField = LabeledTextField(labelText: "Author", defaultFieldText: bookAuthor)
-        self.titleField = LabeledTextField(labelText: "Title", defaultFieldText: bookTitle)
+    init(viewModel: EditBookViewModel) {
+        self.viewModel = viewModel
+        self.authorField = LabeledTextField(labelText: "Author", defaultFieldText: viewModel.getAuthor())
+        self.titleField = LabeledTextField(labelText: "Title", defaultFieldText: viewModel.getTitle())
+        self.onClose = {}
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -31,7 +21,7 @@ class EditBookViewController : UIViewController {
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(false)
-        delegate?.didClose()
+        onClose() // Refreshs the book selector so any possible changes will be reflected
     }
     
     override func viewDidLoad() {
@@ -61,11 +51,13 @@ class EditBookViewController : UIViewController {
         let deleteAction = UIAction(title: "Delete Book") { _ in
             let deleteAlert = UIAlertController(title: "Delete Book", message: "Are you sure you want to delete this book? This action cannot be undone.", preferredStyle: .alert)
             deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-            // The delete button in the alert will actually handle all of the dirty work
-            // This calls the methods associated with the delegate, which are handled in the hompage controller
-            // THey are done there because the book selector needs to update and the book repository is already there, we just need to send the ID of the book to be deleted
             deleteAlert.addAction(UIAlertAction(title: "Delete", style: .destructive) { _ in
-                self.delegate?.didDeleteBook(id: self.bookId)
+                do {
+                    try self.viewModel.deleteBook()
+                } catch {
+                    print(error)
+                    // TODO display another UI Alert if possible saying there was an issue with deleting the book
+                }
             })
             self.present(deleteAlert, animated: true)
         }
@@ -85,12 +77,18 @@ class EditBookViewController : UIViewController {
         ])
     }
     
+    func setOnClose(onClose: @escaping () -> Void) {
+        self.onClose = onClose
+    }
+    
     @objc private func onSave() {
-        // If the textFields are the same as the initial value we will create a nil string
-        // the didSave implementation will know not to update a value in the book that is nil
-        let updatedAuthor : String? = authorField.getTextFieldValue() != bookAuthor ? authorField.getTextFieldValue() : nil
-        let updatedTitle : String? = titleField.getTextFieldValue() != bookTitle ? titleField.getTextFieldValue() : nil
-        delegate?.didSave(id: bookId, author: updatedAuthor, title: updatedTitle)
+        do {
+            try viewModel.updateBook(author: authorField.getTextFieldValue(), title: titleField.getTextFieldValue())
+        } catch {
+            print(error)
+            // TODO Don't just eat this error whe need to display a UI alert letting the user know that book couldn't be updated
+        }
+        dismiss(animated: true)
     }
     
     @objc private func onCancel() {

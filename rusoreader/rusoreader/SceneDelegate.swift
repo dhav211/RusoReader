@@ -3,7 +3,7 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-
+    var appCoordinator: AppCoordinator?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
@@ -24,12 +24,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let dictionaryService = DictionaryService(dictionaryRepo: dictionaryRepo, wordService: wordService)
         let sentenceService = SentenceService(sentenceRepo: sentenceRepo, wordRepo: wordRepo, wordService: wordService)
         
-        let rootController = HomePageController(wordService: wordService, bookService: bookService, dictionaryService: dictionaryService, sentenceService: sentenceService)
+        let appServices = AppServices(
+            bookService: bookService,
+            dictionaryService: dictionaryService,
+            sentenceService: sentenceService,
+            wordService: wordService
+        )
+        let viewControllerFactory = ViewControllerFactory(appServices: appServices)
         
-        let navigationController = UINavigationController(rootViewController: rootController)
+        
+        let navigationController = UINavigationController()
         window.rootViewController = navigationController
         //window.rootViewController = ReaderView(wordRepo: WordRepository(queue: dbManager.queue))
         
+        appCoordinator = AppCoordinator(navigationController: navigationController, viewControllerFactory: viewControllerFactory)
+        appCoordinator?.launch()
         self.window = window
         window.makeKeyAndVisible()
     }
