@@ -36,7 +36,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: Noun(gender: .female, partner: "", animate: true, indeclinable: false, plurality: .neither),
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         
@@ -56,7 +56,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: Noun(gender: .female, partner: "", animate: true, indeclinable: false, plurality: .neither),
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         
@@ -75,7 +75,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: Noun(gender: .female, partner: "", animate: true, indeclinable: false, plurality: .neither),
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         
@@ -96,7 +96,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: Noun(gender: .female, partner: "", animate: true, indeclinable: false, plurality: .neither),
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -114,7 +114,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: Noun(gender: .female, partner: "", animate: false, indeclinable: false, plurality: .neither),
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -132,7 +132,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: Noun(gender: .male, partner: "", animate: true, indeclinable: false, plurality: .neither),
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -150,7 +150,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: Noun(gender: .male, partner: "", animate: false, indeclinable: false, plurality: .neither),
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -168,7 +168,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: Noun(gender: .neuter, partner: "", animate: true, indeclinable: false, plurality: .neither),
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -186,7 +186,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: Noun(gender: .neuter, partner: "", animate: false, indeclinable: false, plurality: .neither),
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -204,7 +204,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: Noun(gender: .both, partner: "", animate: true, indeclinable: false, plurality: .neither),
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -222,7 +222,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: Noun(gender: .both, partner: "", animate: false, indeclinable: false, plurality: .neither),
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -240,7 +240,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -260,7 +260,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: nil,
             verb: Verb(aspect: .perfective, partners: [String]()),
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -278,7 +278,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: nil,
             verb: Verb(aspect: .imperfective, partners: [String]()),
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -297,7 +297,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -317,7 +317,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -335,7 +335,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -353,7 +353,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -373,7 +373,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -390,7 +390,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -409,7 +409,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 11,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -426,7 +426,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 100,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -445,7 +445,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 101,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -462,7 +462,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 499,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -479,7 +479,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 500,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -496,7 +496,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1000,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -513,7 +513,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 23503,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -530,7 +530,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 9999,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -547,7 +547,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 10_000,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -566,7 +566,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 10_001,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -583,7 +583,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 15_000,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -600,7 +600,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 49_999,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -617,7 +617,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 50_000,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -636,7 +636,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 50_001,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -653,7 +653,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: -1,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -670,7 +670,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: -100,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -687,7 +687,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: Int.max,
             noun: nil,
             verb: nil,
-            forms: [String:String](),
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -704,18 +704,18 @@ final class WordsDetailsViewModelTests: XCTestCase {
             noun: nil,
             verb: nil,
             forms: [
-                "ru_noun_sg_nom": "кот",
-                "ru_noun_pl_nom": "коты",
-                "ru_noun_sg_gen": "кота",
-                "ru_noun_pl_gen": "котов",
-                "ru_noun_sg_dat": "коту",
-                "ru_noun_pl_dat": "котам",
-                "ru_noun_sg_acc": "кота",
-                "ru_noun_pl_acc": "котов",
-                "ru_noun_sg_inst": "котом",
-                "ru_noun_pl_inst": "котами",
-                "ru_noun_sg_prep": "коте",
-                "ru_noun_pl_prep": "котах"
+                WordForm(bare: "кот", accented: "кот", form: .nounSingularNominative),
+                WordForm(bare: "коты", accented: "коты", form: .nounPluralNominative),
+                WordForm(bare: "кота", accented: "кота", form: .nounSingularGenitive),
+                WordForm(bare: "котов", accented: "котов", form: .nounPluralGenitive),
+                WordForm(bare: "коту", accented: "коту", form: .nounSingularDative),
+                WordForm(bare: "котам", accented: "котам", form: .nounPluralDative),
+                WordForm(bare: "кота", accented: "кота", form: .nounSingularAccusative),
+                WordForm(bare: "котов", accented: "котов", form: .nounPluralAccusative),
+                WordForm(bare: "котом", accented: "котом", form: .nounSingularInstrumental),
+                WordForm(bare: "котами", accented: "котами", form: .nounPluralInstrumental),
+                WordForm(bare: "коте", accented: "коте", form: .nounSingularInstrumental),
+                WordForm(bare: "котах", accented: "котах", form: .nounPluralInstrumental),
             ],
             translations: [String]()
         )
@@ -735,12 +735,12 @@ final class WordsDetailsViewModelTests: XCTestCase {
             noun: nil,
             verb: nil,
             forms: [
-                "ru_verb_presfut_sg1": "иду",
-                "ru_verb_presfut_sg2": "идёшь",
-                "ru_verb_presfut_sg3": "идёт",
-                "ru_verb_presfut_pl1": "идём",
-                "ru_verb_presfut_pl2": "идёте",
-                "ru_verb_presfut_pl3": "идут"
+                WordForm(bare: "иду", accented: "иду", form: .verbPresentFutureSingularFirst),
+                WordForm(bare: "идёшь", accented: "идёшь", form: .verbPresentFutureSingularSecond),
+                WordForm(bare: "идёт", accented: "идёт", form: .verbPresentFutureSingularThird),
+                WordForm(bare: "идём", accented: "идём", form: .verbPresentFuturePluralFirst),
+                WordForm(bare: "идёте", accented: "идёте", form: .verbPresentFuturePluralSecond),
+                WordForm(bare: "идут", accented: "идут", form: .verbPresentFuturePluralThird),
             ],
             translations: [String]()
         )
@@ -760,10 +760,10 @@ final class WordsDetailsViewModelTests: XCTestCase {
             noun: nil,
             verb: nil,
             forms: [
-                "ru_verb_past_m": "делал",
-                "ru_verb_past_f": "делала",
-                "ru_verb_past_n": "делало",
-                "ru_verb_past_pl": "делали"
+                WordForm(bare: "делал", accented: "делал", form: .verbPastMale),
+                WordForm(bare: "делала", accented: "делала", form: .verbPastFemale),
+                WordForm(bare: "делало", accented: "делало", form: .verbPastNeuter),
+                WordForm(bare: "делали", accented: "делали", form: .verbPastPlural)
             ],
             translations: [String]()
         )
@@ -784,8 +784,8 @@ final class WordsDetailsViewModelTests: XCTestCase {
             noun: nil,
             verb: nil,
             forms: [
-                "ru_verb_imperative_sg": "иди",
-                "ru_verb_imperative_pl": "идите"
+                WordForm(bare: "иди", accented: "иди", form: .verbImperativeSingular),
+                WordForm(bare: "идите", accented: "идите", form: .verbImperativePlural)
             ],
             translations: [String]()
         )
@@ -805,7 +805,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             ranking: 1,
             noun: nil,
             verb: nil,
-            forms: [:],
+            forms: [WordForm](),
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
@@ -825,7 +825,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             noun: nil,
             verb: nil,
             forms: [
-                "ru_verb_participle_present_active": "делающий"
+                WordForm(bare: "делающий", accented: "делающий", form: .verbParticipleActivePresent)
             ],
             translations: [String]()
         )

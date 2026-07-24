@@ -102,9 +102,10 @@ final class EpubTests: XCTestCase {
             let book = parser.parse(from: chekhovBookURL)
             let _ = try bookRepo.saveBook(parsedBook: book!)
             
-            if let foundBook = try bookRepo.findBookBy(by: 1) {
+            if var foundBook = try bookRepo.findBookBy(by: 1) {
                 do {
-                    try bookRepo.updateBookInformation(by: foundBook.id, title: "Changed Title", author: nil)
+                    foundBook.name = "Changed Title"
+                    try bookRepo.updateBookInformation(book: foundBook)
                 } catch {
                     XCTFail()
                 }

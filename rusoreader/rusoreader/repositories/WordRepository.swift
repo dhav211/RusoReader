@@ -124,13 +124,21 @@ class WordRepository {
                 return tranlsation.tl
             }
             
-            var forms = [String:String]()
-            for form in wordInfo.wordForms {
-                if forms[form.form_type] != nil {
-                    forms[form.form_type]?.append(",\(form.form)")
-                } else {
-                    forms[form.form_type] = form.form
-                }
+//            var forms = [String:String]()
+//            for form in wordInfo.wordForms {
+//                if forms[form.form_type] != nil {
+//                    forms[form.form_type]?.append(",\(form.form)")
+//                } else {
+//                    forms[form.form_type] = form.form
+//                }
+//            }
+            
+            var forms : [WordForm] = wordInfo.wordForms.map() { form in
+                return WordForm(bare: form.form_bare, accented: form.form, form: Form(rawValue: form.form_type) ?? .error)
+            }
+            
+            if wordType == .verb {
+                forms.append(WordForm(bare: wordInfo.word.bare, accented: wordInfo.word.accented, form: .verbInfitive))
             }
             
             words.append(
@@ -188,6 +196,26 @@ class WordRepository {
                 
                 return uniqueForms
             }
+        } catch {
+            print("Error: \(error)")
+            return []
+        }
+    }
+    
+    func findAllWordForms(for word: Word) -> [WordForm] {
+        do {
+            let dbWordForms = try databaseManager.wordQueue.read { db in
+                return try DatabaseWordForm
+                    .filter { $0.wordId == Int64(word.id) }
+                    .fetchAll(db)
+            }
+            
+            var wordForms = [WordForm]()
+            if word.type == .verb {
+                wordForms.append(WordForm(bare: word.bare, accented: word.accented, form: .verbInfitive))
+            }
+            
+            return [WordForm]()
         } catch {
             print("Error: \(error)")
             return []

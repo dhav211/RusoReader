@@ -112,4 +112,8 @@ class WordService {
         
         return wordWithoutPunct
     }
+    
+    func getAllWordFormsForExercise(word: Word) -> [WordForm] {
+        return [WordForm]()
+    }
 }

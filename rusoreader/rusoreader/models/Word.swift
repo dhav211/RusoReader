@@ -7,10 +7,10 @@ struct Word {
     let ranking: Int
     let noun: Noun?
     let verb: Verb?
-    let forms: [String:String]
+    let forms: [WordForm]
     let translations: [String]
     
-    init(id: Int, bare: String, accented: String, type: WordType, level: String, ranking: Int, noun: Noun?, verb: Verb?, forms: [String:String], translations: [String]) {
+    init(id: Int, bare: String, accented: String, type: WordType, level: String, ranking: Int, noun: Noun?, verb: Verb?, forms: [WordForm], translations: [String]) {
         self.id = id
         self.bare = bare
         self.accented = accented

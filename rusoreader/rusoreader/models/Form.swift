@@ -1,4 +1,5 @@
 enum Form: String {
+    case verbInfitive = "ru_verb_infinitive"
     case gerundPast = "ru_verb_gerund_past"
     case gerundPresent = "ru_verb_gerund_present"
     case base = "ru_base"
@@ -60,4 +61,5 @@ enum Form: String {
     case adjectiveShortFemale = "ru_adj_short_f"
     case adjectiveShortNeuter = "ru_adj_short_n"
     case adjectiveShortPlural = "ru_adj_short_pl"
+    case error
 }

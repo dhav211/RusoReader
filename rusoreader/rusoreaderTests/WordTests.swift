@@ -69,5 +69,10 @@ final class WordTests: XCTestCase {
         let sut = wordService.removePunctuation(from: "дья́вола,")
         XCTAssert(sut == "дья́вола")
     }
+    
+    func testХотетьHas18WordForms() throws {
+        let word = wordRepo.findMatches(by: [90]).first!
+        XCTAssert(word.forms.count == 18)
+    }
 }
 
