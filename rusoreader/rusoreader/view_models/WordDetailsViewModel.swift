@@ -103,7 +103,11 @@ class WordDetailsViewModel {
     }
     
     func createGrammarFormTableData(grammarTableType: GrammarFormTableData.TableType) -> GrammarFormTableData{
-        return GrammarFormTableData(wordForms: word.forms, grammarTableType: grammarTableType)
+        var forms = [String: WordForm]()
+        for form in word.forms {
+            forms[form.form.rawValue] = form
+        }
+        return GrammarFormTableData(wordForms: forms, grammarTableType: grammarTableType)
     }
     
     func getLongestRows(grammarFormTableData: GrammarFormTableData) -> [Int] {

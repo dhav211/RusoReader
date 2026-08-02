@@ -201,24 +201,4 @@ class WordRepository {
             return []
         }
     }
-    
-    func findAllWordForms(for word: Word) -> [WordForm] {
-        do {
-            let dbWordForms = try databaseManager.wordQueue.read { db in
-                return try DatabaseWordForm
-                    .filter { $0.wordId == Int64(word.id) }
-                    .fetchAll(db)
-            }
-            
-            var wordForms = [WordForm]()
-            if word.type == .verb {
-                wordForms.append(WordForm(bare: word.bare, accented: word.accented, form: .verbInfitive))
-            }
-            
-            return [WordForm]()
-        } catch {
-            print("Error: \(error)")
-            return []
-        }
-    }
 }

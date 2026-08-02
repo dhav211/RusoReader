@@ -13,6 +13,7 @@ class FlashcardExerciseView : UIViewController, Exercise {
     private var front: FlashcardFront
     private var back: FlashcardBack
     private var rating: FlashcardRating
+    private var banner: ExerciseBanner
 
     private var frontCardConstraints = [NSLayoutConstraint]()
     private var backCardConstraints = [NSLayoutConstraint]()
@@ -31,9 +32,9 @@ class FlashcardExerciseView : UIViewController, Exercise {
             ),
         )
         self.rating = FlashcardRating()
+        self.banner = ExerciseBanner(text: "Do you know this word?")
         
         super.init(nibName: nil, bundle: nil)
-        setup()
     }
     
     required init?(coder: NSCoder) {
@@ -55,17 +56,21 @@ class FlashcardExerciseView : UIViewController, Exercise {
         }
     }
     
-    func setup() {
+    override func viewDidLoad() {
         view.backgroundColor = .systemBackground
         
         // The card view will hold the initial sizing so we can set constraints based on this
         card.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(banner)
         view.addSubview(card)
         card.addSubview(front)
         
         front.onFlipCard = flipCard
         
         NSLayoutConstraint.activate([
+            banner.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            banner.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            banner.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             card.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             card.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
             card.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.7),
@@ -134,6 +139,7 @@ class FlashcardExerciseView : UIViewController, Exercise {
     
     private func sendResult(doesUserKnow: Bool) {
         completionDelegate?.grade(result: viewModel.calculateResult(doesUserKnow: doesUserKnow))
+        completionDelegate?.next()
     }
     
     @objc func runTTS() {

@@ -1,0 +1,122 @@
+import UIKit
+class WordEndingExerciseView : UIViewController, Exercise {
+    private let viewModel: WordEndingExerciseViewModel
+    private let banner: ExerciseBanner
+    private let exerciseArea: UIView
+    private let inputField: UITextField
+    private let submitButton: UIButton
+    private let completionBanner: ExerciseCompletionBanner
+    
+    weak var completionDelegate: CompletedExerciseDelegate?
+    
+    init(viewModel: WordEndingExerciseViewModel) {
+        self.viewModel = viewModel
+        self.banner = ExerciseBanner(text: "Write the word in the correct ending")
+        self.exerciseArea = UIView()
+        self.inputField = UITextField()
+        self.submitButton = UIButton()
+        self.completionBanner = ExerciseCompletionBanner()
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewDidLoad() {
+        view.backgroundColor = .systemBackground
+        
+        exerciseArea.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(banner)
+        view.addSubview(exerciseArea)
+        addChild(completionBanner)
+        view.addSubview(completionBanner.view)
+        completionBanner.didMove(toParent: self)
+        
+        let informationStack = UIStackView()
+        informationStack.axis = .vertical
+        informationStack.alignment = .center
+        informationStack.translatesAutoresizingMaskIntoConstraints = false
+        exerciseArea.addSubview(informationStack)
+        
+        let wordLabel = UILabel()
+        wordLabel.font = .preferredFont(forTextStyle: .headline)
+        wordLabel.text = viewModel.word.bare // BAD LETS CHANGE THIS TO THE BUILT IN ACCENTED
+        informationStack.addArrangedSubview(wordLabel)
+        
+        let wordFormLabel = UILabel()
+        wordFormLabel.font = .preferredFont(forTextStyle: .subheadline)
+        wordFormLabel.text = viewModel.getFormText()
+        informationStack.addArrangedSubview(wordFormLabel)
+        
+        let inputStack = UIStackView()
+        inputStack.axis = .vertical
+        inputStack.alignment = .fill
+        inputStack.spacing = 4
+        inputStack.translatesAutoresizingMaskIntoConstraints = false
+        exerciseArea.addSubview(inputStack)
+        
+        let inputStackWidth = min((UIScreen.main.bounds.width) * 0.75, 300)
+        print(inputStackWidth)
+        
+        inputField.borderStyle = .roundedRect
+        inputField.textColor = .label
+        inputField.backgroundColor = .secondarySystemBackground
+        inputStack.addArrangedSubview(inputField)
+        
+        submitButton.setTitle("Submit", for: .normal)
+        submitButton.setTitleColor(.label, for: .normal)
+        submitButton.backgroundColor = .systemGreen
+        submitButton.layer.cornerRadius = 8
+        submitButton.addTarget(self, action: #selector(onSubmit), for: .touchUpInside)
+        inputStack.addArrangedSubview(submitButton)
+        
+        NSLayoutConstraint.activate([
+            banner.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            banner.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            banner.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            exerciseArea.topAnchor.constraint(equalTo: banner.bottomAnchor),
+            exerciseArea.bottomAnchor.constraint(equalTo: view.keyboardLayoutGuide.topAnchor),
+            exerciseArea.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            exerciseArea.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            informationStack.topAnchor.constraint(equalTo: exerciseArea.topAnchor, constant: 8),
+            informationStack.centerXAnchor.constraint(equalTo: exerciseArea.centerXAnchor),
+            inputStack.widthAnchor.constraint(equalToConstant: inputStackWidth),
+            inputStack.centerYAnchor.constraint(equalTo: exerciseArea.centerYAnchor),
+            inputStack.centerXAnchor.constraint(equalTo: exerciseArea.centerXAnchor),
+            completionBanner.view.heightAnchor.constraint(equalToConstant: 200),
+            completionBanner.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            completionBanner.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            completionBanner.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+    }
+    
+    @objc private func onSubmit() {
+        view.endEditing(true)
+        guard let answer = inputField.text else { return }
+        submitButton.isEnabled = false
+        submitButton.backgroundColor = .systemGray
+        let result = viewModel.calculateResult(exerciseInput: answer)
+        completionDelegate?.grade(result: result)
+        
+        // Take the users inputed answer then compare it to the actual answer while bolding and underlining incorrect letters
+        let attributedAnswer = NSMutableAttributedString(string: viewModel.getWordFormText())
+        // we are grabbing the default text so we can get a bold font point size here in the attributed string
+        let defaultFont = UIFont.systemFont(ofSize: UIFont.labelFontSize)
+        
+        for affectedIndex in viewModel.createHightlightedDifferenceInAnswer(answer: answer) {
+            attributedAnswer.addAttributes(
+                [
+                    .underlineStyle: NSUnderlineStyle.single.rawValue,
+                    .font: UIFont.boldSystemFont(ofSize: defaultFont.pointSize)
+                ],
+                range: NSRange(location: affectedIndex, length: 1))
+        }
+        
+        
+        completionBanner.open(exerciseResult: result, actualAnswer: attributedAnswer) { [weak self] in
+            self?.completionDelegate?.next()
+        }
+    }
+}

@@ -113,7 +113,26 @@ class WordService {
         return wordWithoutPunct
     }
     
-    func getAllWordFormsForExercise(word: Word) -> [WordForm] {
-        return [WordForm]()
+    func getWordStem(of word: Word) -> String {
+        return {
+            for i in 1..<word.bare.count {
+                let index = word.bare.index(word.bare.startIndex, offsetBy: i)
+                for wordForm in word.forms {
+                    // the db may contain empty values so we can just skip them for now
+                    if wordForm.bare.isEmpty {
+                        continue
+                    }
+                    // If a word takes on a completely different speling in some forms, lets just ignore it as a stem
+                    if wordForm.bare[wordForm.bare.startIndex] != word.bare[word.bare.startIndex] {
+                        continue
+                    }
+                    if wordForm.bare.count < i || wordForm.bare[wordForm.bare.startIndex...index] != word.bare[word.bare.startIndex...index] {
+                        let stemIndex = word.bare.index(word.bare.startIndex, offsetBy: i - 1)
+                        return String(wordForm.bare[wordForm.bare.startIndex...stemIndex])
+                    }
+                }
+            }
+            return ""
+        }()
     }
 }

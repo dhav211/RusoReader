@@ -74,5 +74,21 @@ final class WordTests: XCTestCase {
         let word = wordRepo.findMatches(by: [90]).first!
         XCTAssert(word.forms.count == 18)
     }
+    
+    func testGetStemForЖенщина() throws {
+        let word = wordRepo.findMatches(by: [169]).first!
+        let stem = wordService.getWordStem(of: word)
+        let expected = "женщин"
+        
+        XCTAssert(stem == expected)
+    }
+    
+    func testGetStemForВстретиться() throws {
+        let word = wordRepo.findMatches(by: [1169]).first!
+        let stem = wordService.getWordStem(of: word)
+        let expected = "встре"
+        
+        XCTAssert(stem == expected)
+    }
 }
 

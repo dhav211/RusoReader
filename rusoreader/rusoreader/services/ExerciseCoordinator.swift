@@ -31,14 +31,23 @@ class ExerciseCoordinator {
         let exerciseWords = dictionaryService.getAllWords().shuffled()[0..<dictionarySize]
         
         return exerciseWords.compactMap { word in
-            if !word.translations.isEmpty {
-                let sentence = sentenceService.findSingleSentence(by: word.id)
-
-                return FlashcardFactory(
-                    word: word,
-                    sentence: sentence?.text ?? "",
-                    flashcardExerciseViewModel: FlashcardExerciseViewModel(word: word, sentence: sentence?.text ?? "", wordService: wordService, sentenceService: sentenceService)
-                )
+            // uncomment this when we are ready to reimplement flash cards
+            // we will have a spaced repetion algorithm that will choose the words and the exercises
+            // right now we are just testing the exercises themselves
+//            if !word.translations.isEmpty {
+//                let sentence = sentenceService.findSingleSentence(by: word.id)
+//
+//                return FlashcardFactory(
+//                    word: word,
+//                    sentence: sentence?.text ?? "",
+//                    flashcardExerciseViewModel: FlashcardExerciseViewModel(word: word, sentence: sentence?.text ?? "", wordService: wordService, sentenceService: sentenceService)
+//                )
+//            }
+            if word.type != .adverb || word.type != .other {
+                let wordEndingFactory = WordEndingFactory(word: word, wordService: wordService)
+                if wordEndingFactory.hasWordForm {
+                    return wordEndingFactory
+                }
             }
             return nil
         }
@@ -46,6 +55,14 @@ class ExerciseCoordinator {
 }
 
 extension ExerciseCoordinator: CompletedExerciseDelegate {
+    func next() {
+        if exercises.isEmpty {
+            onShowSummary()
+        } else {
+            onLoadNextExercise()
+        }
+    }
+    
     func grade(result: ExerciseResult) {
         switch result.grade {
         case .correct:
@@ -60,12 +77,6 @@ extension ExerciseCoordinator: CompletedExerciseDelegate {
         case .almost:
             let exercise = exercises.removeFirst()
             exercises.append(exercise)
-        }
-        
-        if exercises.isEmpty {
-            onShowSummary()
-        } else {
-            onLoadNextExercise()
         }
     }
 }
