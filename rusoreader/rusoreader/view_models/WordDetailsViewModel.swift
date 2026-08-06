@@ -12,6 +12,10 @@ class WordDetailsViewModel {
     func getWordType() -> Word.WordType {
         return word.type
     }
+
+    func getVerbAspect() -> Verb.Aspect? {
+        return word.verb?.aspect
+    }
     
     func getWordText() -> String {
         return wordService.addStress(to: word.accented)
@@ -146,15 +150,17 @@ class WordDetailsViewModel {
     /// - Returns: A string representing the generated label text for the cell.
     private func getLabelTextFromCell(wordText: String, isRussianWord: Bool, isAdjective: Bool) -> String {
         if isRussianWord {
+            var stressedRussianWord = ""
             if !isAdjective {
-                return wordService.addStress(to: wordText)
+                stressedRussianWord = wordService.addStress(to: wordText)
             } else {
                 if wordText.count > 5 { // If an adjective is longer than 5 letters then lets just display the endings
-                    return getAdjectiveEnding(for: wordText)
+                    stressedRussianWord = wordService.addStress(to: getAdjectiveEnding(for: wordText))
                 } else {
-                    return wordService.addStress(to: wordText)
+                    stressedRussianWord = wordService.addStress(to: wordText)
                 }
             }
+            return stressedRussianWord
         } else {
             return wordText
         }
@@ -166,7 +172,7 @@ class WordDetailsViewModel {
     /// - Returns: A string representing the extracted ending part of the adjective.
     private func getAdjectiveEnding(for adjective: String) -> String {
         let adjectiveBase = wordService.findAdjectiveBase(for: adjective)
-        let baseRange = adjective.range(of: adjectiveBase)
-        return "-\(adjective[baseRange!.upperBound..<adjective.endIndex])"
+        guard let baseRange = adjective.range(of: adjectiveBase) else { return ""}
+        return "-\(adjective[baseRange.upperBound..<adjective.endIndex])"
     }
 }

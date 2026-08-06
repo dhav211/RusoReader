@@ -2,11 +2,11 @@ import GRDB
 
 class WordRepository {
     let databaseManager: DatabaseManager
-    
+
     init(databaseManager: DatabaseManager) {
         self.databaseManager = databaseManager
     }
-    
+
     /// Finds matches for given word IDs by fetching their corresponding word information and creating Word objects.
     ///
     /// This function relies on two other functions: `fetchWordInfos(by:in:)` to fetch word information from the database, and `createWords(from:)` to transform the fetched information into `[Word]` objects.
@@ -24,7 +24,7 @@ class WordRepository {
             return []
         }
     }
-    
+
     /// Fetches word information from the database using given IDs.
     ///
     /// This function performs a batch fetch to improve performance.
@@ -41,14 +41,14 @@ class WordRepository {
                 .including(all: DatabaseWord.translations)
                 .including(all: DatabaseWord.wordForms.forKey("wordForms"))
                 .asRequest(of: FetchedWordInfo.self)
-            
+
             return try FetchedWordInfo.fetchAll(db, request)
         } catch {
             print("Error: \(error)")
             return []
         }
     }
-    
+
     /// Finds IDs of words in the database that match a given search term.
     ///
     /// This function performs fuzzy matching to account for variations in Cyrillic letters (e.g., "е" vs. "ё").
@@ -58,7 +58,7 @@ class WordRepository {
     func findWordIDs(by bare: String) -> [Int64] {
         let searchTerm = bare.lowercased()
         var searches = [searchTerm]
-        
+
         // Oftentimes russian texts ommit the ё but our database requires it. So add it to any word that has a e but no ё
         if searchTerm.contains("е") && !searchTerm.contains("ё") {
             for letter in 0..<bare.count {
@@ -71,7 +71,7 @@ class WordRepository {
                 }
             }
         }
-        
+
         do {
             return try databaseManager.wordQueue.read { db in
                 let wordFormIds = try DatabaseWordForm
@@ -79,7 +79,7 @@ class WordRepository {
                     .filter(searches.contains(DatabaseWordForm.Columns.bare))
                     .distinct()
                     .fetchAll(db)
-                
+
                 // If a search comes up empty, then it may be a base form for a verb, so search the word table as a last effort
                 if wordFormIds.isEmpty {
                     return try DatabaseWord
@@ -96,7 +96,7 @@ class WordRepository {
             return []
         }
     }
-    
+
     /// Takes a list of `FetchedWordInfo` objects and returns a new array of `Word` objects.
     ///
     /// Each `Word` object is created by extracting relevant information from the corresponding `FetchedWordInfo`.
@@ -106,41 +106,45 @@ class WordRepository {
     /// - Returns: An array of `[Word]` objects, where each element corresponds to a `FetchedWordInfo` in the input list.
     private func createWords(from wordInfos: [FetchedWordInfo]) -> [Word] {
         var words = [Word]()
-        
+
         for wordInfo in wordInfos {
             var noun: Noun?
             var verb: Verb?
             let wordType = Word.WordType(rawValue: wordInfo.word.type) ?? Word.WordType.other
-            
+
             if let dbNoun = wordInfo.noun {
                 noun = Noun(dbNoun: dbNoun)
             }
-            
+
             if let dbVerb = wordInfo.verb {
                 verb = Verb(dbVerb: dbVerb)
             }
-            
+
             let translations = wordInfo.translations.map { tranlsation in
                 return tranlsation.tl
             }
-            
-//            var forms = [String:String]()
-//            for form in wordInfo.wordForms {
-//                if forms[form.form_type] != nil {
-//                    forms[form.form_type]?.append(",\(form.form)")
-//                } else {
-//                    forms[form.form_type] = form.form
-//                }
-//            }
-            
-            var forms : [WordForm] = wordInfo.wordForms.map() { form in
-                return WordForm(bare: form.form_bare, accented: form.form, form: Form(rawValue: form.form_type) ?? .error)
+
+           var preaddedForms = [String:(String,String)]()
+           for form in wordInfo.wordForms {
+               if preaddedForms[form.form_type] != nil {
+                   preaddedForms[form.form_type]?.0.append(",\(form.form.trimmingCharacters(in: .punctuationCharacters))")
+                   preaddedForms[form.form_type]?.1.append(",\(form.form_bare.trimmingCharacters(in: .punctuationCharacters))")
+               } else {
+                   preaddedForms[form.form_type] = (
+                       form.form.trimmingCharacters(in: .punctuationCharacters), 
+                       form.form_bare.trimmingCharacters(in: .punctuationCharacters)
+                   )
+               }
+           }
+
+            var forms : [WordForm] = preaddedForms.map() { form in
+                return WordForm(bare: form.value.1, accented: form.value.0, form: Form(rawValue: form.key) ?? .error)
             }
-            
+
             if wordType == .verb {
                 forms.append(WordForm(bare: wordInfo.word.bare, accented: wordInfo.word.accented, form: .verbInfitive))
             }
-            
+
             words.append(
                 Word(
                     id: Int(wordInfo.word.id),
@@ -155,10 +159,10 @@ class WordRepository {
                     translations: translations)
             )
         }
-        
+
         return words
     }
-    
+
     /// Find all forms of a word by it's ID
     /// - Parameter wordId: The ID of a word
     /// - Returns: An array of strings which hold all the unique forms of the word
@@ -176,7 +180,7 @@ class WordRepository {
             return []
         }
     }
-    
+
     /// Find all forms with stress marks of a word by it's ID
     /// - Parameter wordId: The ID of a word
     /// - Parameter accentedBaseForm: The accented form of the word, will be used to compare if infinitive is in the word form which for verbs it's often not
@@ -189,11 +193,11 @@ class WordRepository {
                     .distinct()
                     .fetchAll(db)
                     .map { return $0.form }
-                
+
                 if !uniqueForms.contains(accentedBaseForm) {
                     uniqueForms.append(accentedBaseForm)
                 }
-                
+
                 return uniqueForms
             }
         } catch {

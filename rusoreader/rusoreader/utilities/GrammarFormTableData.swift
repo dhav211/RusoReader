@@ -7,7 +7,8 @@ struct GrammarFormTableData {
     enum TableType {
         case adjective
         case noun
-        case verb
+        case verbPresent
+        case verbFuture
         case verbPast
         case verbImperative
         case verbParticiples
@@ -74,6 +75,9 @@ struct GrammarFormTableData {
             case .verbPast:
                 return [
                     [
+                        Cell(text: "Past", isRussianWord: false)
+                    ],
+                    [
                         Cell(text: "Masculine", isRussianWord: false),
                         Cell(text: wordForms["ru_verb_past_m"]?.accented ?? "", isRussianWord: true)
                     ],
@@ -90,8 +94,41 @@ struct GrammarFormTableData {
                         Cell(text: wordForms["ru_verb_past_pl"]?.accented ?? "", isRussianWord: true)
                     ]
                 ]
-            case .verb:
+            case .verbPresent:
                 return [
+                    [
+                        Cell(text: "Present", isRussianWord: false),
+                    ],
+                    [
+                        Cell(text: "я", isRussianWord: false),
+                        Cell(text: wordForms["ru_verb_presfut_sg1"]?.accented ?? "", isRussianWord: true)
+                    ],
+                    [
+                        Cell(text: "ты", isRussianWord: false),
+                        Cell(text: wordForms["ru_verb_presfut_sg2"]?.accented ?? "", isRussianWord: true)
+                    ],
+                    [
+                        Cell(text: "он/она/оно", isRussianWord: false),
+                        Cell(text: wordForms["ru_verb_presfut_sg3"]?.accented ?? "", isRussianWord: true)
+                    ],
+                    [
+                        Cell(text: "мы", isRussianWord: false),
+                        Cell(text: wordForms["ru_verb_presfut_pl1"]?.accented ?? "", isRussianWord: true)
+                    ],
+                    [
+                        Cell(text: "вы", isRussianWord: false),
+                        Cell(text: wordForms["ru_verb_presfut_pl2"]?.accented ?? "", isRussianWord: true)
+                    ],
+                    [
+                        Cell(text: "они", isRussianWord: false),
+                        Cell(text: wordForms["ru_verb_presfut_pl3"]?.accented ?? "", isRussianWord: true)
+                    ],
+                ]
+            case .verbFuture:
+                return [
+                    [
+                        Cell(text: "Future", isRussianWord: false),
+                    ],
                     [
                         Cell(text: "я", isRussianWord: false),
                         Cell(text: wordForms["ru_verb_presfut_sg1"]?.accented ?? "", isRussianWord: true)

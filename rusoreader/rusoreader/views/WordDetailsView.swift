@@ -46,8 +46,12 @@ class WordDetailsView: UIViewController {
         case .noun:
             wordDetailsStack.addArrangedSubview(GrammarTable(tableType: .noun, viewModel: viewModel))
         case .verb:
-            wordDetailsStack.addArrangedSubview(GrammarTable(tableType: .verb, viewModel: viewModel))
-            wordDetailsStack.addArrangedSubview(GrammarTable(tableType: .verbPast, viewModel: viewModel))
+            if let verbAspect = viewModel.getVerbAspect() {
+                wordDetailsStack.addArrangedSubview(GrammarTable(
+                    tableType: verbAspect == .imperfective ? .verbPresent : .verbFuture, 
+                    viewModel: viewModel))
+                wordDetailsStack.addArrangedSubview(GrammarTable(tableType: .verbPast, viewModel: viewModel))
+            }
         case .adjective:
             wordDetailsStack.addArrangedSubview(GrammarTable(tableType: .adjective, viewModel: viewModel))
         default:

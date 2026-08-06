@@ -34,9 +34,15 @@ class WordService {
     ///- Returns:A string representing the base form of the adjective. If the input is invalid (i.e., not a valid Russian adjective), an empty string is returned.
     func findAdjectiveBase(for adjective: String) -> String {
         let endingStemLetter = adjective[adjective.index(adjective.startIndex, offsetBy: adjective.count - 2)]
-        let baseEndingIndex = isVowel(letter: endingStemLetter)
+        var baseEndingIndex = isVowel(letter: endingStemLetter)
             ? adjective.index(adjective.startIndex, offsetBy: adjective.count - 2)
             : adjective.index(adjective.startIndex, offsetBy: adjective.count - 3)
+
+        // There may be times where the vowel before a constantent is stressed so we will need to kick the index back one more space
+        if adjective[baseEndingIndex] == "'" && !isVowel(letter: endingStemLetter) {
+            baseEndingIndex = adjective.index(adjective.startIndex, offsetBy: adjective.count - 4)
+        }
+        
         let base = adjective[adjective.startIndex..<baseEndingIndex]
         return String(base)
     }
