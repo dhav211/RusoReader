@@ -151,23 +151,44 @@ final class EpubParser : EbookParser {
                 guard let title = try navPoint.getElementsByTag("navLabel").first()?
                     .getElementsByTag("text").first()?
                     .text() else { continue }
-                
-                guard let chapterFileName = try navPoint.getElementsByTag("content")
+
+                let pathWithId = try navPoint.getElementsByTag("content")
                     .first()?.attr("src")
-                    .split(separator: "#").first else { continue }
-                let chapterUrl = ("\(contentFolderPath)\(chapterFileName)")
+                    .split(separator: "#")
+            
+                guard let chapterFileName = pathWithId?.first else { continue }
+                let idPath = pathWithId?.last ?? ""
+                let chapterUrl = ("\(contentFolderPath)\(String(chapterFileName))")
                 
                 if !chapters.keys.contains(chapterUrl) {
                     guard let chapterText = try extractText(from: archive, with: chapterUrl) else { continue }
                     let parsedChapterText = try SwiftSoup.parse(chapterText)
-                    
-                    let paragraphs = try parsedChapterText.select("p")
                     var text = ""
-                    for paragraph in paragraphs {
-                        text.append("\(try paragraph.text())\n")
+
+                    let idSpans = try parsedChapterText.select("span") 
+
+                    if idSpans.count > 0 {
+                        for span in idSpans {
+                            let spanSelector = try span.cssSelector()
+    
+                            if spanSelector == "#\(String(idPath))" {
+                                let paragraphs = span.children().filter { $0.tagName() == "p" }
+                                
+                                for paragraph in paragraphs {
+                                    text.append("\(try paragraph.text())\n")
+                                }
+                            }
+                        }
+                        
+                        chapters["\(chapterUrl)#\(idPath)"] = (ChapterDetails(index: currentIndex, title: title, text: text))
+                    } else {
+                        let paragraphs = try parsedChapterText.select("p")
+                        for paragraph in paragraphs {
+                            text.append("\(try paragraph.text())\n")
+                        }
+                        
+                        chapters[chapterUrl] = (ChapterDetails(index: currentIndex, title: title, text: text))
                     }
-                    
-                    chapters[chapterUrl] = (ChapterDetails(index: currentIndex, title: title, text: text))
                     currentIndex += 1
                 }
             }

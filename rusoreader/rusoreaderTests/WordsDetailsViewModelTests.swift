@@ -745,7 +745,7 @@ final class WordsDetailsViewModelTests: XCTestCase {
             translations: [String]()
         )
         let sut = WordDetailsViewModel(word: word, wordService: wordService, sentenceService: sentenceService)
-        let data = sut.createGrammarFormTableData(grammarTableType: .verb)
+        let data = sut.createGrammarFormTableData(grammarTableType: .verbPresent)
         XCTAssertEqual(sut.getLongestRows(grammarFormTableData: data), [1, 1, 0, 1, 1, 1])
     }
 

@@ -192,13 +192,19 @@ class BookRepository {
     
     func fetchTableOfContentIndices(by bookId: Int) throws -> [TableOfContentIndex] {
         return try databaseManager.userDataQueue.read { db in
-            let rows = try Row.fetchCursor(db, sql: "SELECT id, name, position FROM chapters WHERE book_id = ?", arguments: [bookId])
+            let rows = try Row.fetchCursor(db, sql: "SELECT * FROM chapters WHERE book_id = ?", arguments: [bookId])
             
             var indices = [TableOfContentIndex]()
-            
             // Loop through every row creating the table of content indices
             while let row = try rows.next() {
-                indices.append(TableOfContentIndex(title: row["name"] ?? "", index: row["position"] ?? 0, id: row["id"] ?? 0))
+                indices.append(
+                    TableOfContentIndex(
+                        title: row["name"] ?? "", 
+                        index: row["position"] ?? 0, 
+                        id: row["id"] ?? 0,
+                        isHeader: String(row["text"]).count == 0
+                    )
+                )
             }
             
             return indices

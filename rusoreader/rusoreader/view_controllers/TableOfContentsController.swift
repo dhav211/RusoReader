@@ -37,7 +37,10 @@ class TableOfContentsController : UITableViewController {
         
         // Set the cell text as the chapter title at this index row
         if indices.count > indexPath.row {
-            content.text = indices[indexPath.row].title
+            content.text = indices[indexPath.row].title.capitalized
+            if indices[indexPath.row].isHeader {
+                content.textProperties.font = UIFont.boldSystemFont(ofSize: 18) 
+            }
         }
         
         cell.contentConfiguration = content
@@ -47,8 +50,10 @@ class TableOfContentsController : UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // Delegate is sent to the ReaderViewController, which will hold all the information for book including chapters
-        dismiss(animated: true) {
-            self.delegate?.chapterTitleClicked(at: indexPath.row)
+        if !indices[indexPath.row].isHeader {
+            dismiss(animated: true) {
+                self.delegate?.chapterTitleClicked(at: indexPath.row)
+            }
         }
     }
 }
