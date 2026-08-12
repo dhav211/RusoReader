@@ -32,8 +32,8 @@ class ParagraphCellView : UITableViewCell {
         paragraphView.highlightSelection(selectionRange: selectionRange)
     }
     
-    func setText(with text: String) {
-        paragraphView.text = text
+    func setText(with text: NSMutableAttributedString) {
+        paragraphView.attributedText = text
     }
     
     func getText() -> String {

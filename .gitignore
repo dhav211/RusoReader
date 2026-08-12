@@ -4,3 +4,8 @@ rusoreader/rusoreader/resources/database/words.db
 rusoreader/rusoreader/resources/database/books.db
 
 *.epub
+
+.zed
+rusoreader/xcede.yml
+rusoreader/.xcede
+rusoreader/buildServer.json

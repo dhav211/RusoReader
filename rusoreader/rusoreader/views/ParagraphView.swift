@@ -31,4 +31,8 @@ class ParagraphView: UITextView {
         textStorage.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: selectionRange.wordRange)
         textStorage.addAttribute(.underlineColor, value: UIColor.blue, range: selectionRange.wordRange)
     }
+
+    func updateParagraphText(updatedParagraph: NSMutableAttributedString) {
+        textStorage.setAttributedString(updatedParagraph)
+    }
 }

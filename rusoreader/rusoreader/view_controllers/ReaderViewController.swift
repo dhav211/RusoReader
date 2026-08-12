@@ -44,7 +44,7 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate {
     }
     
     override func viewDidLayoutSubviews() {
-        if shouldScroll && !viewModel.paragraphs.isEmpty {
+        if shouldScroll && viewModel.paragraphCount() != 0 {
             shouldScroll = false
             tableView.scrollToRow(
                 at: IndexPath(row: viewModel.currentProgress, section: 0), at: .top,
@@ -54,41 +54,24 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.paragraphs.count
+        return viewModel.paragraphCount()
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ParagraphCellView.reuseID) as! ParagraphCellView
-        cell.setText(with: viewModel.paragraphs[indexPath.row])
-        cell.setIndex(to: indexPath.row)
-        cell.onTextClicked = { [weak self] paragraphView, location, index in
-            self?.textClicked(in: paragraphView, at: location, from: index)
-        }
-        
-        // If the index can be found in the selections dictionary that means there are words we can underline, lets do that here
-        if let selectionsAtIndex = selections[indexPath.row] {
-            for selection in selectionsAtIndex {
-                cell.highlightWord(at: selection)
+        if let paragraph = viewModel.getParagraph(at: indexPath.row) {
+            cell.setText(with: paragraph)
+            cell.setIndex(to: indexPath.row)
+            cell.onTextClicked = { [weak self] paragraphView, location, index in
+                self?.textClicked(in: paragraphView, at: location, from: index)
             }
         }
         
         return cell
     }
     
-    override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        // Remove any selections associated with the paragraph that is exiting the table and add them to the dictionary for later highlighting when cell comes back on
-        for currentSelection in currentSelections {
-            if currentSelection.index == indexPath.row {
-                if selections[indexPath.row] == nil {
-                    selections[indexPath.row] = Set<SelectionRange>()
-                }
-                selections[indexPath.row]?.insert(currentSelection.selectionRange)
-            }
-        }
-        
-        currentSelections = currentSelections.filter { $0.index != indexPath.row }
-        
-        if indexPath.row < viewModel.paragraphs.count - 1 {
+    override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {        
+        if indexPath.row < viewModel.paragraphCount() - 1 {
             viewModel.updateProgress(to: indexPath.row + 1)
         }
     }
@@ -113,7 +96,13 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate {
         let selectionRange = SelectionRange(text: textView.text, characterIndex: charIndex)
         
         if let wordRange = Range(selectionRange.wordRange, in: textView.text) {
-            textView.highlightSelection(selectionRange: selectionRange)
+            //textView.highlightSelection(selectionRange: selectionRange)
+            if let selectedParagraph = viewModel.getParagraph(at: index) {
+                selectedParagraph.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: selectionRange.wordRange)
+                selectedParagraph.addAttribute(.underlineColor, value: UIColor.blue, range: selectionRange.wordRange)
+                textView.updateParagraphText(updatedParagraph: selectedParagraph)
+                viewModel.setParagraph(at: index, with: selectedParagraph)
+            }
             
             // If we have matches we can open the modal to show the details on the word
             if let wordDetailsViewModel = viewModel.buildWordDetailsViewModel(for: String(textView.text[wordRange])) {

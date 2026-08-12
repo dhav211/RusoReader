@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 struct ChapterLoadError: LocalizedError {
     var errorDescription: String?
@@ -14,13 +15,15 @@ class ReaderViewModel {
     private let sentenceService: SentenceService
     private let book: Book
     private var chapterProgressToUpdate = 0
-    private(set) var paragraphs = [String]()
+    private(set) var textSize: CGFloat
+    private var paragraphs = [NSMutableAttributedString]()
     
     init(wordService: WordService, bookService: BookService, sentenceService: SentenceService, book: Book) {
         self.wordService = wordService
         self.bookService = bookService
         self.sentenceService = sentenceService
         self.book = book
+        self.textSize = 20
     }
     
     func commitProgress() {
@@ -30,7 +33,9 @@ class ReaderViewModel {
     func setChapter(to index: Int) throws {
         if let chapter = bookService.getChapter(from: book, at: index) {
             paragraphs = chapter.text.split(separator: "\n").map { paragraph in
-                return String(paragraph)
+                let paragraphText = NSMutableAttributedString(string: String(paragraph))
+                paragraphText.addAttribute(.font, value: UIFont.systemFont(ofSize: textSize), range: NSRange(location: 0, length: paragraph.count))
+                return paragraphText
             }
             
             bookService.updateCurrentChapter(for: book, to: index)
@@ -57,6 +62,24 @@ class ReaderViewModel {
     
     func updateProgress(to value: Int) {
         chapterProgressToUpdate = value
+    }
+
+    func getParagraph(at index: Int) -> NSMutableAttributedString? {
+        if paragraphs.count <= index {
+            return nil
+        }
+
+        return paragraphs[index]
+    }
+
+    func setParagraph(at index: Int, with newParagraph: NSMutableAttributedString) {
+        if paragraphs.count > index {
+            paragraphs[index] = newParagraph
+        }
+    }
+
+    func paragraphCount() -> Int {
+        return paragraphs.count
     }
     
     func buildWordDetailsViewModel(for word: String) -> WordDetailsViewModel? {
