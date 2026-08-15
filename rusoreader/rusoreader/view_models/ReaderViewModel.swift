@@ -15,7 +15,7 @@ class ReaderViewModel {
     private let sentenceService: SentenceService
     private let book: Book
     private var chapterProgressToUpdate = 0
-    private(set) var textSize: CGFloat
+    private var textSize: CGFloat = 12
     private var paragraphs = [NSMutableAttributedString]()
     
     init(wordService: WordService, bookService: BookService, sentenceService: SentenceService, book: Book) {
@@ -23,7 +23,6 @@ class ReaderViewModel {
         self.bookService = bookService
         self.sentenceService = sentenceService
         self.book = book
-        self.textSize = 20
     }
     
     func commitProgress() {
@@ -62,6 +61,19 @@ class ReaderViewModel {
     
     func updateProgress(to value: Int) {
         chapterProgressToUpdate = value
+    }
+
+    var currentTextSize: Float {
+        return Float(textSize)
+    }
+
+    /// Change the font size is every paragraphs AttributedString
+    /// - Parameter newSize: The new size of the text
+    func setTextSize(to newSize: Float) {
+        textSize = CGFloat(newSize)
+        for paragaph in paragraphs {
+            paragaph.addAttribute(.font, value: UIFont.systemFont(ofSize: textSize), range: NSRange(location: 0, length: paragaph.string.count))
+        }
     }
 
     func getParagraph(at index: Int) -> NSMutableAttributedString? {

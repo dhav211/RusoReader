@@ -1,6 +1,6 @@
 import UIKit
 
-class ReaderViewController: UITableViewController, TableOfContentsDelegate {
+class ReaderViewController: UITableViewController, TableOfContentsDelegate, ReaderViewSettingsDelegate {
     private var selections = [Int:Set<SelectionRange>]()
     private var currentSelections = Set<CurrentSelectionRange>()
     private var shouldScroll: Bool = true
@@ -9,6 +9,17 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate {
     init(viewModel: ReaderViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
+
+        // The user defaults can hold the default text size, this will return 0 if it's never been saved
+        var textSize = Float(UserDefaults.standard.float(forKey: "textSize"))
+
+        // A text size has never been saved so we will save a default text size of 16 right out of the gate
+        if textSize == 0 {
+            UserDefaults.standard.set(16, forKey: "textSize")
+            textSize = 16
+        }
+        
+        viewModel.setTextSize(to: textSize)
         
         do {
             try viewModel.setChapter(to: viewModel.currentChapter)
@@ -33,14 +44,20 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate {
         tableView.register(ParagraphCellView.self, forCellReuseIdentifier: ParagraphCellView.reuseID)
         
         // There may be a chance there are no indices in the table of contents, if there are then show the button
-        if viewModel.hasTableOfContents() {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(
+        navigationItem.rightBarButtonItems = [
+            UIBarButtonItem(
                 image: UIImage(systemName: "list.bullet"),
                 style: .plain,
                 target: self,
                 action: #selector(openTableOfContents)
-            )
-        }
+            ),
+            viewModel.hasTableOfContents() ? UIBarButtonItem(
+                image: UIImage(systemName: "gearshape"),
+                style: .plain,
+                target: self,
+                action: #selector(openReaderSettings)
+            ) : nil
+        ].compactMap { $0 }
     }
     
     override func viewDidLayoutSubviews() {
@@ -124,6 +141,15 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate {
         tableOfContents.delegate = self
         self.present(tableOfContents, animated: true)
     }
+
+    /// A modal that only covers half the screen and will let the user change some basic settings
+    @objc private func openReaderSettings() {
+        let settings = ReaderViewSettingsController(currentTextSize: viewModel.currentTextSize)
+        settings.delegate = self
+        settings.modalPresentationStyle = .pageSheet
+        settings.sheetPresentationController?.detents = [.medium()]
+        self.present(settings, animated: true)
+    }
     
     /// Set the reader view's text with the selected chapter's text, this will also be a point to reset any possible values the reader view has accumluated
     /// - Parameter index: Index of the chapter the user is trying to open
@@ -150,6 +176,16 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate {
         }
         
         return false
+    }
+
+    /// Changes the text size of the chapters paragraphs AttributedString. Once this is complete it will set the change as a default in the system to remember for next. Then will reload all the data to display the updated size
+    /// - Parameter newSize:
+    func updateTextSize(to newSize: Float) {
+        if newSize > viewModel.currentTextSize || newSize < viewModel.currentTextSize {
+            viewModel.setTextSize(to: newSize)
+            UserDefaults.standard.set(newSize, forKey: "textSize")
+            tableView.reloadData()
+        }
     }
     
     private struct CurrentSelectionRange : Hashable {
