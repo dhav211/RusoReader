@@ -67,4 +67,11 @@ final class SelectionRangeTests: XCTestCase {
         XCTAssert(selectionRange.sentenceRange.location == sentenceStartIndex)
         XCTAssert(selectionRange.sentenceRange.length == "Других людей «семерка» отторгала.".count)
     }
+
+    func testWordWithAccent() {
+        let text = "Однажды моя жена Ли́са принесла домой книгу Рассела Стэннарда"
+        let selectionRange = SelectionRange(text: text, characterIndex: 23)
+        XCTAssert(selectionRange.wordRange.location == 22)
+        XCTAssert(selectionRange.wordRange.length == "принесла".count)
+    }
 }

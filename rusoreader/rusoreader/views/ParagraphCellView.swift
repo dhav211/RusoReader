@@ -28,10 +28,6 @@ class ParagraphCellView : UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func highlightWord(at selectionRange: SelectionRange) {
-        paragraphView.highlightSelection(selectionRange: selectionRange)
-    }
-    
     func setText(with text: NSMutableAttributedString) {
         paragraphView.attributedText = text
     }

@@ -1736,7 +1736,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "BC9DA885-97B6-4A68-AA41-0814CB7EE7D5"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "rusoreader/view_controllers/BookSelectorViewController.swift"
@@ -2017,6 +2017,22 @@
             startingLineNumber = "132"
             endingLineNumber = "132"
             landmarkName = "init(wordForms:grammarTableType:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "CCA16C7E-6922-41C9-818B-391A27D992BB"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "rusoreader/utilities/SpeechSynth.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "33"
+            endingLineNumber = "33"
+            landmarkName = "speak(content:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
