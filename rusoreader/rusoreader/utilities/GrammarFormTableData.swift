@@ -17,10 +17,12 @@ struct GrammarFormTableData {
     struct Cell {
         let text: String
         let isRussianWord: Bool
+        let isAdjective: Bool
         
-        init(text: String, isRussianWord: Bool) {
+        init(text: String, isRussianWord: Bool, isAdjective: Bool = false) {
             self.text = text
             self.isRussianWord = isRussianWord
+            self.isAdjective = isAdjective
         }
     }
     
@@ -176,45 +178,45 @@ struct GrammarFormTableData {
                     ],
                     [
                         Cell(text: "Nom", isRussianWord: false),
-                        Cell(text: wordForms["ru_adj_m_nom"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_f_nom"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_n_nom"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_pl_nom"]?.accented ?? "", isRussianWord: true)
+                        Cell(text: wordForms["ru_adj_m_nom"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_f_nom"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_n_nom"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_pl_nom"]?.accented ?? "", isRussianWord: true, isAdjective: true)
                     ],
                     [
                         Cell(text: "Gen", isRussianWord: false),
-                        Cell(text: wordForms["ru_adj_m_gen"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_f_gen"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_n_gen"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_pl_gen"]?.accented ?? "", isRussianWord: true)
+                        Cell(text: wordForms["ru_adj_m_gen"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_f_gen"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_n_gen"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_pl_gen"]?.accented ?? "", isRussianWord: true, isAdjective: true)
                     ],
                     [
                         Cell(text: "Dat", isRussianWord: false),
-                        Cell(text: wordForms["ru_adj_m_dat"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_f_dat"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_n_dat"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_pl_dat"]?.accented ?? "", isRussianWord: true)
+                        Cell(text: wordForms["ru_adj_m_dat"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_f_dat"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_n_dat"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_pl_dat"]?.accented ?? "", isRussianWord: true, isAdjective: true)
                     ],
                     [
                         Cell(text: "Acc", isRussianWord: false),
-                        Cell(text: wordForms["ru_adj_m_acc"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_f_acc"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_n_acc"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_pl_acc"]?.accented ?? "", isRussianWord: true)
+                        Cell(text: wordForms["ru_adj_m_acc"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_f_acc"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_n_acc"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_pl_acc"]?.accented ?? "", isRussianWord: true, isAdjective: true)
                     ],
                     [
                         Cell(text: "Inst", isRussianWord: false),
-                        Cell(text: wordForms["ru_adj_m_inst"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_f_inst"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_n_inst"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_pl_inst"]?.accented ?? "", isRussianWord: true)
+                        Cell(text: wordForms["ru_adj_m_inst"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_f_inst"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_n_inst"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_pl_inst"]?.accented ?? "", isRussianWord: true, isAdjective: true)
                     ],
                     [
                         Cell(text: "Prep", isRussianWord: false),
-                        Cell(text: wordForms["ru_adj_m_prep"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_f_prep"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_n_prep"]?.accented ?? "", isRussianWord: true),
-                        Cell(text: wordForms["ru_adj_pl_prep"]?.accented ?? "", isRussianWord: true)
+                        Cell(text: wordForms["ru_adj_m_prep"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_f_prep"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_n_prep"]?.accented ?? "", isRussianWord: true, isAdjective: true),
+                        Cell(text: wordForms["ru_adj_pl_prep"]?.accented ?? "", isRussianWord: true, isAdjective: true)
                     ]
                 ]
             default:

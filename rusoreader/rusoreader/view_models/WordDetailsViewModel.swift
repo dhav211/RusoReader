@@ -2,6 +2,11 @@ class WordDetailsViewModel {
     private let word: Word
     private let wordService: WordService
     private let sentenceService: SentenceService
+
+    struct WordFormWithCompressedForm {
+        let full: String
+        let compressed: String
+    }
     
     init(word: Word, wordService: WordService, sentenceService: SentenceService) {
         self.word = word
@@ -136,33 +141,25 @@ class WordDetailsViewModel {
     /// - Parameters:
     ///   - rowCellData: A simple struct which contains the text of the word and wether or not its a word form
     /// - Returns: An array of strings which contain the presentable form of the word
-    func getWordFormVariations(for rowCellData: GrammarFormTableData.Cell) -> [String] {
+    func getWordFormVariations(for rowCellData: GrammarFormTableData.Cell) -> [WordFormWithCompressedForm] {
         return rowCellData.text.split(separator: ",").map { varation in
-            return getLabelTextFromCell(wordText: String(varation), isRussianWord: rowCellData.isRussianWord, isAdjective: word.type == .adjective)
+
+            if !rowCellData.isRussianWord {
+                return WordFormWithCompressedForm(full: String(varation), compressed: String(varation))
+            } else if rowCellData.isRussianWord && !rowCellData.isAdjective {
+                return WordFormWithCompressedForm(full: wordService.addStress(to: String(varation)), compressed: wordService.addStress(to: String(varation)))
+            } else if rowCellData.isRussianWord && rowCellData.isAdjective {
+                return WordFormWithCompressedForm(full: wordService.addStress(to: String(varation)), compressed: compressAdjectiveForm(form: String(varation)))
+            }
+            return WordFormWithCompressedForm(full: "", compressed: "")
         }
     }
-    
-    /// Generates a label text from a given cell's word text based on its language and type.
-    /// - Parameters:
-    ///    - wordText: The original word text from the cell.
-    ///    - isRussianWord: A boolean indicating whether the word is in Russian.
-    ///    - isAdjective: A boolean indicating whether the word is an adjective.
-    /// - Returns: A string representing the generated label text for the cell.
-    private func getLabelTextFromCell(wordText: String, isRussianWord: Bool, isAdjective: Bool) -> String {
-        if isRussianWord {
-            var stressedRussianWord = ""
-            if !isAdjective {
-                stressedRussianWord = wordService.addStress(to: wordText)
-            } else {
-                if wordText.count > 5 { // If an adjective is longer than 5 letters then lets just display the endings
-                    stressedRussianWord = wordService.addStress(to: getAdjectiveEnding(for: wordText))
-                } else {
-                    stressedRussianWord = wordService.addStress(to: wordText)
-                }
-            }
-            return stressedRussianWord
+
+    private func compressAdjectiveForm(form: String) -> String {
+        if form.count > 5 { // If an adjective is longer than 5 letters then lets just display the endings
+            return wordService.addStress(to: getAdjectiveEnding(for: form))
         } else {
-            return wordText
+            return wordService.addStress(to: form)
         }
     }
     

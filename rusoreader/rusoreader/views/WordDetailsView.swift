@@ -2,9 +2,11 @@ import UIKit
 
 class WordDetailsView: UIViewController {
     let viewModel: WordDetailsViewModel
+    let speechSynth: SpeechSynth
     
-    init(viewModel: WordDetailsViewModel) {
+    init(viewModel: WordDetailsViewModel, speechSynth: SpeechSynth) {
         self.viewModel = viewModel
+        self.speechSynth = speechSynth
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -34,7 +36,9 @@ class WordDetailsView: UIViewController {
         wordDetailsStack.spacing = 16
         scrollView.addSubview(wordDetailsStack)
 
-        wordDetailsStack.addArrangedSubview(createWordTitleHeader())
+        wordDetailsStack.addArrangedSubview(
+            SpeakableLabel(textToSpeak: viewModel.getWordText(), speechSynth: speechSynth)
+        )
         
         if let translationStack = createTranslationSection() {
             wordDetailsStack.addArrangedSubview(translationStack)
@@ -44,16 +48,18 @@ class WordDetailsView: UIViewController {
         
         switch viewModel.getWordType() {
         case .noun:
-            wordDetailsStack.addArrangedSubview(GrammarTable(tableType: .noun, viewModel: viewModel))
+            wordDetailsStack.addArrangedSubview(GrammarTable(tableType: .noun, viewModel: viewModel, speechSynth: speechSynth))
         case .verb:
             if let verbAspect = viewModel.getVerbAspect() {
                 wordDetailsStack.addArrangedSubview(GrammarTable(
                     tableType: verbAspect == .imperfective ? .verbPresent : .verbFuture, 
-                    viewModel: viewModel))
-                wordDetailsStack.addArrangedSubview(GrammarTable(tableType: .verbPast, viewModel: viewModel))
+                    viewModel: viewModel,
+                    speechSynth: speechSynth
+                ))
+                wordDetailsStack.addArrangedSubview(GrammarTable(tableType: .verbPast, viewModel: viewModel, speechSynth: speechSynth))
             }
         case .adjective:
-            wordDetailsStack.addArrangedSubview(GrammarTable(tableType: .adjective, viewModel: viewModel))
+            wordDetailsStack.addArrangedSubview(GrammarTable(tableType: .adjective, viewModel: viewModel, speechSynth: speechSynth))
         default:
             print("You need to implement all word forms")
         }
@@ -88,8 +94,7 @@ class WordDetailsView: UIViewController {
         wordStack.axis = .horizontal
         wordStack.spacing = 32
         wordStack.setContentHuggingPriority(.defaultLow, for: .vertical)
-        let wordLabel = UILabel()
-        wordLabel.text = viewModel.getWordText()
+        let wordLabel = SpeakableLabel(textToSpeak: viewModel.getWordText(), speechSynth: SpeechSynth())
         wordStack.addArrangedSubview(wordLabel)
         // TODO the add to dictionary will need to handle tap recongization
         let bookImage = UIImage(systemName: "book")
