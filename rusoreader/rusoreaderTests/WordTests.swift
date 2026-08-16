@@ -90,5 +90,9 @@ final class WordTests: XCTestCase {
         
         XCTAssert(stem == expected)
     }
+
+    func testWordWithAccentMarkSize() throws {
+        XCTAssert("сказа́".count == "сказа".count)
+    }
 }
 
