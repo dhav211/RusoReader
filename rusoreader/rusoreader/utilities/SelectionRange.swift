@@ -23,44 +23,33 @@ struct SelectionRange : Hashable {
     /// - charIndex: The character index within the string to find the word.
     /// - Returns: An NSRange containing the location and length of the identified word.
     private func getSelectedWordRange(from text: String, at charIndex: Int) -> NSRange {
-        var currentIndex = charIndex
-        var startingIndex = 0
-        var hasFoundStartOfWord = false
-        
-        // Loop backwards through the string looking for a punctuation, whitespace, or the zero index of the string
-        while !hasFoundStartOfWord {
-            if currentIndex == 0 {
-                hasFoundStartOfWord = true
-            } else {
-                let character = text[text.index(text.startIndex, offsetBy: currentIndex)]
-                if character.isPunctuation || character.isWhitespace {
-                    hasFoundStartOfWord = true
-                    currentIndex += 1 // We will need to increase the index by one because we don't want to start the search for the end of word with a white space
-                    startingIndex = currentIndex
-                } else { // If the character wasn't whitespace or punctuation, then lets go back one
-                    currentIndex -= 1
-                }
-            }
+        // charIndex is a UTF-16 offset (e.g. from a text view's selectedRange).
+        // Convert it to a String.Index instead of using offsetBy: directly.
+        guard let charPosition = Range(NSRange(location: charIndex, length: 0), in: text)?.lowerBound else {
+            return NSRange(location: charIndex, length: 0)
         }
-        
-        var hasFoundEndOfWord = false
-        var lengthCounter = 0 // this value will increment every loop so we know the length of the word
-        // Now we can loop forward to find the end of word, this is done similarly to the last loop
-        while !hasFoundEndOfWord {
-            if currentIndex == text.count - 1 {
-                hasFoundEndOfWord = true
-            } else {
-                let character = text[text.index(text.startIndex, offsetBy: currentIndex)]
-                if (character.isPunctuation && character != "-") || character.isWhitespace {
-                    hasFoundEndOfWord = true
-                } else {
-                    currentIndex += 1
-                    lengthCounter += 1
-                }
+    
+        // Walk backwards by Character to find the start of the word
+        var startIndex = charPosition
+        while startIndex > text.startIndex {
+            let previous = text.index(before: startIndex)
+            if text[previous].isPunctuation || text[previous].isWhitespace {
+                break
             }
+            startIndex = previous
         }
-        
-        return NSRange(location: startingIndex, length: lengthCounter)
+    
+        // Walk forwards by Character to find the end of the word
+        var endIndex = charPosition
+        while endIndex < text.endIndex {
+            let character = text[endIndex]
+            if (character.isPunctuation && character != "-") || character.isWhitespace {
+                break
+            }
+            endIndex = text.index(after: endIndex)
+        }
+    
+        return NSRange(startIndex..<endIndex, in: text)
     }
     
     /// Determines and returns the NSRange of the sentence containing a specific character.
@@ -72,53 +61,51 @@ struct SelectionRange : Hashable {
     ///   - charIndex: The character index within the text to identify the target sentence.
     /// - Returns: An NSRange representing the full range (location and length) of the identified sentence.
     private func getSelectedSentenceRange(from text: String, at charIndex: Int) -> NSRange {
-        var startingLocation = 0
-        var lengthCounter = 0
-        var currentIndex = charIndex
-        
-        var hasFoundSentenceStart = false
-        while !hasFoundSentenceStart {
-            if currentIndex == 0 {
-                hasFoundSentenceStart = true
-            } else {
-                if isSentenceTerminatingPunctuation(in: text, at: currentIndex) {
-                    var i = 0
-                    var hasReturned = false
-                    // we will loop through the indices within the checkLength looking for a letter or a left point cheveron, that would indicate the sentence starting
-                    while !hasReturned{
-                        if currentIndex + i >= text.count - 1 {
-                            hasReturned = true
-                            break
-                        }
-                        let sentenceStartCheckerCharacter = text[text.index(text.startIndex, offsetBy: currentIndex + i)]
-                        if sentenceStartCheckerCharacter.isLetter || sentenceStartCheckerCharacter == "«" || sentenceStartCheckerCharacter == "—" {
-                            currentIndex += i
-                            startingLocation = currentIndex
-                            hasReturned = true
-                            break
-                        }
-                        i += 1
+        guard let charPosition = Range(NSRange(location: charIndex, length: 0), in: text)?.lowerBound else {
+            return NSRange(location: charIndex, length: 0)
+        }
+    
+        // Walk backwards looking for sentence-terminating punctuation
+        var searchIndex = charPosition
+        var sentenceStart = text.startIndex
+    
+        while searchIndex > text.startIndex {
+            let previous = text.index(before: searchIndex)
+            if isSentenceTerminatingPunctuation(text[previous]) {
+                // Found terminating punctuation of the PREVIOUS sentence.
+                // Now scan forward from here looking for a letter, «, or — to find
+                // where the new sentence actually starts.
+                var scanIndex = searchIndex
+                while scanIndex < text.endIndex {
+                    let character = text[scanIndex]
+                    if character.isLetter || character == "«" || character == "—" {
+                        sentenceStart = scanIndex
+                        break
                     }
-                    
-                    hasFoundSentenceStart = true
-                } else {
-                    currentIndex -= 1
+                    scanIndex = text.index(after: scanIndex)
                 }
+                break
+            }
+            searchIndex = previous
+        }
+        // If we exited the loop via searchIndex == text.startIndex without finding
+        // punctuation, sentenceStart correctly remains text.startIndex.
+    
+        // Walk forwards looking for the end of the sentence
+        var endIndex = sentenceStart
+        while endIndex < text.endIndex {
+            let character = text[endIndex]
+            endIndex = text.index(after: endIndex)
+            if isSentenceTerminatingPunctuation(character) {
+                break
             }
         }
-        
-        var hasFoundSentenceEnd = false
-        while !hasFoundSentenceEnd {
-            if currentIndex == text.count - 1 {
-                hasFoundSentenceEnd = true
-            } else if isSentenceTerminatingPunctuation(in: text, at: currentIndex) {
-                hasFoundSentenceEnd = true
-            }
-            lengthCounter += 1
-            currentIndex += 1
-        }
-        
-        return NSRange(location: startingLocation, length: lengthCounter)
+    
+        return NSRange(sentenceStart..<endIndex, in: text)
+    }
+    
+    private func isSentenceTerminatingPunctuation(_ character: Character) -> Bool {
+        character == "." || character == "!" || character == "?"
     }
 
     /// Determines whether a character at a specific index is considered sentence-terminating punctuation.
