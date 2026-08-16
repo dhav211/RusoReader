@@ -38,11 +38,14 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
     }
     
     override func viewDidLoad() {
+        super.viewDidLoad()
+
+        navigationController?.hidesBarsOnSwipe = true
         view.backgroundColor = .systemBackground
     
         tableView.separatorStyle = .none
         tableView.register(ParagraphCellView.self, forCellReuseIdentifier: ParagraphCellView.reuseID)
-        
+
         // There may be a chance there are no indices in the table of contents, if there are then show the button
         navigationItem.rightBarButtonItems = [
             UIBarButtonItem(
