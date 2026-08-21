@@ -54,6 +54,7 @@ class EditBookViewController : UIViewController {
             deleteAlert.addAction(UIAlertAction(title: "Delete", style: .destructive) { _ in
                 do {
                     try self.viewModel.deleteBook()
+                    self.dismiss(animated: true)
                 } catch {
                     print(error)
                     // TODO display another UI Alert if possible saying there was an issue with deleting the book
