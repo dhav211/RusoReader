@@ -98,12 +98,16 @@ final class WordEndingExerciseViewModel : ExerciseViewModel {
         
         return affectedIndices
     }
+
+    var accentedBaseFormText: String {
+        return wordService.addStress(to: word.accented)
+    }
     
-    func getWordFormText() -> String {
+    var accentedWordFormText: String {
         return wordService.addStress(to: wordForm.accented)
     }
     
-    func getFormText() -> String {
+    var formText: String {
         switch wordForm.form {
         case .adjectiveFemaleAccusative:
             return "Accusative in Female Form"

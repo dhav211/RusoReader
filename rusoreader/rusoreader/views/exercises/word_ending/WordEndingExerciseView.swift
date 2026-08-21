@@ -34,21 +34,8 @@ class WordEndingExerciseView : UIViewController, Exercise {
         view.addSubview(completionBanner.view)
         completionBanner.didMove(toParent: self)
         
-        let informationStack = UIStackView()
-        informationStack.axis = .vertical
-        informationStack.alignment = .center
-        informationStack.translatesAutoresizingMaskIntoConstraints = false
+        let informationStack = WordEndingInformationView(accentedWord: viewModel.accentedBaseFormText, wordFormText: viewModel.formText)
         exerciseArea.addSubview(informationStack)
-        
-        let wordLabel = UILabel()
-        wordLabel.font = .preferredFont(forTextStyle: .headline)
-        wordLabel.text = viewModel.word.bare // BAD LETS CHANGE THIS TO THE BUILT IN ACCENTED
-        informationStack.addArrangedSubview(wordLabel)
-        
-        let wordFormLabel = UILabel()
-        wordFormLabel.font = .preferredFont(forTextStyle: .subheadline)
-        wordFormLabel.text = viewModel.getFormText()
-        informationStack.addArrangedSubview(wordFormLabel)
         
         let inputStack = UIStackView()
         inputStack.axis = .vertical
@@ -101,7 +88,7 @@ class WordEndingExerciseView : UIViewController, Exercise {
         completionDelegate?.grade(result: result)
         
         // Take the users inputed answer then compare it to the actual answer while bolding and underlining incorrect letters
-        let attributedAnswer = NSMutableAttributedString(string: viewModel.getWordFormText())
+        let attributedAnswer = NSMutableAttributedString(string: viewModel.accentedWordFormText)
         // we are grabbing the default text so we can get a bold font point size here in the attributed string
         let defaultFont = UIFont.systemFont(ofSize: UIFont.labelFontSize)
         
