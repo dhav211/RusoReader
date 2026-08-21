@@ -30,6 +30,12 @@ final class EpubParser : EbookParser {
                 // throughout this function we will need the initial folder where the content file is held. Not only is the content file held there but just about every other piece of information required for the epub, such as images and the actual text contents of the chapters
                 let contentFolderPath = {
                     var path = ""
+
+                    // This epub doesn't really contain much of a directory structure, so return an empty string
+                    if !path.contains("/") {
+                        return ""
+                    }
+                    
                     for char in contentPath {
                         path.append(char)
                         if char == "/" {
