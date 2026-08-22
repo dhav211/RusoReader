@@ -4,7 +4,7 @@ class WordEndingExerciseView : UIViewController, Exercise {
     private let banner: ExerciseBanner
     private let exerciseArea: UIView
     private let inputField: UITextField
-    private let submitButton: UIButton
+    private let submitButton: SubmitButton
     private let completionBanner: ExerciseCompletionBanner
     
     weak var completionDelegate: CompletedExerciseDelegate?
@@ -14,9 +14,13 @@ class WordEndingExerciseView : UIViewController, Exercise {
         self.banner = ExerciseBanner(text: "Write the word in the correct ending")
         self.exerciseArea = UIView()
         self.inputField = UITextField()
-        self.submitButton = UIButton()
+        self.submitButton = SubmitButton()
         self.completionBanner = ExerciseCompletionBanner()
         super.init(nibName: nil, bundle: nil)
+
+        self.submitButton.setClickHandler {
+            self.submit()
+        }
     }
     
     required init?(coder: NSCoder) {
@@ -52,11 +56,7 @@ class WordEndingExerciseView : UIViewController, Exercise {
         inputField.backgroundColor = .secondarySystemBackground
         inputStack.addArrangedSubview(inputField)
         
-        submitButton.setTitle("Submit", for: .normal)
-        submitButton.setTitleColor(.label, for: .normal)
-        submitButton.backgroundColor = .systemGreen
-        submitButton.layer.cornerRadius = 8
-        submitButton.addTarget(self, action: #selector(onSubmit), for: .touchUpInside)
+
         inputStack.addArrangedSubview(submitButton)
         
         NSLayoutConstraint.activate([
@@ -79,7 +79,7 @@ class WordEndingExerciseView : UIViewController, Exercise {
         ])
     }
     
-    @objc private func onSubmit() {
+    private func submit() {
         view.endEditing(true)
         guard let answer = inputField.text else { return }
         submitButton.isEnabled = false
