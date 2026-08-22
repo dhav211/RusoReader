@@ -1,5 +1,5 @@
 enum Form: String {
-    case verbInfitive = "ru_verb_infinitive"
+    case verbInfinitive = "ru_verb_infinitive"
     case gerundPast = "ru_verb_gerund_past"
     case gerundPresent = "ru_verb_gerund_present"
     case base = "ru_base"

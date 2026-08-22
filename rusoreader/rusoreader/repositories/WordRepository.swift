@@ -142,7 +142,7 @@ class WordRepository {
             }
 
             if wordType == .verb {
-                forms.append(WordForm(bare: wordInfo.word.bare, accented: wordInfo.word.accented, form: .verbInfitive))
+                forms.append(WordForm(bare: wordInfo.word.bare, accented: wordInfo.word.accented, form: .verbInfinitive))
             }
 
             words.append(
