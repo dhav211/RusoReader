@@ -9,7 +9,7 @@ class FlashcardFactory: ExerciseFactory {
         self.flashcardExerciseViewModel = flashcardExerciseViewModel
     }
     
-    func createExercise() -> any Exercise {
+    func createExercise() -> (any Exercise)? {
         return FlashcardExerciseView(viewModel: flashcardExerciseViewModel)
     }
 }
