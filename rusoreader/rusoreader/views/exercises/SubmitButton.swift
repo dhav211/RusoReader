@@ -6,10 +6,11 @@ final class SubmitButton: UIButton {
     init() {
         super.init(frame: .zero)
 
+        translatesAutoresizingMaskIntoConstraints = false
         setTitle("Submit", for: .normal)
         setTitleColor(.label, for: .normal)
-        backgroundColor = .systemGreen
         layer.cornerRadius = 8
+        disable()
     }
 
     required init?(coder: NSCoder) {
@@ -20,8 +21,20 @@ final class SubmitButton: UIButton {
         self.onSubmit = onSubmit
         addTarget(self, action: #selector(didClick), for: .touchUpInside)
     }
+
+    func enable() {
+        backgroundColor = .systemGreen
+        isEnabled = true
+    }
+
+    func disable() {
+        backgroundColor = .systemGray
+        isEnabled = false
+    }
     
     @objc private func didClick() {
+        isEnabled = false
+        isHidden = true
         onSubmit?()
     }
 }

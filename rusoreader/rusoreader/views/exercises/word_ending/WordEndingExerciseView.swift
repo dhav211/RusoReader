@@ -49,15 +49,15 @@ class WordEndingExerciseView : UIViewController, Exercise {
         exerciseArea.addSubview(inputStack)
         
         let inputStackWidth = min((UIScreen.main.bounds.width) * 0.75, 300)
-        print(inputStackWidth)
         
         inputField.borderStyle = .roundedRect
         inputField.textColor = .label
         inputField.backgroundColor = .secondarySystemBackground
+        inputField.addTarget(self, action: #selector(didEditInputField), for: .editingChanged)
         inputStack.addArrangedSubview(inputField)
         
 
-        inputStack.addArrangedSubview(submitButton)
+        view.addSubview(submitButton)
         
         NSLayoutConstraint.activate([
             banner.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -72,6 +72,9 @@ class WordEndingExerciseView : UIViewController, Exercise {
             inputStack.widthAnchor.constraint(equalToConstant: inputStackWidth),
             inputStack.centerYAnchor.constraint(equalTo: exerciseArea.centerYAnchor),
             inputStack.centerXAnchor.constraint(equalTo: exerciseArea.centerXAnchor),
+            submitButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -32),
+            submitButton.widthAnchor.constraint(equalToConstant: inputStackWidth),
+            submitButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             completionBanner.view.heightAnchor.constraint(equalToConstant: 200),
             completionBanner.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             completionBanner.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -82,8 +85,6 @@ class WordEndingExerciseView : UIViewController, Exercise {
     private func submit() {
         view.endEditing(true)
         guard let answer = inputField.text else { return }
-        submitButton.isEnabled = false
-        submitButton.backgroundColor = .systemGray
         let result = viewModel.calculateResult(answer)
         completionDelegate?.grade(result: result)
         
@@ -104,6 +105,15 @@ class WordEndingExerciseView : UIViewController, Exercise {
         
         completionBanner.open(exerciseResult: result, actualAnswer: attributedAnswer) { [weak self] in
             self?.completionDelegate?.next()
+        }
+    }
+
+    @objc private func didEditInputField() {
+        guard let inputText = inputField.text else { return }
+        if inputText.count > 0 {
+            submitButton.enable()
+        } else {
+            submitButton.disable()
         }
     }
 }
