@@ -27,6 +27,8 @@ final class ExerciseCompletionBanner: UIViewController {
             view.backgroundColor = .systemRed
         case .almost:
             view.backgroundColor = .systemBlue
+        case .error:
+            view.backgroundColor = .systemGray
         }
         
         nextExercise = onPressed
@@ -52,6 +54,8 @@ final class ExerciseCompletionBanner: UIViewController {
                 return "So Close!"
             case .incorrect:
                 return "Too Bad!"
+            case .error:
+                return "That's odd, an error"
             }
         }()
         resultInformationStack.addArrangedSubview(gradeText)

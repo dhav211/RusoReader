@@ -29,7 +29,7 @@ final class WordEndingTests: XCTestCase {
         let word = wordRepo.findMatches(by: [169]).first!
         
         let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "женщине", accented: "же'нщине", form: .nounSingularDative), wordService: wordService)
-        XCTAssert(sut.calculateResult(exerciseInput: "женщине").grade == .correct)
+        XCTAssert(sut.calculateResult( "женщине").grade == .correct)
     }
     //
     
@@ -37,42 +37,49 @@ final class WordEndingTests: XCTestCase {
         let word = wordRepo.findMatches(by: [173]).first!
         
         let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "ребёнка", accented: "ребёнка", form: .nounSingularAccusative), wordService: wordService)
-        XCTAssert(sut.calculateResult(exerciseInput: "ребёнка").grade == .correct)
+        XCTAssert(sut.calculateResult( "ребёнка").grade == .correct)
     }
     
     func testDativeSingluarNounWithWhiteSpace() throws {
         let word = wordRepo.findMatches(by: [169]).first!
         
         let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "женщине", accented: "же'нщине", form: .nounSingularDative), wordService: wordService)
-        XCTAssert(sut.calculateResult(exerciseInput: "женщине   ").grade == .correct)
+        XCTAssert(sut.calculateResult( "женщине   ").grade == .correct)
     }
     
     func testDativeSingluarNounWithCapitalization() throws {
         let word = wordRepo.findMatches(by: [169]).first!
         
         let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "женщине", accented: "же'нщине", form: .nounSingularDative), wordService: wordService)
-        XCTAssert(sut.calculateResult(exerciseInput: "Женщине").grade == .correct)
+        XCTAssert(sut.calculateResult( "Женщине").grade == .correct)
     }
     
     func testEndingForNounIsWrong() throws {
         let word = wordRepo.findMatches(by: [169]).first!
         
         let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "женщине", accented: "же'нщине", form: .nounSingularDative), wordService: wordService)
-        XCTAssert(sut.calculateResult(exerciseInput: "женщина").grade == .incorrect)
+        XCTAssert(sut.calculateResult( "женщина").grade == .incorrect)
     }
     
     func testStemForNounIsWrongButClose() throws {
         let word = wordRepo.findMatches(by: [169]).first!
         
         let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "женщине", accented: "же'нщине", form: .nounSingularDative), wordService: wordService)
-        XCTAssert(sut.calculateResult(exerciseInput: "жинщине").grade == .almost)
+        XCTAssert(sut.calculateResult( "жинщине").grade == .almost)
     }
     
     func testStemForNounIsWrong() throws {
         let word = wordRepo.findMatches(by: [169]).first!
         
         let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "женщине", accented: "же'нщине", form: .nounSingularDative), wordService: wordService)
-        XCTAssert(sut.calculateResult(exerciseInput: "жинщене").grade == .incorrect)
+        XCTAssert(sut.calculateResult( "жинщене").grade == .incorrect)
+    }
+
+    func testHighlightedDifferenceForAllWrong() throws {
+        let word = wordRepo.findMatches(by: [173]).first!
+        
+        let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "ребёнка", accented: "ребёнка", form: .nounSingularAccusative), wordService: wordService)
+        XCTAssert(sut.createHightlightedDifferenceInAnswer(answer: "ж") == [0,1,2,3,4,5,6])
     }
     
     func testHighlightedDifferenceForРебёнкаAndРибёнка() throws {

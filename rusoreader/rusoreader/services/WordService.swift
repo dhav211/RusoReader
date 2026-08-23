@@ -120,25 +120,20 @@ class WordService {
     }
     
     func getWordStem(of word: Word) -> String {
-        return {
-            for i in 1..<word.bare.count {
-                let index = word.bare.index(word.bare.startIndex, offsetBy: i)
-                for wordForm in word.forms {
-                    // the db may contain empty values so we can just skip them for now
-                    if wordForm.bare.isEmpty {
-                        continue
-                    }
-                    // If a word takes on a completely different speling in some forms, lets just ignore it as a stem
-                    if wordForm.bare[wordForm.bare.startIndex] != word.bare[word.bare.startIndex] {
-                        continue
-                    }
-                    if wordForm.bare.count < i || wordForm.bare[wordForm.bare.startIndex...index] != word.bare[word.bare.startIndex...index] {
-                        let stemIndex = word.bare.index(word.bare.startIndex, offsetBy: i - 1)
-                        return String(wordForm.bare[wordForm.bare.startIndex...stemIndex])
-                    }
+        let wordChars = Array(word.bare)
+        guard !wordChars.isEmpty else { return "" }
+    
+        for i in 1..<wordChars.count {
+            for wordForm in word.forms {
+                if wordForm.bare.isEmpty { continue }
+                let formChars = Array(wordForm.bare)
+                guard formChars.first == wordChars.first else { continue }
+    
+                if wordChars.count < i || formChars.count < i || formChars[0...i] != wordChars[0...i] {
+                    return String(wordChars[0..<i])  // safe: always sliced from word, always in bounds
                 }
             }
-            return ""
-        }()
+        }
+        return ""
     }
 }

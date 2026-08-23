@@ -77,6 +77,9 @@ extension ExerciseCoordinator: CompletedExerciseDelegate {
         case .almost:
             let exercise = exercises.removeFirst()
             exercises.append(exercise)
+
+        case .error: // Rarely if ever should hit here, but just move past the exercise without updating the score
+            exercises.removeFirst()
         }
     }
 }
