@@ -138,7 +138,7 @@ class FlashcardExerciseView : UIViewController, Exercise {
     }
     
     private func sendResult(doesUserKnow: Bool) {
-        completionDelegate?.grade(result: viewModel.calculateResult(doesUserKnow: doesUserKnow))
+        completionDelegate?.grade(result: viewModel.calculateResult(doesUserKnow))
         completionDelegate?.next()
     }
     

@@ -12,19 +12,20 @@ final class WordEndingExerciseViewModel : ExerciseViewModel {
     }
     
     /// Compares what the user submits to the actual answer. The ending of the word is weighted heavier than the stem of the word as that is what this exercise is focusing on
-    /// - Parameter exerciseInput: A string value which is submited from a text field by the user
+    /// - Parameter answer: A string value which is submited from a text field by the user
     /// - Returns: The grade the user will see and the associated score which will affect the spaced repetion algorithim
-    func calculateResult(exerciseInput: String) -> ExerciseResult {
+    func calculateResult(_ answer: String) -> ExerciseResult {
         // we will trim and lowercase the input so the user won't be dinged for accidently clicking space or capitializing a letter
-        let checkable = exerciseInput.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        let checkable = answer.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         let stem = wordService.getWordStem(of: word)
         
         // first we will isolate the ending of the word as this is what this exercise is testing
-        let endingIndex = wordForm.bare.index(wordForm.bare.startIndex, offsetBy: stem.count)
+        guard let endingIndex = wordForm.bare.index(wordForm.bare.startIndex, offsetBy: stem.count, limitedBy: wordForm.bare.endIndex) else {
+            return ExerciseResult(word: word, grade: .error, score: 0)
+        }
         let ending = wordForm.bare[endingIndex..<wordForm.bare.endIndex]
         
-        // the input strings ending must be the exact same as the word forms ending, if one letter off lets consider it a fail
-        if checkable[checkable.index(checkable.endIndex, offsetBy: -ending.count)..<checkable.endIndex] != ending {
+        if !checkable.hasSuffix(ending) {
             return ExerciseResult(word: word, grade: .incorrect, score: 1)
         }
         
@@ -61,7 +62,7 @@ final class WordEndingExerciseViewModel : ExerciseViewModel {
                 affectedIndices.append(i)
             } else if editedAnswer[i] != correctAnswer[i] {
                 // we must first check to see if i + 1 is out of range, if its out of range then its a always an insert
-                if i + 1 >= editedAnswer.count || i + 1 >= correctAnswer.count {
+                if i + 1 == editedAnswer.count || i + 1 == correctAnswer.count {
                     editedAnswer.insert(correctAnswer[i], at: i)
                     affectedIndices.append(i)
                     continue
@@ -105,5 +106,9 @@ final class WordEndingExerciseViewModel : ExerciseViewModel {
     
     var accentedWordFormText: String {
         return wordService.addStress(to: wordForm.accented)
+    }
+
+    var formText: String {
+        return wordForm.formText
     }
 }

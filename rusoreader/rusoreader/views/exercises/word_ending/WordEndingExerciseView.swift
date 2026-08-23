@@ -84,7 +84,7 @@ class WordEndingExerciseView : UIViewController, Exercise {
         guard let answer = inputField.text else { return }
         submitButton.isEnabled = false
         submitButton.backgroundColor = .systemGray
-        let result = viewModel.calculateResult(exerciseInput: answer)
+        let result = viewModel.calculateResult(answer)
         completionDelegate?.grade(result: result)
         
         // Take the users inputed answer then compare it to the actual answer while bolding and underlining incorrect letters
