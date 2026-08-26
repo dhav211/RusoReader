@@ -17,7 +17,11 @@ final class WordTests: XCTestCase {
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        databaseManager = nil
+        wordRepo = nil
+        sentenceRepo = nil
+        dictionaryRepo = nil
+        wordService = nil
     }
 
     func testFindAdjectiveBase() throws {
@@ -93,6 +97,37 @@ final class WordTests: XCTestCase {
 
     func testWordWithAccentMarkSize() throws {
         XCTAssert("сказа́".count == "сказа".count)
+    }
+
+    func test3VowelWordForMultipleVowels() throws {
+        let sut = wordService.findMatches(from: [28]).first!
+        XCTAssert(wordService.hasMultipleVowels(sut) == true)
+    }
+
+    func test1VowelWordForMultipleVowels() throws {
+        let sut = wordService.findMatches(from: [12]).first!
+        XCTAssert(wordService.hasMultipleVowels(sut) == false)
+    }
+
+    func testEmptyStringForMultipleVowels() throws {
+        let sut = Word(id: 0, bare: "", accented: "", type: .other, level: "A1", ranking: 0, noun: nil, verb: nil, forms: [], translations: [])
+        XCTAssert(wordService.hasMultipleVowels(sut) == false)
+    }
+
+    func testNoVowelAcronymForMultipleVowels() throws {
+        let sut = Word(id: 0, bare: "ссср", accented: "ссср", type: .other, level: "A1", ranking: 0, noun: nil, verb: nil, forms: [], translations: [])
+        XCTAssert(wordService.hasMultipleVowels(sut) == false)
+    }
+
+    func testSeperateWordFormByComma() throws {
+        let sut = wordService.getRandomCommaSeperatedWordForm("test,testy")
+        XCTAssert(!sut.contains(","))
+        XCTAssert(sut == "test" || sut == "testy")
+    }
+
+    func testSeperateWordFormWithoutComma() throws {
+        let sut = wordService.getRandomCommaSeperatedWordForm("testtesty")
+        XCTAssert(sut == "testtesty")
     }
 }
 

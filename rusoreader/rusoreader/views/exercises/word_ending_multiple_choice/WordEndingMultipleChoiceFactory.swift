@@ -12,7 +12,7 @@ final class WordEndingMultipleChoiceFactory: ExerciseFactory {
         self.correctWordForm = RandomWordFormSelector.getRandomWordFormForExercise(from: word)
 
         if let correctForm = self.correctWordForm {
-            self.wordFormChoices = Self.createMultipleChoiceData(correctForm.bare, self.word)
+            self.wordFormChoices = Self.createMultipleChoiceData(correctForm.bare, self.word, wordService: wordService)
         } else {
             self.wordFormChoices = [String]()
         }
@@ -41,33 +41,29 @@ final class WordEndingMultipleChoiceFactory: ExerciseFactory {
     ///   - word: The word we will be using to get the random word forms
     ///
     /// - Returns: A list of unique three word form strings, one is supplied and two are randomly chosen.
-    private static func createMultipleChoiceData(_ correctFormText: String, _ word: Word) -> [String] {
-        var selectedForms = [correctFormText] // add the correct form in initially to compare against randomly chosen forms
+    private static func createMultipleChoiceData(_ correctFormText: String, _ word: Word, wordService: WordService) -> [String] {
+        var selectedForms: Set = [correctFormText] // add the correct form in initially to compare against randomly chosen forms
         var attempts = 0 // attempt threshold to prevent infinite loop
 
         while selectedForms.count < 3 && attempts < 20 {
+            attempts += 1
+            
             // Choose a random word form and check if it's already added
             guard var randomForm = word.forms.shuffled().first?.bare else {
-                attempts += 1
-                continue
+                break
             }
 
-            if randomForm.contains([","]) {
-                guard let seperatedForm = randomForm.split(separator: ",")
-                    .map({ return $0 })
-                    .first else { continue}
-                randomForm = String(seperatedForm)
+            if randomForm.contains(",") {
+                randomForm = wordService.getRandomCommaSeperatedWordForm(randomForm)
             }
 
             if randomForm.isEmpty {
                 continue
             }
             
-            if !selectedForms.contains(randomForm) {
-                selectedForms.append(randomForm)
-            }
+            selectedForms.insert(randomForm)
         }
 
-        return selectedForms
+        return [String](selectedForms)
     }
 }

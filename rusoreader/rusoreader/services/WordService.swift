@@ -136,4 +136,22 @@ class WordService {
         }
         return ""
     }
+
+    func getRandomCommaSeperatedWordForm(_ commaSeperatedWordForm: String) -> String {
+        guard let seperatedForm = commaSeperatedWordForm.split(separator: ",")
+            .map({ return $0 })
+            .first else { return ""}
+        
+        return String(seperatedForm)
+    }
+    
+    /// Check in a word has more than one vowel
+    /// - Parameter word: The word we will check for multiple vowels
+    /// - Returns: True if more than one vowel, false if one or less
+    func hasMultipleVowels(_ word: Word) -> Bool {
+        return word.bare.compactMap { letter in
+            return isVowel(letter: letter) ? letter : nil
+        }
+        .count > 1
+    }
 }
