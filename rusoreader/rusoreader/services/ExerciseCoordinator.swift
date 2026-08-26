@@ -1,3 +1,7 @@
+enum ExerciseCoordinatorError: Error {
+    case incorrectWordAmountInDictionary
+}
+
 class ExerciseCoordinator {
     private var exercises = [ExerciseFactory]()
     private let dictionaryService: DictionaryService
@@ -12,7 +16,11 @@ class ExerciseCoordinator {
         self.sentenceService = sentenceService
         self.onLoadNextExercise = onLoadNextExercise
         self.onShowSummary = onShowSummary
-        self.exercises = createExerciseFactories()
+        do {
+            self.exercises = try createExerciseFactories()
+        } catch {
+            self.exercises = [ExerciseFactory]()
+        }
     }
     
     
@@ -26,9 +34,19 @@ class ExerciseCoordinator {
     
     /// Create exercises on 10 words, this will create the factories, which hold all the information to create the exercise view controllers
     /// - Returns: A list of exercise factories which will create the exercise view controllers as they are removed from the list
-    private func createExerciseFactories() -> [ExerciseFactory] {
-        let dictionarySize: Int = dictionaryService.count >= 10 ? 10 : dictionaryService.count - 1
-        let exerciseWords = dictionaryService.getAllWords().shuffled()[0..<dictionarySize]
+    private func createExerciseFactories() throws -> [ExerciseFactory] {
+        if dictionaryService.count == 0 {
+            throw ExerciseCoordinatorError.incorrectWordAmountInDictionary
+        }
+        
+        let dictionarySize: Int = dictionaryService.count >= 10 ? 10 : dictionaryService.count
+        let allWords = dictionaryService.getAllWords()
+
+        if allWords.count < dictionarySize {
+            throw ExerciseCoordinatorError.incorrectWordAmountInDictionary
+        }
+        
+        let exerciseWords = allWords.shuffled()[0..<dictionarySize]
         
         return exerciseWords.compactMap { word in
             // uncomment this when we are ready to reimplement flash cards
@@ -44,9 +62,9 @@ class ExerciseCoordinator {
 //                )
 //            }
             if word.type != .adverb || word.type != .other {
-                let wordEndingFactory = WordEndingFactory(word: word, wordService: wordService)
-                if wordEndingFactory.hasWordForm {
-                    return wordEndingFactory
+                let wordEndingMultipleChoiceFactory = WordEndingMultipleChoiceFactory(word: word, wordService: wordService)
+                if wordEndingMultipleChoiceFactory.hasWordFormChoices {
+                    return wordEndingMultipleChoiceFactory
                 }
             }
             return nil
