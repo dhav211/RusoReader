@@ -79,7 +79,7 @@ class WordEndingMultipleChoiceView : UIViewController, Exercise, MultipleChoiceB
     
     private func onSubmit() {
         let result = viewModel.calculateResult(viewModel.isTheCorrectButtonChosen)
-        let attributedAnswer = result.grade == .incorrect ? NSAttributedString(string: viewModel.correctWordForm.bare) : NSAttributedString(string: "")
+        let attributedAnswer = result.grade == .incorrect ? NSAttributedString(string: viewModel.correctWordForm.bare) : nil
         completionDelegate?.grade(result: result)
         completionBanner.open(exerciseResult: result, actualAnswer: attributedAnswer) { [weak self] in
             self?.completionDelegate?.next()

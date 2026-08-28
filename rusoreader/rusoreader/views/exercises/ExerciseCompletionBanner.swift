@@ -8,18 +8,24 @@ final class ExerciseCompletionBanner: UIViewController {
         super.init(nibName: nil, bundle: nil)
         
         view.translatesAutoresizingMaskIntoConstraints = false
+        view.isHidden = true // When not hidden the banner will intercept clicks, covering various ui buttons
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    /// Slides open the banner from the bottom of the screen giving the user some visual feedback on the exercise. A closure will be used to set
+    /// the continue button for the user to continue forward with the next exercise.
+    /// - Parameters:
+    ///   - exerciseResult: A grade for the exercise giving a score and pass/fail indication
+    ///   - actualAnswer: If the user was wrong, then this will show the correct answer
+    ///   - onPressed: A closure which supplies what will happen when user clicks the continue button
+    ///
     func open(exerciseResult: ExerciseResult, actualAnswer: NSAttributedString?, onPressed: @escaping () -> Void) {
-        // animate this banner opening from the bottom, should be about .3 seconds
-        // if the exercise result is correct the banner will be green, if incorrect it will be red, if almost it should be orange or maybe blue
-        // It will compose of an uistackview that is horizontal, the left side will contain the message the right side will have a button that proceed to next exercise
-        // in the left side of that stack will have another stack view, this time horizontal. The first element will say correct/incorrect the next will display the correct answer if wrong
-        // the the button is pressed the onPressed button will fire and this whole view should dissapear so no need for animation.
+        view.isHidden = false // now we can unhide it because the animation will begin showing the banner at the bottom
+
+        // set the color of banner based on the grade of the exercise result
         switch exerciseResult.grade {
         case .correct:
             view.backgroundColor = .systemGreen
@@ -32,7 +38,10 @@ final class ExerciseCompletionBanner: UIViewController {
         }
         
         nextExercise = onPressed
-        
+
+        // The content stack splits the view horizontally
+        // on the left is information on how user did and what htye got wrong
+        // on the right is the button to go to the next exercise
         let contentStack = UIStackView()
         contentStack.translatesAutoresizingMaskIntoConstraints = false
         contentStack.axis = .horizontal
@@ -43,7 +52,8 @@ final class ExerciseCompletionBanner: UIViewController {
         let resultInformationStack = UIStackView()
         resultInformationStack.axis = .vertical
         contentStack.addArrangedSubview(resultInformationStack)
-        
+
+        // Gives the user some text based indication on how they did based upon the exercise grade
         let gradeText = UILabel()
         gradeText.textColor = .white
         gradeText.text = {
@@ -59,8 +69,9 @@ final class ExerciseCompletionBanner: UIViewController {
             }
         }()
         resultInformationStack.addArrangedSubview(gradeText)
-        
-        if exerciseResult.grade == .almost || exerciseResult.grade == .incorrect {
+
+        // If the user got the answer wrong the actualAnswer variable will not be nil
+        if let actualAnswer {
             let answerLabel = UILabel()
             answerLabel.attributedText = actualAnswer
             answerLabel.textColor = .white

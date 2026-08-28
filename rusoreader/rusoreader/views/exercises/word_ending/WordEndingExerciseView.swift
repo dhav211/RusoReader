@@ -89,17 +89,19 @@ class WordEndingExerciseView : UIViewController, Exercise {
         completionDelegate?.grade(result: result)
         
         // Take the users inputed answer then compare it to the actual answer while bolding and underlining incorrect letters
-        let attributedAnswer = NSMutableAttributedString(string: viewModel.word.bare)
+        let attributedAnswer = result.grade != .correct ? NSMutableAttributedString(string: viewModel.word.bare) : nil
         // we are grabbing the default text so we can get a bold font point size here in the attributed string
         let defaultFont = UIFont.systemFont(ofSize: UIFont.labelFontSize)
-        
-        for affectedIndex in viewModel.createHightlightedDifferenceInAnswer(answer: answer) {
-            attributedAnswer.addAttributes(
-                [
-                    .underlineStyle: NSUnderlineStyle.single.rawValue,
-                    .font: UIFont.boldSystemFont(ofSize: defaultFont.pointSize)
-                ],
-                range: NSRange(location: affectedIndex, length: 1))
+
+        if let attributedAnswer {
+            for affectedIndex in viewModel.createHightlightedDifferenceInAnswer(answer: answer) {
+                attributedAnswer.addAttributes(
+                    [
+                        .underlineStyle: NSUnderlineStyle.single.rawValue,
+                        .font: UIFont.boldSystemFont(ofSize: defaultFont.pointSize)
+                    ],
+                    range: NSRange(location: affectedIndex, length: 1))
+            }
         }
         
         
