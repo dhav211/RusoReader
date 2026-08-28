@@ -61,11 +61,9 @@ class ExerciseCoordinator {
 //                    flashcardExerciseViewModel: FlashcardExerciseViewModel(word: word, sentence: sentence?.text ?? "", wordService: wordService, sentenceService: sentenceService)
 //                )
 //            }
-            if word.type != .adverb || word.type != .other {
-                let wordEndingMultipleChoiceFactory = WordEndingMultipleChoiceFactory(word: word, wordService: wordService)
-                if wordEndingMultipleChoiceFactory.hasWordFormChoices {
-                    return wordEndingMultipleChoiceFactory
-                }
+            // if word.type != .adverb || word.type != .other { this is for word ending exercises
+            if wordService.hasMultipleVowels(word) {
+                return StressChoiceExerciseFactory(word: word, wordService: wordService)
             }
             return nil
         }
