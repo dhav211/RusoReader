@@ -8,7 +8,7 @@ struct DatabaseDictionaryWord : Codable, Identifiable, MutablePersistableRecord 
     var times_appeared: Int64
     var first_seen: Date
     var last_seen: Date
-    var due_date: Date?
+    var due_date: Date
 }
 
 extension DatabaseDictionaryWord : FetchableRecord, TableRecord {

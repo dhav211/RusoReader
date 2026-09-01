@@ -83,11 +83,11 @@ extension ExerciseCoordinator: CompletedExerciseDelegate {
         switch result.grade {
         case .correct:
             exercises.removeFirst()
-            dictionaryService.updateWordScore(word: result.word, by: result.score)
+            dictionaryService.update(word: result.word, by: result.score)
             
         case .incorrect:
             let exercise = exercises.removeFirst()
-            dictionaryService.updateWordScore(word: result.word, by: result.score)
+            dictionaryService.update(word: result.word, by: result.score)
             exercises.append(exercise)
             
         case .almost:

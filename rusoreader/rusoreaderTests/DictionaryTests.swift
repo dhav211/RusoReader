@@ -11,17 +11,22 @@ final class DictionaryTests: XCTestCase {
     var dictionaryService: DictionaryService!
     
     override func setUpWithError() throws {
-        databaseManager = DatabaseManager()
+        databaseManager = DatabaseManager(createFresh: false)
         dictionaryRepo = DictionaryRepository(databaseManager: databaseManager)
         wordRepo = WordRepository(databaseManager: databaseManager)
         sentenceRepo = SentenceRepository(databaseManager: databaseManager)
         
         wordService = WordService(wordRepo: wordRepo, sentenceRepo: sentenceRepo, dictionaryRepo: dictionaryRepo)
         dictionaryService = DictionaryService(dictionaryRepo: dictionaryRepo, wordService: wordService)
+
+        if dictionaryRepo.count > 0 {
+            dictionaryRepo.clear()
+        }
     }
     
     override func tearDownWithError() throws {
         dictionaryRepo.clear()
+
         databaseManager = nil
         dictionaryRepo = nil
         wordRepo = nil
@@ -33,13 +38,15 @@ final class DictionaryTests: XCTestCase {
     func testAddWordToDictionary() throws {
         dictionaryRepo.addWord(by: 1)
         dictionaryRepo.addWord(by: 4)
-        XCTAssert(dictionaryRepo.count == 2)
+        let count = dictionaryRepo.count
+        XCTAssert(count == 2)
     }
     
     func testWordAlreadyInDictionary() throws {
         dictionaryRepo.addWord(by: 1)
         dictionaryRepo.addWord(by: 1)
-        XCTAssert(dictionaryRepo.count == 1)
+        let count = dictionaryRepo.count
+        XCTAssert(count == 1)
     }
     
     func testWordScoreIncreasesOnReAdd() throws {
@@ -58,7 +65,8 @@ final class DictionaryTests: XCTestCase {
     func testAddNegativeOrZeroWordId() throws {
         dictionaryRepo.addWord(by: 0)
         dictionaryRepo.addWord(by: -4)
-        XCTAssert(dictionaryRepo.count == 0)
+        let count = dictionaryRepo.count
+        XCTAssert(count == 0)
     }
     
     func testTimesClicked() throws {
@@ -126,5 +134,179 @@ final class DictionaryTests: XCTestCase {
         }
         
         XCTFail()
+    }
+
+    func testGetAllNeverSeenBeforeWordsWhenLessThanFive() throws {
+        dictionaryRepo.addWord(by: 77)
+        dictionaryRepo.addWord(by: 12)
+        dictionaryRepo.addWord(by: 99)
+
+        let neverBeforeSeenWords = dictionaryRepo.getNeverBeforeSeenWords()
+        XCTAssert(neverBeforeSeenWords.count == 3)
+    }
+
+    func testGetAllNeverSeenBeforeWordsWhenGreaterThanFive() throws {
+        dictionaryRepo.addWord(by: 77)
+        dictionaryRepo.addWord(by: 12)
+        dictionaryRepo.addWord(by: 99)
+        dictionaryRepo.addWord(by: 177)
+        dictionaryRepo.addWord(by: 112)
+        dictionaryRepo.addWord(by: 199)
+
+        let neverBeforeSeenWords = dictionaryRepo.getNeverBeforeSeenWords()
+        XCTAssert(neverBeforeSeenWords.count == 5)
+    }
+
+    func testGetAllNeverSeenBeforeWordsWithLimitOfThree() throws {
+        dictionaryRepo.addWord(by: 77)
+        dictionaryRepo.addWord(by: 12)
+        dictionaryRepo.addWord(by: 99)
+        dictionaryRepo.addWord(by: 177)
+        dictionaryRepo.addWord(by: 112)
+        dictionaryRepo.addWord(by: 199)
+
+        let neverBeforeSeenWords = dictionaryRepo.getNeverBeforeSeenWords(limit: 3)
+        XCTAssert(neverBeforeSeenWords.count == 3)
+    }
+
+    func testGetAllNeverSeenBeforeWordsWhenNoWordsAdded() throws {
+        let neverBeforeSeenWords = dictionaryRepo.getNeverBeforeSeenWords()
+        XCTAssert(neverBeforeSeenWords.count == 0)
+    }
+
+    func testGetAllOverDueWords() throws {
+        dictionaryRepo.addWord(by: 77, dueDate: Date.now - TimeInterval(60 * 60 * 2))
+        dictionaryRepo.addWord(by: 12, dueDate: Date.now - TimeInterval(60 * 60 * 2))
+        dictionaryRepo.addWord(by: 99, dueDate: Date.now - TimeInterval(60 * 60 * 2))
+        dictionaryRepo.addWord(by: 177)
+        dictionaryRepo.addWord(by: 112, dueDate: Date.now - TimeInterval(60 * 60 * 2))
+        dictionaryRepo.addWord(by: 199)
+
+        let overdueWords = dictionaryRepo.getAllDueWords()
+        XCTAssert(overdueWords.count == 4)
+    }
+
+    func testGetNoOverDueWordsNoneAreOverDue() throws {
+        dictionaryRepo.addWord(by: 77)
+        dictionaryRepo.addWord(by: 12)
+        dictionaryRepo.addWord(by: 99)
+        dictionaryRepo.addWord(by: 177)
+        dictionaryRepo.addWord(by: 112)
+        dictionaryRepo.addWord(by: 199)
+
+        let overdueWords = dictionaryRepo.getAllDueWords()
+        XCTAssert(overdueWords.count == 0)
+    }
+
+    func testGetDueDateNextWeekCorrectAnswerForStrongWord() throws {
+        dictionaryRepo.addWord(
+            by: 77, 
+            score: 2.0, 
+            timesClicked: 1, 
+            timesAppeared: 3, 
+            firstSeen: Date.now - TimeInterval(60 * 60 * 15), 
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3), 
+            dueDate: Date.now
+        )
+
+        let exerciseScore = -0.75
+        let daysToNextDueDate = dictionaryService.daysUntilNextDueDate(wordId: 77, exerciseScoreAmount: exerciseScore)
+        XCTAssert(daysToNextDueDate == 7)
+    }
+
+    func testGetDueDate1DayCorrectAnswerForWeakWord() throws {
+        dictionaryRepo.addWord(
+            by: 77, 
+            score: 8.0, 
+            timesClicked: 6, 
+            timesAppeared: 13, 
+            firstSeen: Date.now - TimeInterval(60 * 60 * 15), 
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3), 
+            dueDate: Date.now
+        )
+
+        let exerciseScore = -1.0
+        let daysToNextDueDate = dictionaryService.daysUntilNextDueDate(wordId: 77, exerciseScoreAmount: exerciseScore)
+        XCTAssert(daysToNextDueDate == 1)
+    }
+
+    func testGetDueDate3DayCorrectAnswerForNewWord() throws {
+        dictionaryRepo.addWord(
+            by: 77, 
+            score: 3.0, 
+            timesClicked: 1, 
+            timesAppeared: 1, 
+            firstSeen: Date.now - TimeInterval(60 * 60 * 15), 
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3), 
+            dueDate: Date.now
+        )
+
+        let exerciseScore = -0.5
+        let daysToNextDueDate = dictionaryService.daysUntilNextDueDate(wordId: 77, exerciseScoreAmount: exerciseScore)
+        XCTAssert(daysToNextDueDate == 3)
+    }
+
+    func testGetWeekDueDateForAllZeroValues() throws {
+        dictionaryRepo.addWord(
+            by: 77, 
+            score: 0.0, 
+            timesClicked: 0, 
+            timesAppeared: 0, 
+            firstSeen: Date.now - TimeInterval(60 * 60 * 15), 
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3), 
+            dueDate: Date.now
+        )
+
+        let exerciseScore = 0.0
+        let daysToNextDueDate = dictionaryService.daysUntilNextDueDate(wordId: 77, exerciseScoreAmount: exerciseScore)
+        XCTAssert(daysToNextDueDate == 7)
+    }
+    
+    func testDueDateInFutureHasNoEffectOnNewDueDate() throws {
+        dictionaryRepo.addWord(
+            by: 77,
+            score: 3.0,
+            timesClicked: 1,
+            timesAppeared: 1,
+            firstSeen: Date.now - TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now + TimeInterval(60 * 60 * 30)
+        )
+
+        let exerciseScore = -0.5
+        let daysToNextDueDate = dictionaryService.daysUntilNextDueDate(wordId: 77, exerciseScoreAmount: exerciseScore)
+        XCTAssert(daysToNextDueDate == 3)
+    }
+    
+    func testFirstSeenIsInFuture() throws {
+        dictionaryRepo.addWord(
+            by: 77,
+            score: 3.0,
+            timesClicked: 1,
+            timesAppeared: 1,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now
+        )
+
+        let exerciseScore = -0.5
+        let daysToNextDueDate = dictionaryService.daysUntilNextDueDate(wordId: 77, exerciseScoreAmount: exerciseScore)
+        XCTAssert(daysToNextDueDate == 3)
+    }
+    
+    func testFirstSeenIsInFutureAndMatureStatus() throws {
+        dictionaryRepo.addWord(
+            by: 77,
+            score: 3.0,
+            timesClicked: 1,
+            timesAppeared: 1,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now
+        )
+
+        let exerciseScore = -2.9
+        let daysToNextDueDate = dictionaryService.daysUntilNextDueDate(wordId: 77, exerciseScoreAmount: exerciseScore)
+        XCTAssert(daysToNextDueDate == 7)
     }
 }

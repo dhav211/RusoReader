@@ -23,14 +23,18 @@ final class DatabaseManager {
     }
     
     /// Instantiate the user data database queue by either accessing or creating a new one in the applications sandbox
-    convenience init() {
+    convenience init(createFresh: Bool = false) {
         do {
-            let dbUrl: URL = {
-                let fileManager = FileManager.default
-                let appSupportUrl = try! fileManager.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-                return appSupportUrl.appendingPathComponent("user_data.db")
-            }()
-            self.init(userDataQueue: try DatabaseQueue(path: dbUrl.path))
+            if createFresh {
+                self.init(userDataQueue: nil)
+            } else {
+                let dbUrl: URL = {
+                    let fileManager = FileManager.default
+                    let appSupportUrl = try! fileManager.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+                    return appSupportUrl.appendingPathComponent("user_data.db")
+                }()
+                self.init(userDataQueue: try DatabaseQueue(path: dbUrl.path))
+            }
         } catch {
             self.init(userDataQueue: nil)
         }
@@ -129,7 +133,7 @@ final class DatabaseManager {
                     dictionaryTable.column("score", .integer).notNull()
                     dictionaryTable.column("first_seen", .date).notNull()
                     dictionaryTable.column("last_seen", .date).notNull()
-                    dictionaryTable.column("due_date", .date)
+                    dictionaryTable.column("due_date", .date).notNull()
                 }
             }
             
