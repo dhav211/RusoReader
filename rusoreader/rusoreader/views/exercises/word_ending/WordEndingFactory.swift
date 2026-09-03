@@ -1,6 +1,6 @@
 class WordEndingFactory : ExerciseFactory {
+    var attempts: Int
     let word: Word
-    let attempts: Int
     var wordForm: WordForm? = nil
     var hasWordForm: Bool { return wordForm != nil }
     private let wordService: WordService

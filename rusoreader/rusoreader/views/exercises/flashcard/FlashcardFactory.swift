@@ -1,6 +1,6 @@
 class FlashcardFactory: ExerciseFactory {
+    var attempts: Int
     let word: Word
-    let attempts: Int
     let flashcardExerciseViewModel: FlashcardExerciseViewModel
     
     init(word: Word, sentence: String, flashcardExerciseViewModel: FlashcardExerciseViewModel) {

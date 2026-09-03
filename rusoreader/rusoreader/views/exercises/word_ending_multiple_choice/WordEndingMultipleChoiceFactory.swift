@@ -1,6 +1,6 @@
 final class WordEndingMultipleChoiceFactory: ExerciseFactory {
     let word: Word
-    let attempts: Int
+    var attempts: Int
     private let wordFormChoices: [String]
     private var correctWordForm: WordForm?
     private let wordService: WordService

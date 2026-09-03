@@ -1,6 +1,6 @@
 final class StressChoiceExerciseFactory: ExerciseFactory {
     let word: Word
-    let attempts: Int
+    var attempts: Int
     let incorrectStressedWordChoices: [String]
     private let wordService: WordService
     

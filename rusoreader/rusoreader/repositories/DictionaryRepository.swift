@@ -69,6 +69,34 @@ class DictionaryRepository {
         }
     }
 
+    /// Add an group of words to the dictionary by an array of ids
+    /// - Parameter ids:
+    func addWords(by ids: [Int]) {
+        do {
+            if ids.isEmpty { return } 
+            let idSet = Set(ids.lazy.map { Int64($0) })
+
+            try databaseManager.userDataQueue.write { db in
+                for id in idSet {
+                    if try !isWordAdded(by: id, from: db) {
+                        var newEntry = DatabaseDictionaryWord(
+                            id: id,
+                            score: 3.0,
+                            times_clicked: 0,
+                            times_appeared: 0,
+                            first_seen: Date.now,
+                            last_seen: Date.now,
+                            due_date: Date.now + TimeInterval(60 * 60 * 1)
+                        )
+                        try newEntry.insert(db)
+                    }
+                }
+            }
+        } catch {
+            print("Error: \(error)")
+        }
+    }
+    
     /// Find the word in the dictionary based upon its ID
     /// - Parameter wordId: The id of the word we are searching for
     /// - Returns: A dictionary entry based upon the word id, if the ID doesn't exisit in the dictionary this will return nil
@@ -182,6 +210,19 @@ class DictionaryRepository {
             try databaseManager.userDataQueue.write { db in
                 if var entry = try getDatabaseEntry(by: Int64(wordId), from: db) {
                     entry.score = max(0.0, entry.score + amount)
+                    try entry.update(db)
+                }
+            }
+        } catch {
+            print("Error: \(error)")
+        }
+    }
+
+    func increaseTimesAppeared(for wordId: Int) {
+        do {
+            try databaseManager.userDataQueue.write { db in
+                if var entry = try getDatabaseEntry(by: Int64(wordId), from: db) {
+                    entry.times_appeared += 1
                     try entry.update(db)
                 }
             }

@@ -48,6 +48,25 @@ final class DictionaryTests: XCTestCase {
         let count = dictionaryRepo.count
         XCTAssert(count == 1)
     }
+
+    func testAddMultipleWordsToDictionary() throws {
+        dictionaryRepo.addWords(by: [53, 654, 88])
+        let count = dictionaryRepo.count
+        XCTAssert(count == 3)
+    }
+
+    func testAddMultipleWordsToDictionaryWithRepeats() throws {
+        dictionaryRepo.addWords(by: [53, 654, 88, 53, 88])
+        let count = dictionaryRepo.count
+        XCTAssert(count == 3)
+    }
+
+
+    func testAddMultipleWordsToDictionaryWithEmptyList() throws {
+        dictionaryRepo.addWords(by: [Int]())
+        let count = dictionaryRepo.count
+        XCTAssert(count == 0)
+    }
     
     func testWordScoreIncreasesOnReAdd() throws {
         dictionaryRepo.addWord(by: 1)
@@ -77,6 +96,21 @@ final class DictionaryTests: XCTestCase {
         let entry = dictionaryRepo.find(by: 1)
         
         XCTAssert(entry?.timesClicked == 2)
+    }
+
+    func testIncreaseTimesAppeared() throws {
+        dictionaryRepo.addWord(by: 12, score: 3.0, timesClicked: 1, timesAppeared: 1, firstSeen: Date.now, lastSeen: Date.now, dueDate: Date.now)
+        dictionaryRepo.addWord(by: 21, score: 3.0, timesClicked: 1, timesAppeared: 3, firstSeen: Date.now, lastSeen: Date.now, dueDate: Date.now)
+
+        dictionaryRepo.increaseTimesAppeared(for: 12)
+        dictionaryRepo.increaseTimesAppeared(for: 12)
+        dictionaryRepo.increaseTimesAppeared(for: 21)
+        
+        let entry12 = dictionaryRepo.find(by: 12)
+        let entry21 = dictionaryRepo.find(by: 21)
+        
+        XCTAssert(entry12?.timesAppeared == 3)
+        XCTAssert(entry21?.timesAppeared == 4)
     }
     
     func testGetAll() throws {
@@ -308,5 +342,140 @@ final class DictionaryTests: XCTestCase {
         let exerciseScore = -2.9
         let daysToNextDueDate = dictionaryService.daysUntilNextDueDate(wordId: 77, exerciseScoreAmount: exerciseScore)
         XCTAssert(daysToNextDueDate == 7)
+    }
+
+    func testCreateExerciseWordsWithEnoughOverdueWords() throws {
+        dictionaryRepo.addWord(
+            by: 77,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now - TimeInterval(60 * 60 * 2)
+        )
+        dictionaryRepo.addWord(
+            by: 125,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now - TimeInterval(60 * 60 * 2)
+        )
+        dictionaryRepo.addWord(
+            by: 254,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now - TimeInterval(60 * 60 * 2)
+        )
+        dictionaryRepo.addWord(
+            by: 872,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now - TimeInterval(60 * 60 * 2)
+        )
+        dictionaryRepo.addWord(
+            by: 765,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now - TimeInterval(60 * 60 * 2)
+        )
+        dictionaryRepo.addWord(
+            by: 498,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now - TimeInterval(60 * 60 * 2)
+        )
+        dictionaryRepo.addWord(
+            by: 298,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now - TimeInterval(60 * 60 * 2)
+        )
+        dictionaryRepo.addWord(
+            by: 111,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now - TimeInterval(60 * 60 * 2)
+        )
+
+
+        let exerciseWords = dictionaryService.wordsForExercise()
+        XCTAssert(exerciseWords.count == 7)
+    }
+
+    func testCreateExerciseWordsWithoutEnoughOverDueWords() throws {
+        dictionaryRepo.addWord(
+            by: 77,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now - TimeInterval(60 * 60 * 2)
+        )
+        dictionaryRepo.addWord(
+            by: 125,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now - TimeInterval(60 * 60 * 2)
+        )
+        dictionaryRepo.addWord(
+            by: 254,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now + TimeInterval(60 * 60 * 2)
+        )
+        dictionaryRepo.addWord(
+            by: 872,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now + TimeInterval(60 * 60 * 2)
+        )
+        dictionaryRepo.addWord(
+            by: 765,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now + TimeInterval(60 * 60 * 2)
+        )
+        dictionaryRepo.addWord(
+            by: 498,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now + TimeInterval(60 * 60 * 2)
+        )
+        dictionaryRepo.addWord(
+            by: 298,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now + TimeInterval(60 * 60 * 2)
+        )
+        dictionaryRepo.addWord(
+            by: 111,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now + TimeInterval(60 * 60 * 2)
+        )
+
+
+        let exerciseWords = dictionaryService.wordsForExercise()
+        XCTAssert(exerciseWords.count == 5)
+        
+    }
+
+    func testCreateExerciseWordsWithoutAnyWordsInDictionary() throws {
+        let exerciseWords = dictionaryService.wordsForExercise()
+        XCTAssert(exerciseWords.count == 5)
+    }
+
+    func testCreateExerciseWordsWithoutEnoughWordsInDictionary() throws {
+        dictionaryRepo.addWord(
+            by: 298,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now - TimeInterval(60 * 60 * 2)
+        )
+        dictionaryRepo.addWord(
+            by: 111,
+            firstSeen: Date.now + TimeInterval(60 * 60 * 15),
+            lastSeen: Date.now - TimeInterval(60 * 60 * 3),
+            dueDate: Date.now + TimeInterval(60 * 60 * 2)
+        )
+
+
+        let exerciseWords = dictionaryService.wordsForExercise()
+        XCTAssert(exerciseWords.count == 5)
     }
 }
