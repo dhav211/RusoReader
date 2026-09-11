@@ -32,7 +32,7 @@ final class EpubParser : EbookParser {
                     var path = ""
 
                     // This epub doesn't really contain much of a directory structure, so return an empty string
-                    if !path.contains("/") {
+                    if !contentPath.contains("/") {
                         return ""
                     }
                     
@@ -257,6 +257,7 @@ final class EpubParser : EbookParser {
                 let itemId = try item.attr("id")
                 if itemId == tocId {
                     tocPath = try item.attr("href")
+                    break
                 }
             }
             

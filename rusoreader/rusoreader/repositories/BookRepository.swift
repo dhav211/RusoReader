@@ -29,7 +29,16 @@ class BookRepository {
                 // We are creating a url to the saved cover image, this is a different url from the cover image in the epub. If there is no cover image in the book we will just skip past it, the cover image isn't required
                 let coverImageUrl: String = try {
                     if let coverImage = parsedBook.book.coverImage {
-                        let fileName = "\(parsedBook.book.isbn)-cover-image\(parsedBook.book.coverImageFileType)"
+                        let uniqueId = { // There is a chance that book a book won't contain an isbn or a uuid, we can check for that here
+                            if !parsedBook.book.isbn.isEmpty {
+                                return parsedBook.book.isbn
+                            } else if !parsedBook.book.uuid.isEmpty {
+                                return parsedBook.book.uuid
+                            } else {
+                                return UUID().uuidString
+                            }
+                        }()
+                        let fileName = "\(uniqueId)-cover-image\(parsedBook.book.coverImageFileType)"
                         try fileStore.save(data: coverImage, fileName: fileName)
                         return fileName
                     } else {
