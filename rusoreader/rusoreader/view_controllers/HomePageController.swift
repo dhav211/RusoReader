@@ -2,6 +2,7 @@ import UIKit
 
 protocol HomepageDelegate : AnyObject {
     func onOpenReviewWordsTapped()
+    func onOpenSettingsTapped()
 }
 
 class HomePageController: UIViewController, UIDocumentPickerDelegate {
@@ -24,6 +25,14 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         
+        toolbarItems = [
+            UIBarButtonItem(image: UIImage(systemName: "books.vertical"), style: .plain, target: self, action: #selector(openLibraryTapped)),
+            UIBarButtonItem(image: UIImage(systemName: "brain.head.profile"), style: .plain, target: self, action: #selector(openExerciseTapped)),
+            UIBarButtonItem(image: UIImage(systemName: "gearshape"), style: .plain, target: self, action: #selector(openSettingsTapped))
+        ]
+        
+        navigationController?.setToolbarHidden(false, animated: true)
+        
         let libraryLabel = UILabel()
         libraryLabel.text = "Your Library"
         libraryLabel.font = UIFont.preferredFont(forTextStyle: .headline)
@@ -41,13 +50,6 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
 
         view.addSubview(addBookButton)
         
-        let reviewWordsButton = UIButton()
-        reviewWordsButton.translatesAutoresizingMaskIntoConstraints = false
-        reviewWordsButton.setTitle("Review Words", for: .normal)
-        reviewWordsButton.setTitleColor(.label, for: .normal)
-        reviewWordsButton.addTarget(self, action: #selector(reviewWordsButtonTapped), for: .touchUpInside)
-        view.addSubview(reviewWordsButton)
-        
         NSLayoutConstraint.activate([
             libraryLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             libraryLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -56,9 +58,7 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
             bookSelector.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bookSelector.view.heightAnchor.constraint(equalToConstant: 275),
             addBookButton.topAnchor.constraint(equalTo: bookSelector.view.bottomAnchor),
-            addBookButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -4.0),
-            reviewWordsButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
-            reviewWordsButton.topAnchor.constraint(equalTo: addBookButton.bottomAnchor, constant: 5)
+            addBookButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -4.0)
         ])
     }
     
@@ -73,8 +73,16 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
         present(picker, animated: true)
     }
     
-    @objc func reviewWordsButtonTapped() {
+    @objc func openLibraryTapped() {
+        print("open the library")
+    }
+    
+    @objc func openExerciseTapped() {
         delegate?.onOpenReviewWordsTapped()
+    }
+    
+    @objc func openSettingsTapped() {
+        delegate?.onOpenSettingsTapped()
     }
     
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {

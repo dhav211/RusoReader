@@ -13,14 +13,23 @@ final class SpeechSynth {
     init() {
         // Grabs all russian downloaded voices 
         let voices = AVSpeechSynthesisVoice.speechVoices().filter { $0.language == "ru-RU" }
-
-        // TODO this currently selects the first but we really need it do grab the user default voice they have downloaded and chosen, this works for now
-        if let premium = voices.first(where: { $0.quality == .premium }) { // Premium actually doesn't exist for russian but maybe one day it will
-            voice = premium
-        } else if let enhanced = voices.first(where: { $0.quality == .enhanced }) {
-            voice = enhanced
+        
+        // Look into the user defaults and see if that user has default voice set
+        let defaultVoiceIdentifer = String(UserDefaults.standard.string(forKey: "default-voice") ?? "")
+        let defaultVoice = voices.first(where: { $0.identifier == defaultVoiceIdentifer })
+        
+        // If the user has set a default voice then we can set that as the voice now
+        if let defaultVoice, let index = voices.firstIndex(of: defaultVoice) {
+            voice = voices[index]
         } else {
-            voice = voices.first
+            // The user hasn't set a default voice yet so just grab the first one
+            if let premium = voices.first(where: { $0.quality == .premium }) { // Premium actually doesn't exist for russian but maybe one day it will
+                voice = premium
+            } else if let enhanced = voices.first(where: { $0.quality == .enhanced }) {
+                voice = enhanced
+            } else {
+                voice = voices.first
+            }
         }
 
         // This bypasses the silent toggle on the side of the device

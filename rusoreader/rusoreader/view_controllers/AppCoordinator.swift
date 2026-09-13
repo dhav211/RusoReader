@@ -20,6 +20,13 @@ final class AppCoordinator {
 }
 
 extension AppCoordinator : HomepageDelegate {
+    func onOpenSettingsTapped() {
+        navigationController.pushViewController(
+            viewControllerFactory.createSettingsController(),
+            animated: true
+        )
+    }
+    
     func onOpenReviewWordsTapped() {
         navigationController.pushViewController(
             viewControllerFactory.createExerciseController(),

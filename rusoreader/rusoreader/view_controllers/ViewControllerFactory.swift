@@ -28,4 +28,8 @@ final class ViewControllerFactory {
 
         return ReaderViewController(viewModel: readerViewModel)
     }
+    
+    func createSettingsController() -> SettingsViewController {
+        return SettingsViewController()
+    }
 }
