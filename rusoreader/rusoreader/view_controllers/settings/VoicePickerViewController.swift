@@ -1,11 +1,11 @@
 import UIKit
 import AVFAudio
 
-final class ChooseDefaultVoiceViewController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
+final class ChooseDefaultVoiceViewController : UIViewController, SettingPicker {
     private let voicePickerView: UIPickerView
     private let voices: [AVSpeechSynthesisVoice]
     private var selectedVoiceIdentifer: String?
-    private var selectionButton: UIButton
+    let selectionButton: UIButton
     
     init() {
         self.voicePickerView = UIPickerView()
@@ -49,7 +49,7 @@ final class ChooseDefaultVoiceViewController : UIViewController, UIPickerViewDel
         
         selectionButton.setTitle("Select", for: .normal)
         selectionButton.setTitleColor(.systemBlue, for: .normal)
-        selectionButton.addTarget(self, action: #selector(onSelectTapped), for: .touchUpInside)
+        selectionButton.addTarget(self, action: #selector(activateSelection), for: .touchUpInside)
         
         informationStack.addArrangedSubview(informationLabel)
         informationStack.addArrangedSubview(selectionButton)
@@ -65,8 +65,7 @@ final class ChooseDefaultVoiceViewController : UIViewController, UIPickerViewDel
         ])
     }
     
-    /// When the selection button is pressed set the voice's identifer in the user defaults and close this modal
-    @objc private func onSelectTapped() {
+    @objc func activateSelection() {
         guard let selectedVoiceIdentifer else { return }
         dismiss(animated: true) {
             UserDefaults.standard.set(selectedVoiceIdentifer, forKey: "default-voice")
@@ -89,6 +88,4 @@ final class ChooseDefaultVoiceViewController : UIViewController, UIPickerViewDel
         // When the user hovers over the voice we will set the selectedVoiceIdentifer, this is an unique code that won't have any duplicates
         selectedVoiceIdentifer = voices[row].identifier
     }
-    
-    
 }
