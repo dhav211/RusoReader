@@ -6,6 +6,7 @@ import UIKit
 /// Users can flip the card to reveal the answer and rate their knowledge of the word.
 class FlashcardExerciseView : UIViewController, Exercise {
     private let viewModel: FlashcardExerciseViewModel
+    private let speechSynth: SpeechSynth
     
     weak var completionDelegate: CompletedExerciseDelegate?
     
@@ -20,8 +21,9 @@ class FlashcardExerciseView : UIViewController, Exercise {
     
     private var isFlipped = false
     
-    init(viewModel: FlashcardExerciseViewModel) {
+    init(viewModel: FlashcardExerciseViewModel, speechSynth: SpeechSynth) {
         self.viewModel = viewModel
+        self.speechSynth = speechSynth
         self.card = UIView()
         self.front = FlashcardFront(wordText: viewModel.getWordText())
         self.back = FlashcardBack(
@@ -65,7 +67,9 @@ class FlashcardExerciseView : UIViewController, Exercise {
         view.addSubview(card)
         card.addSubview(front)
         
-        front.onFlipCard = flipCard
+        // set the closures for the front of card
+        front.setOnFlipCard(onFlipCard: flipCard)
+        front.setOnRunTTS(onRunTTS: runTTS)
         
         NSLayoutConstraint.activate([
             banner.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -137,12 +141,16 @@ class FlashcardExerciseView : UIViewController, Exercise {
         })
     }
     
+    private func runTTS() {
+        do {
+            try speechSynth.speak(content: viewModel.getWordText())
+        } catch {
+            print("Couldn't run tts: \(error)")
+        }
+    }
+    
     private func sendResult(doesUserKnow: Bool) {
         completionDelegate?.grade(result: viewModel.calculateResult(doesUserKnow))
         completionDelegate?.next()
-    }
-    
-    @objc func runTTS() {
-        print("running tts")
     }
 }

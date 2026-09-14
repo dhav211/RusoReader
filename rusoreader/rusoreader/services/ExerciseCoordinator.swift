@@ -11,6 +11,7 @@ class ExerciseCoordinator {
     private let sentenceService: SentenceService
     private let onLoadNextExercise: () -> Void
     private let onShowSummary: () -> Void
+    private let speechSynth: SpeechSynth
     
     init(dictionaryService: DictionaryService, wordService: WordService, sentenceService: SentenceService, onLoadNextExercise: @escaping () -> Void, onShowSummary: @escaping () -> Void) {
         self.dictionaryService = dictionaryService
@@ -18,11 +19,13 @@ class ExerciseCoordinator {
         self.sentenceService = sentenceService
         self.onLoadNextExercise = onLoadNextExercise
         self.onShowSummary = onShowSummary
+        self.speechSynth = SpeechSynth()
 
         self.exercises =  Self.createExerciseFactories(
             exerciseWords: dictionaryService.wordsForExercise(), 
             sentenceService: sentenceService, 
-            wordService: wordService
+            wordService: wordService,
+            speechSynth: speechSynth
         )
     }
     
@@ -37,23 +40,23 @@ class ExerciseCoordinator {
     
     /// Create exercises on 10 words, this will create the factories, which hold all the information to create the exercise view controllers
     /// - Returns: A list of exercise factories which will create the exercise view controllers as they are removed from the list
-    static func createExerciseFactories(exerciseWords: [ExerciseWord], sentenceService: SentenceService, wordService: WordService) -> [ExerciseFactory] {
+    static func createExerciseFactories(exerciseWords: [ExerciseWord], sentenceService: SentenceService, wordService: WordService, speechSynth: SpeechSynth) -> [ExerciseFactory] {
         var rounds = Array(repeating: [ExerciseFactory](), count: 3)
 
         for exerciseWord in exerciseWords {
             let factories: [ExerciseFactory] = {
                 switch exerciseWord.userLevel {
                     case .new:
-                    return createExercisesForNew(exerciseWord: exerciseWord, sentenceService: sentenceService, wordService: wordService)
+                    return createExercisesForNew(exerciseWord: exerciseWord, sentenceService: sentenceService, wordService: wordService, speechSynth: speechSynth)
     
                     case .unfamiliar:
-                    return createExercisesForNew(exerciseWord: exerciseWord, sentenceService: sentenceService, wordService: wordService)
+                    return createExercisesForNew(exerciseWord: exerciseWord, sentenceService: sentenceService, wordService: wordService, speechSynth: speechSynth)
     
                     case .familiar:
-                    return createExercisesForNew(exerciseWord: exerciseWord, sentenceService: sentenceService, wordService: wordService)
+                    return createExercisesForNew(exerciseWord: exerciseWord, sentenceService: sentenceService, wordService: wordService, speechSynth: speechSynth)
     
                     case .fluent:
-                    return createExercisesForNew(exerciseWord: exerciseWord, sentenceService: sentenceService, wordService: wordService)
+                    return createExercisesForNew(exerciseWord: exerciseWord, sentenceService: sentenceService, wordService: wordService, speechSynth: speechSynth)
                 }
             }()
 
@@ -85,7 +88,10 @@ class ExerciseCoordinator {
         return rounds[0].shuffled() + rounds[1].shuffled() + rounds[2].shuffled()
     }
 
-    static private func createExercisesForNew(exerciseWord: ExerciseWord, sentenceService: SentenceService, wordService: WordService) -> [ExerciseFactory] {
+    static private func createExercisesForNew(exerciseWord: ExerciseWord,
+                                              sentenceService: SentenceService,
+                                              wordService: WordService,
+                                              speechSynth: SpeechSynth) -> [ExerciseFactory] {
         var factories = [ExerciseFactory]()
         if !exerciseWord.word.translations.isEmpty {
             let sentence = sentenceService.findSingleSentence(by: exerciseWord.word.id)
@@ -98,7 +104,8 @@ class ExerciseCoordinator {
                         sentence: sentence?.text ?? "", 
                         wordService: wordService, 
                         sentenceService: sentenceService
-                    )
+                    ),
+                    speechSynth: speechSynth
                 )
             )
         }

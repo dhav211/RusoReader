@@ -1,7 +1,7 @@
 import UIKit
 class FlashcardFront : UIView {
-    var onFlipCard: () -> Void
-    var onRunTTS: () -> Void
+    private var onFlipCard: (() -> Void)?
+    private var onRunTTS: (() -> Void)?
     
     init(wordText: String) {
         self.onFlipCard = {}
@@ -14,6 +14,14 @@ class FlashcardFront : UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setOnFlipCard(onFlipCard: @escaping () -> Void) {
+        self.onFlipCard = onFlipCard
+    }
+    
+    func setOnRunTTS(onRunTTS: @escaping () -> Void) {
+        self.onRunTTS = onRunTTS
     }
     
     func setup(wordText: String) {
@@ -67,10 +75,10 @@ class FlashcardFront : UIView {
     }
     
     @objc private func flipCardButtonPressed() {
-        onFlipCard()
+        onFlipCard?()
     }
     
     @objc private func speakerButtonPressed() {
-        onRunTTS()
+        onRunTTS?()
     }
 }
