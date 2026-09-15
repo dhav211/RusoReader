@@ -5,12 +5,12 @@ final class ChooseDefaultVoiceViewController : UIViewController, SettingPicker {
     private let voicePickerView: UIPickerView
     private let voices: [AVSpeechSynthesisVoice]
     private var selectedVoiceIdentifer: String?
-    let selectionButton: UIButton
+    let selectionButton = UIButton()
+    let informationLabel = UILabel()
     
     init() {
         self.voicePickerView = UIPickerView()
         self.voices = AVSpeechSynthesisVoice.speechVoices().filter { $0.language == "ru-RU" }
-        self.selectionButton = UIButton()
 
         super.init(nibName: nil, bundle: nil)
     }
@@ -44,7 +44,6 @@ final class ChooseDefaultVoiceViewController : UIViewController, SettingPicker {
         informationStack.axis = .horizontal
         informationStack.distribution = .equalSpacing
         
-        let informationLabel = UILabel()
         informationLabel.text = "Choose a default voice"
         
         selectionButton.setTitle("Select", for: .normal)

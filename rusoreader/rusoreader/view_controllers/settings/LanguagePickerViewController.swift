@@ -2,6 +2,7 @@ import UIKit
 
 final class LanguagePickerViewController: UIViewController, SettingPicker {
     let selectionButton = UIButton()
+    let informationLabel = UILabel()
     let languages = ["English", "Russian"]
     
     
