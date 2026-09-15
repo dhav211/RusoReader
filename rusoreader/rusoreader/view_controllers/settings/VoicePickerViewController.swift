@@ -4,7 +4,7 @@ import AVFAudio
 final class ChooseDefaultVoiceViewController : UIViewController, SettingPicker {
     private let voicePickerView: UIPickerView
     private let voices: [AVSpeechSynthesisVoice]
-    private var selectedVoiceIdentifer: String?
+    private var selectedVoice: AVSpeechSynthesisVoice?
     let selectionButton = UIButton()
     let informationLabel = UILabel()
     
@@ -25,15 +25,16 @@ final class ChooseDefaultVoiceViewController : UIViewController, SettingPicker {
         view.addSubview(voicePickerView)
         
         // Check the UserDefaults to see if there has already been a default voice to preselect, if not just preselect the first voice
-        let defaultVoiceIdentifer = String(UserDefaults.standard.string(forKey: "default-voice") ?? "")
-        let defaultVoice = voices.first(where: { $0.identifier == defaultVoiceIdentifer })
+        let defaultVoiceDictionary = UserDefaultsManager.defaultVoice
+        let defaultVoiceIdentifier = defaultVoiceDictionary["identifier"] as? String
+        let defaultVoice = voices.first(where: { $0.identifier == defaultVoiceIdentifier })
         if let defaultVoice, let index = voices.firstIndex(of: defaultVoice) {
             voicePickerView.selectRow(index, inComponent: 0, animated: false)
-            selectedVoiceIdentifer = defaultVoiceIdentifer
+            selectedVoice = defaultVoice
         } else {
             voicePickerView.selectRow(0, inComponent: 0, animated: false)
             if let firstVoice = voices.first {
-                selectedVoiceIdentifer = firstVoice.identifier
+                selectedVoice = firstVoice
             }
         }
         
@@ -65,9 +66,14 @@ final class ChooseDefaultVoiceViewController : UIViewController, SettingPicker {
     }
     
     @objc func activateSelection() {
-        guard let selectedVoiceIdentifer else { return }
+        guard let selectedVoice else { return }
         dismiss(animated: true) {
-            UserDefaults.standard.set(selectedVoiceIdentifer, forKey: "default-voice")
+            let defaultVoice = [
+                "identifier": selectedVoice.identifier,
+                "name": selectedVoice.name
+            ]
+            
+            UserDefaultsManager.defaultVoice = defaultVoice
         }
     }
     
@@ -85,6 +91,6 @@ final class ChooseDefaultVoiceViewController : UIViewController, SettingPicker {
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         // When the user hovers over the voice we will set the selectedVoiceIdentifer, this is an unique code that won't have any duplicates
-        selectedVoiceIdentifer = voices[row].identifier
+        selectedVoice = voices[row]
     }
 }

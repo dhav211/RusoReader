@@ -11,11 +11,11 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
         super.init(nibName: nil, bundle: nil)
 
         // The user defaults can hold the default text size, this will return 0 if it's never been saved
-        var textSize = Float(UserDefaults.standard.float(forKey: "textSize"))
+        var textSize = UserDefaultsManager.textSize
 
         // A text size has never been saved so we will save a default text size of 16 right out of the gate
         if textSize == 0 {
-            UserDefaults.standard.set(16, forKey: "textSize")
+            UserDefaultsManager.textSize = 16
             textSize = 16
         }
         
@@ -186,7 +186,7 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
     func updateTextSize(to newSize: Float) {
         if newSize > viewModel.currentTextSize || newSize < viewModel.currentTextSize {
             viewModel.setTextSize(to: newSize)
-            UserDefaults.standard.set(newSize, forKey: "textSize")
+            UserDefaultsManager.textSize = newSize
             tableView.reloadData()
         }
     }

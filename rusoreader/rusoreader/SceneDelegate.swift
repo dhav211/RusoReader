@@ -41,6 +41,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         appCoordinator?.launch()
         self.window = window
         window.makeKeyAndVisible()
+        
+        if UserDefaults.standard.dictionary(forKey: "defaultVoice") == nil {
+            SpeechSynth.setDefaultVoice()
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

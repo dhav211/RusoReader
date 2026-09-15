@@ -15,8 +15,9 @@ final class SpeechSynth {
         let voices = AVSpeechSynthesisVoice.speechVoices().filter { $0.language == "ru-RU" }
         
         // Look into the user defaults and see if that user has default voice set
-        let defaultVoiceIdentifer = String(UserDefaults.standard.string(forKey: "default-voice") ?? "")
-        let defaultVoice = voices.first(where: { $0.identifier == defaultVoiceIdentifer })
+        let defaultVoiceDictionary = UserDefaultsManager.defaultVoice
+        let identifier = defaultVoiceDictionary["identifier"] as? String
+        let defaultVoice = identifier.flatMap { id in voices.first(where: { $0.identifier == id }) }
         
         // If the user has set a default voice then we can set that as the voice now
         if let defaultVoice, let index = voices.firstIndex(of: defaultVoice) {
@@ -58,5 +59,17 @@ final class SpeechSynth {
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate
         utterance.pitchMultiplier = 1.0
         synthesizer.speak(utterance)
+    }
+    
+    /// Set the first found with highest quality voice as the user default. This should happen in the SceneDelegate
+    static func setDefaultVoice() {
+        // Grabs all russian downloaded voices
+        let voices = AVSpeechSynthesisVoice.speechVoices()
+            .filter { $0.language == "ru-RU" }
+            .sorted { $0.quality.rawValue > $1.quality.rawValue }
+        
+        guard let voice = voices.first else { return }
+
+        
     }
 }

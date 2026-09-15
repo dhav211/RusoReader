@@ -3,7 +3,7 @@ import UIKit
 final class SettingsViewController : UITableViewController {
     enum SettingsSelection {
         case toggle(title: String, isOn: Bool, action: (Bool) -> Void)
-        case basic(title: String, action: (() -> Void)?)
+        case pickerWheel(title: String, selectedOption: String, onClicked: (() -> Void)?)
     }
     
     private var sections: [SettingsSelection] = []
@@ -19,7 +19,7 @@ final class SettingsViewController : UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "basic")
+        tableView.register(SettingPickerWheelTableViewCell.self, forCellReuseIdentifier: "pickerWheel")
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -27,23 +27,20 @@ final class SettingsViewController : UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "basic") else { return UITableViewCell() }
-        var content = cell.defaultContentConfiguration()
-        
-        // Set the cell text as the chapter title at this index row
         if sections.count > indexPath.row {
             switch sections[indexPath.row] {
-            case .basic(let title, _):
-                content.text = title
-                content.secondaryText = "testy"
+            case .pickerWheel(let title, let selectedOption, _):
+                guard let cell = tableView.dequeueReusableCell(withIdentifier: "pickerWheel") as? SettingPickerWheelTableViewCell else { return UITableViewCell() }
+                cell.configure(title: title, currentSelected: selectedOption)
+                
+                return cell
             case .toggle(let title, let isOn, _):
-                content.text = title
+                //content.text = title
+                return UITableViewCell()
             }
         }
         
-        cell.contentConfiguration = content
-        
-        return cell
+        return UITableViewCell()
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -51,7 +48,7 @@ final class SettingsViewController : UITableViewController {
         let row = sections[indexPath.row]
         
         switch row {
-        case .basic(_, let action):
+        case .pickerWheel(_, _, let action):
             action?()
         case .toggle:
             break
@@ -60,7 +57,15 @@ final class SettingsViewController : UITableViewController {
 
     private func build() {
         sections = [
-            .basic(title: "Default Voice", action: openDefaultVoiceSelectionMenu)
+            .pickerWheel(
+                title: "Default Voice",
+                selectedOption: {
+                    let defaultVoiceDictionary = UserDefaults.standard.dictionary(forKey: "defaultVoice")
+                    let defaultVoiceName = defaultVoiceDictionary?["name"] as? String
+                    return defaultVoiceName ?? ""
+                }(),
+                onClicked: openDefaultVoiceSelectionMenu
+            )
         ]
     }
     
