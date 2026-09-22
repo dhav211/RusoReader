@@ -42,6 +42,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.window = window
         window.makeKeyAndVisible()
         
+        if UserDefaults.standard.string(forKey: "defaultLanguage") == nil {
+            let languageCode = Locale.current.language.languageCode?.identifier ?? "en"
+            
+            if languageCode == "ru" {
+                UserDefaultsManager.defaultLanguage = .Russian
+            } else {
+                UserDefaultsManager.defaultLanguage = .English
+            }
+        }
+        
         if UserDefaults.standard.dictionary(forKey: "defaultVoice") == nil {
             SpeechSynth.setDefaultVoice()
         }

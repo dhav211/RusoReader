@@ -1,15 +1,19 @@
 import UIKit
 import AVFAudio
 
-final class ChooseDefaultVoiceViewController : UIViewController, SettingPicker {
-    private let voicePickerView: UIPickerView
+final class VoicePickerViewController : UIViewController, SettingsPicker {
+    let row: Int
+    let viewPicker: UIPickerView
     private let voices: [AVSpeechSynthesisVoice]
     private var selectedVoice: AVSpeechSynthesisVoice?
     let selectionButton = UIButton()
     let informationLabel = UILabel()
     
-    init() {
-        self.voicePickerView = UIPickerView()
+    weak var delegate: UpdateSettingSectionDelegate?
+    
+    init(row: Int) {
+        self.row = row
+        self.viewPicker = UIPickerView()
         self.voices = AVSpeechSynthesisVoice.speechVoices().filter { $0.language == "ru-RU" }
 
         super.init(nibName: nil, bundle: nil)
@@ -20,61 +24,54 @@ final class ChooseDefaultVoiceViewController : UIViewController, SettingPicker {
     }
     
     override func viewDidLoad() {
-        voicePickerView.translatesAutoresizingMaskIntoConstraints = false
-        voicePickerView.delegate = self
-        view.addSubview(voicePickerView)
+        viewPicker.translatesAutoresizingMaskIntoConstraints = false
+        viewPicker.delegate = self
+        view.addSubview(viewPicker)
         
         // Check the UserDefaults to see if there has already been a default voice to preselect, if not just preselect the first voice
         let defaultVoiceDictionary = UserDefaultsManager.defaultVoice
         let defaultVoiceIdentifier = defaultVoiceDictionary["identifier"] as? String
         let defaultVoice = voices.first(where: { $0.identifier == defaultVoiceIdentifier })
         if let defaultVoice, let index = voices.firstIndex(of: defaultVoice) {
-            voicePickerView.selectRow(index, inComponent: 0, animated: false)
+            viewPicker.selectRow(index, inComponent: 0, animated: false)
             selectedVoice = defaultVoice
         } else {
-            voicePickerView.selectRow(0, inComponent: 0, animated: false)
+            viewPicker.selectRow(0, inComponent: 0, animated: false)
             if let firstVoice = voices.first {
                 selectedVoice = firstVoice
             }
         }
         
         // The information stack will hold the label and button horizontally of each other
-        let informationStack = UIStackView()
+        let informationStack = SettingsPickerInformationStack(information: "Choose a default voice") { [weak self] in
+            self?.activateSelection()
+        }
         view.addSubview(informationStack)
-        informationStack.translatesAutoresizingMaskIntoConstraints = false
-        informationStack.axis = .horizontal
-        informationStack.distribution = .equalSpacing
         
-        informationLabel.text = "Choose a default voice"
-        
-        selectionButton.setTitle("Select", for: .normal)
-        selectionButton.setTitleColor(.systemBlue, for: .normal)
-        selectionButton.addTarget(self, action: #selector(activateSelection), for: .touchUpInside)
-        
-        informationStack.addArrangedSubview(informationLabel)
-        informationStack.addArrangedSubview(selectionButton)
         
         NSLayoutConstraint.activate([
             informationStack.topAnchor.constraint(equalTo: view.topAnchor, constant: 8),
             informationStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             informationStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            voicePickerView.topAnchor.constraint(equalTo: informationStack.bottomAnchor, constant: 16),
-            voicePickerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            voicePickerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            voicePickerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            viewPicker.topAnchor.constraint(equalTo: informationStack.bottomAnchor, constant: 16),
+            viewPicker.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            viewPicker.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            viewPicker.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
     }
     
-    @objc func activateSelection() {
+    func activateSelection() {
         guard let selectedVoice else { return }
-        dismiss(animated: true) {
-            let defaultVoice = [
-                "identifier": selectedVoice.identifier,
-                "name": selectedVoice.name
-            ]
-            
-            UserDefaultsManager.defaultVoice = defaultVoice
-        }
+        
+        let defaultVoice = [
+            "identifier": selectedVoice.identifier,
+            "name": selectedVoice.name
+        ]
+        
+        UserDefaultsManager.defaultVoice = defaultVoice
+        self.delegate?.updateSelectedOption(with: selectedVoice.name, at: self.row)
+        
+        dismiss(animated: true)
     }
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
