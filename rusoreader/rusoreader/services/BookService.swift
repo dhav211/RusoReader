@@ -32,6 +32,10 @@ class BookService {
         }
     }
     
+    func getLastReadBook() -> Book? {
+        return bookRepo.getLastReadBook()
+    }
+    
     func removeBook(book: Book) throws {
         try bookRepo.removeBook(by: book.id)
     }

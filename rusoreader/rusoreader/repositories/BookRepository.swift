@@ -84,20 +84,36 @@ class BookRepository {
     
     /// Find a specific book by its ID
     /// - Parameter id: The ID of the book we are looking for
-    /// - Returns: The book object with all chapters, ready to be read by the user. Will return nil if nothing is found.
+    /// - Returns: The book object, ready to be read by the user. Will return nil if nothing is found.
     func findBookBy(by id: Int) throws -> Book? {
         return try databaseManager.userDataQueue.read { db in
-            guard let fetchedBook = try DatabaseBook.fetchOne(db, id: Int64(id)) else { throw BookRepositoryError.notFound(id: id) }
+            let request = DatabaseBook
+                .filter(id: Int64(id))
+                .including(all: DatabaseBook.chapters)
+                .asRequest(of: FetchedBookInfo.self)
             
-            return Book(
-                id: Int(fetchedBook.id ?? 0),
-                name: fetchedBook.name,
-                author: fetchedBook.author,
-                coverImageUrl: fetchedBook.cover_image_url,
-                currentChapter: Int(fetchedBook.current_chapter),
-                dateLastOpened: fetchedBook.date_last_opened,
-                dateCreated: fetchedBook.date_created
-            )
+            guard let fetchedBookInfo = try FetchedBookInfo.fetchOne(db, request) else { return nil }
+            return createBook(from: fetchedBookInfo);
+        }
+    }
+    
+    /// Fetches the last book the user read, this will be used to display the continue reading book view on the homepage
+    /// - Returns: The book object, ready to be read by the user. Will return nil if nothing is found.
+    func getLastReadBook() -> Book? {
+        do {
+            return try databaseManager.userDataQueue.read { db in
+                let request = DatabaseBook
+                    .order(\.lastOpened.desc)
+                    .limit(1)
+                    .including(all: DatabaseBook.chapters)
+                    .asRequest(of: FetchedBookInfo.self)
+                
+                guard let fetchedBookInfo = try FetchedBookInfo.fetchOne(db, request) else { return nil }
+                return createBook(from: fetchedBookInfo);
+            }
+        } catch {
+            print("Error finding last read book. Error: \(error)")
+            return nil
         }
     }
     
@@ -180,21 +196,13 @@ class BookRepository {
     /// - Parameter fetchBookInfo: The book and chapter information that was fetched from the database
     /// - Returns: A complete book object that will be used in the reader view
     private func createBook(from fetchBookInfo: FetchedBookInfo) -> Book {
-        let chapters = fetchBookInfo.chapters.map { dbChapter in
-            return Chapter(
-                name: dbChapter.name,
-                index: Int(dbChapter.position),
-                currentUserProgress: Int(dbChapter.current_user_progress),
-                text: dbChapter.text
-            )
-        }
-        
         return Book(
             id: Int(fetchBookInfo.book.id ?? 0),
             name: fetchBookInfo.book.name,
             author: fetchBookInfo.book.author,
             coverImageUrl: fetchBookInfo.book.cover_image_url,
             currentChapter: Int(fetchBookInfo.book.current_chapter),
+            numberOfChapters: fetchBookInfo.chapters.count,
             dateLastOpened: fetchBookInfo.book.date_last_opened,
             dateCreated: fetchBookInfo.book.date_created)
     }
