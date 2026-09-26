@@ -9,7 +9,7 @@ struct DatabaseBook : Codable, Identifiable, MutablePersistableRecord {
     var current_chapter: Int64
     var isbn: String?
     var uuid: String?
-    var date_last_opened: Date
+    var date_last_opened: Date?
     var date_created: Date
     
     init(id: Int64? = nil, name: String, author: String, cover_image_url: String?, current_chapter: Int64, isbn: String?, uuid: String?) {
@@ -20,7 +20,7 @@ struct DatabaseBook : Codable, Identifiable, MutablePersistableRecord {
         self.current_chapter = current_chapter
         self.isbn = isbn
         self.uuid = uuid
-        self.date_last_opened = Date()
+        self.date_last_opened = nil
         self.date_created = Date()
     }
     

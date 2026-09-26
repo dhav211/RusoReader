@@ -103,6 +103,7 @@ class BookRepository {
         do {
             return try databaseManager.userDataQueue.read { db in
                 let request = DatabaseBook
+                    .filter(DatabaseBook.Columns.lastOpened != nil)
                     .order(\.lastOpened.desc)
                     .limit(1)
                     .including(all: DatabaseBook.chapters)

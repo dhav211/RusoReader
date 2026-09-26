@@ -9,11 +9,11 @@ struct Book {
     let numberOfChapters: Int
     let isbn: String?
     let uuid: String?
-    let dateLastOpened: Date
+    let dateLastOpened: Date?
     let dateCreated: Date
     
     init(id: Int, name: String, author: String, coverImageUrl: String?, currentChapter: Int, numberOfChapters: Int = 0,
-         isbn: String? = nil, uuid: String? = nil, dateLastOpened: Date, dateCreated: Date) {
+         isbn: String? = nil, uuid: String? = nil, dateLastOpened: Date? = nil, dateCreated: Date) {
         self.id = id
         self.name = name
         self.author = author
