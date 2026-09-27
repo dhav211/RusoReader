@@ -6,14 +6,14 @@ protocol HomepageDelegate : AnyObject {
 }
 
 class HomePageController: UIViewController, UIDocumentPickerDelegate {
-    private let bookSelector: BookSelectorViewController
+    private let continueReading: ContinueReadingView
     private let viewModel: HomePageViewModel
     
     weak var delegate: HomepageDelegate?
     
     init(viewModel: HomePageViewModel) {
         self.viewModel = viewModel
-        self.bookSelector = viewModel.createBookSelector()
+        self.continueReading = viewModel.createContinueReadingView()
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -25,45 +25,32 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         
+        view.addSubview(continueReading)
+        
+        // TODO Add a width to this, which should be 10% smaller than the width of the screen
+        // The thing is we will have stats under the continue reading book but in landscape mode they will be the right
+        
+        NSLayoutConstraint.activate([
+            continueReading.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 8),
+            continueReading.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8),
+            continueReading.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16)
+        ])
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
         toolbarItems = [
             UIBarButtonItem(image: UIImage(systemName: "books.vertical"), style: .plain, target: self, action: #selector(openLibraryTapped)),
             UIBarButtonItem(image: UIImage(systemName: "brain.head.profile"), style: .plain, target: self, action: #selector(openExerciseTapped)),
             UIBarButtonItem(image: UIImage(systemName: "gearshape"), style: .plain, target: self, action: #selector(openSettingsTapped))
         ]
         
-        navigationController?.setToolbarHidden(false, animated: true)
-        
-        let libraryLabel = UILabel()
-        libraryLabel.text = "Your Library"
-        libraryLabel.font = UIFont.preferredFont(forTextStyle: .headline)
-        libraryLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(libraryLabel)
-        
-        addChild(bookSelector)
-        view.addSubview(bookSelector.view)
-        
-        let addBookButton = UIButton()
-        addBookButton.translatesAutoresizingMaskIntoConstraints = false
-        addBookButton.setTitle("Add Book", for: .normal)
-        addBookButton.setTitleColor(.label, for: .normal)
-        addBookButton.addTarget(self, action: #selector(addBookButtonTapped), for: .touchUpInside)
-
-        view.addSubview(addBookButton)
-        
-        NSLayoutConstraint.activate([
-            libraryLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            libraryLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            bookSelector.view.topAnchor.constraint(equalTo: libraryLabel.topAnchor),
-            bookSelector.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            bookSelector.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bookSelector.view.heightAnchor.constraint(equalToConstant: 275),
-            addBookButton.topAnchor.constraint(equalTo: bookSelector.view.bottomAnchor),
-            addBookButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -4.0)
-        ])
+        navigationController?.setToolbarHidden(false, animated: animated)
     }
     
-    func setBookSelectorDelegate(appCoordinator: AppCoordinator) {
-        bookSelector.selectorDelegate = appCoordinator
+    func setContinueReadingDelegate(appCoordinator: AppCoordinator) {
+        continueReading.delegate = appCoordinator
     }
     
     @objc func addBookButtonTapped() {
@@ -92,7 +79,5 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
             print("Failed to parse book: \(error)")
             // TODO display an alert message letting the user know there was an issue parsing the book
         }
-        
-        bookSelector.refresh()
     }
 }

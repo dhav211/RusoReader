@@ -14,7 +14,7 @@ final class AppCoordinator {
     func launch() {
         let homepageController = viewControllerFactory.createHomePageController()
         homepageController.delegate = self
-        homepageController.setBookSelectorDelegate(appCoordinator: self)
+        homepageController.setContinueReadingDelegate(appCoordinator: self)
         navigationController.pushViewController(homepageController, animated: false)
     }
 }
@@ -37,6 +37,15 @@ extension AppCoordinator : HomepageDelegate {
 
 extension AppCoordinator : BookSelectorDelegate {
     func onOpenBookTapped(book: Book) {
+        navigationController.pushViewController(
+            viewControllerFactory.createReaderController(bookToOpen: book),
+            animated: true
+        )
+    }
+}
+
+extension AppCoordinator : ContinueReadingDelegate {
+    func onTapped(book: Book) {
         navigationController.pushViewController(
             viewControllerFactory.createReaderController(bookToOpen: book),
             animated: true

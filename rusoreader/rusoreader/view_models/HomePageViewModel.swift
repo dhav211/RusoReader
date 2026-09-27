@@ -11,6 +11,10 @@ final class HomePageViewModel {
         return BookSelectorViewController(viewModel: BookSelectorViewModel(bookService: bookService))
     }
     
+    func createContinueReadingView() -> ContinueReadingView {
+        return ContinueReadingView(book: bookService.getLastReadBook())
+    }
+    
     func parseBooks(from urls: [URL]) throws {
         for url in urls {
             try bookService.parseBook(from: url)
