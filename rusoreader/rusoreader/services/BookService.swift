@@ -24,12 +24,11 @@ class BookService {
     }
     
     func getBook(by id: Int) -> Book? {
-        do {
-            return try bookRepo.findBookBy(by: id)
-        } catch {
-            print("Failed to find book by id \(id): \(error)")
-            return nil
-        }
+        return bookRepo.findBookBy(by: id)
+    }
+    
+    func getAllBooks() -> [Book] {
+        return bookRepo.getAllBooks()
     }
     
     func getLastReadBook() -> Book? {

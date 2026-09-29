@@ -69,7 +69,7 @@ class BookRepository {
             return try databaseManager.userDataQueue.read { db in
                 let request = DatabaseBook
                     .filter(DatabaseBook.Columns.name.uppercased == title.uppercased())
-                    .including(all: DatabaseBook.chapters)
+                    .annotated(with: DatabaseBook.chapters.count)
                     .asRequest(of: FetchedBookInfo.self)
                 
                 return try FetchedBookInfo.fetchAll(db, request).map { fetchedBook in
@@ -85,15 +85,38 @@ class BookRepository {
     /// Find a specific book by its ID
     /// - Parameter id: The ID of the book we are looking for
     /// - Returns: The book object, ready to be read by the user. Will return nil if nothing is found.
-    func findBookBy(by id: Int) throws -> Book? {
-        return try databaseManager.userDataQueue.read { db in
-            let request = DatabaseBook
-                .filter(id: Int64(id))
-                .including(all: DatabaseBook.chapters)
-                .asRequest(of: FetchedBookInfo.self)
-            
-            guard let fetchedBookInfo = try FetchedBookInfo.fetchOne(db, request) else { return nil }
-            return createBook(from: fetchedBookInfo);
+    func findBookBy(by id: Int) -> Book? {
+        do {
+            return try databaseManager.userDataQueue.read { db in
+                let request = DatabaseBook
+                    .filter(id: Int64(id))
+                    .annotated(with: DatabaseBook.chapters.count)
+                    .asRequest(of: FetchedBookInfo.self)
+                
+                guard let fetchedBookInfo = try FetchedBookInfo.fetchOne(db, request) else { return nil }
+                return createBook(from: fetchedBookInfo);
+            }
+        } catch {
+            print("Failed to find book by ID \(id): \(error)")
+            return nil
+        }
+    }
+    
+    func getAllBooks() -> [Book] {
+        do {
+            return try databaseManager.userDataQueue.read { db in
+                let request = DatabaseBook
+                    .all()
+                    .annotated(with: DatabaseBook.chapters.count)
+                    .asRequest(of: FetchedBookInfo.self)
+                
+                return try FetchedBookInfo.fetchAll(db, request).map { fetchedBook in
+                    return createBook(from: fetchedBook)
+                }
+            }
+        } catch {
+            print("Error finding all books. Error: \(error)")
+            return [Book]()
         }
     }
     
@@ -106,7 +129,7 @@ class BookRepository {
                     .filter(DatabaseBook.Columns.lastOpened != nil)
                     .order(\.lastOpened.desc)
                     .limit(1)
-                    .including(all: DatabaseBook.chapters)
+                    .annotated(with: DatabaseBook.chapters.count)
                     .asRequest(of: FetchedBookInfo.self)
                 
                 guard let fetchedBookInfo = try FetchedBookInfo.fetchOne(db, request) else { return nil }
@@ -203,7 +226,7 @@ class BookRepository {
             author: fetchBookInfo.book.author,
             coverImageUrl: fetchBookInfo.book.cover_image_url,
             currentChapter: Int(fetchBookInfo.book.current_chapter),
-            numberOfChapters: fetchBookInfo.chapters.count,
+            numberOfChapters: fetchBookInfo.chapterCount,
             dateLastOpened: fetchBookInfo.book.date_last_opened,
             dateCreated: fetchBookInfo.book.date_created)
     }
