@@ -14,7 +14,7 @@ class SettingsViewController : UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.register(SettingPickerWheelTableViewCell.self, forCellReuseIdentifier: "pickerWheel")
+        tableView.register(SettingPickerWheelTableViewCell.self, forCellReuseIdentifier: SettingPickerWheelTableViewCell.reuseIdentifier)
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -27,7 +27,7 @@ class SettingsViewController : UITableViewController {
             switch section.type {
             case .pickerWheel:
                 guard let pickerWheelSection = section as? PickerWheelSettingsSection else { return UITableViewCell() }
-                guard let cell = tableView.dequeueReusableCell(withIdentifier: "pickerWheel") as? SettingPickerWheelTableViewCell else { return UITableViewCell() }
+                guard let cell = tableView.dequeueReusableCell(withIdentifier: SettingPickerWheelTableViewCell.reuseIdentifier) as? SettingPickerWheelTableViewCell else { return UITableViewCell() }
                 cell.configure(title: pickerWheelSection.title, currentSelected: pickerWheelSection.selectedOption)
                 
                 return cell
