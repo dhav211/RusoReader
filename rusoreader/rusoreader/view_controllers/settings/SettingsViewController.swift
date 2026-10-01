@@ -84,10 +84,9 @@ class SettingsViewController : UITableViewController {
     /// Slides open a half screen modal displaying a picker wheel, letting the user choose an option
     /// - Parameter picker: A picker wheel view controller that conforms to SettingsPicker
     private func openSettingPickerModal(picker: SettingsPicker) {
-        let defaultVoiceChooser = picker
-        defaultVoiceChooser.modalPresentationStyle = .pageSheet
-        defaultVoiceChooser.sheetPresentationController?.detents = [.medium()]
-        present(defaultVoiceChooser, animated: true)
+        picker.modalPresentationStyle = .pageSheet
+        picker.sheetPresentationController?.detents = [.medium()]
+        present(picker, animated: true)
     }
 }
 
