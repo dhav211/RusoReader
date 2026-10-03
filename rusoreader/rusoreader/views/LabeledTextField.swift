@@ -3,6 +3,8 @@ import UIKit
 class LabeledTextField : UIStackView {
     private let textField: UITextField
     
+    var onUpdated: (() -> Void)?
+    
     init(labelText: String, defaultFieldText: String) {
         let label = UILabel()
         label.text = labelText
@@ -17,6 +19,8 @@ class LabeledTextField : UIStackView {
         addArrangedSubview(label)
         addArrangedSubview(textField)
         axis = .vertical
+
+        textField.addTarget(self, action: #selector(textChanged), for: .editingChanged)
     }
     
     required init(coder: NSCoder) {
@@ -25,5 +29,9 @@ class LabeledTextField : UIStackView {
     
     func getTextFieldValue() -> String {
         return textField.text ?? ""
+    }
+    
+    @objc private func textChanged() {
+        onUpdated?()
     }
 }

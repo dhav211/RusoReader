@@ -33,6 +33,29 @@ extension AppCoordinator : HomepageDelegate {
             animated: true
         )
     }
+    
+    func onOpenLibraryTapped() {
+        let libraryController = viewControllerFactory.createLibraryController()
+        libraryController.launcherDelegate = self
+        
+        navigationController.pushViewController(
+            libraryController,
+            animated: true
+        )
+    }
+}
+
+extension AppCoordinator : LibraryLauncherDelegate {
+    func onBookTapped(id: Int) throws {
+        guard let readerViewController = viewControllerFactory.createReaderController(bookToOpenById: id) else {
+            throw LibraryError.failedToLoadBook
+        }
+        
+        navigationController.pushViewController(
+            readerViewController,
+            animated: true
+        )
+    }
 }
 
 extension AppCoordinator : BookSelectorDelegate {

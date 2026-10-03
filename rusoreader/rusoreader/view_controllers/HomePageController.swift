@@ -3,6 +3,7 @@ import UIKit
 protocol HomepageDelegate : AnyObject {
     func onOpenReviewWordsTapped()
     func onOpenSettingsTapped()
+    func onOpenLibraryTapped()
 }
 
 class HomePageController: UIViewController, UIDocumentPickerDelegate {
@@ -61,7 +62,7 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
     }
     
     @objc func openLibraryTapped() {
-        print("open the library")
+        delegate?.onOpenLibraryTapped()
     }
     
     @objc func openExerciseTapped() {

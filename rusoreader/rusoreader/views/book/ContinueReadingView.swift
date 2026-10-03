@@ -36,15 +36,19 @@ final class ContinueReadingView: UIView {
         // This stack is split horizontally with cover image on the left and the information about the book and user's progress on the right
         let bookDetailsStack = makeBookDetailsStack()
         tappableView.addSubview(bookDetailsStack)
-        bookDetailsStack.addArrangedSubview(CoverImageView(imageUrl: book?.coverImageUrl, width: 150))
-        bookDetailsStack.addArrangedSubview(
-            BookDetailsView(
-                title: book?.name,
-                author: book?.author,
-                currentChapter: book?.currentChapter ?? 0,
-                chapterCount: book?.numberOfChapters ?? 0
-            )
+        
+        let coverImageView = CoverImageView()
+        coverImageView.configure(imageUrl: book?.coverImageUrl, height: 225)
+        bookDetailsStack.addArrangedSubview(coverImageView)
+        
+        let bookDetails = BookDetailsView()
+        bookDetails.configure(
+            title: book?.name,
+            author: book?.author,
+            currentChapter: book?.currentChapter ?? 0,
+            chapterCount: book?.numberOfChapters ?? 0
         )
+        bookDetailsStack.addArrangedSubview(bookDetails)
         
         setupConstraints(mainStack: mainStack, tappableView: tappableView, tappableStack: bookDetailsStack)
     }

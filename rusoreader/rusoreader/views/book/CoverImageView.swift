@@ -2,25 +2,26 @@ import UIKit
 
 /// Loads the cover image by the given url, sets the size based on the given width which then sets the height based on a 2:3 ratio, applies a faint shadow behind the cover art for added depth. If there isn't a url or the url fails to load an image then a placeholder will be set instead of the image.
 final class CoverImageView: UIView {
-    private let imageUrl: String?
-    private let width: CGFloat
-    private let height: CGFloat
+    private var imageUrl: String?
+    private var width: CGFloat = 0
+    private var height: CGFloat = 0
     
-    init(imageUrl: String?, width: CGFloat) {
-        self.imageUrl = imageUrl
-        self.width = width
-        self.height = width / 0.6667
-        
+    init() {
         super.init(frame: .zero)
-        
-        setup()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func setup() {
+    func configure(imageUrl: String?, height: CGFloat) {
+        self.imageUrl = imageUrl
+        self.height = height
+        self.width = height * 0.66
+
+        subviews.forEach { $0.removeFromSuperview() }
+        NSLayoutConstraint.deactivate(constraints)
+
         if let coverImage = loadCoverImage() {
             // Applies the shadow to the container, since the image uses clipToBounds this will prevent the shadow from displaying
             layer.shadowColor = UIColor.black.cgColor

@@ -99,9 +99,6 @@ final class BookSelectorViewController: UIViewController, BookCardDelegate {
             // Slides up the edit book view menu so the queried book can be edited
             let editBookMenu = viewModel.createEditBookViewController(for: book)
             editBookMenu.modalPresentationStyle = .pageSheet
-            editBookMenu.setOnClose() { [weak self] in
-                self?.refresh()
-            }
             let editBookNavigationController = UINavigationController(rootViewController: editBookMenu)
             present(editBookNavigationController, animated: true)
         }

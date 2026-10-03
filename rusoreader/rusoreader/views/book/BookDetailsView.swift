@@ -2,17 +2,12 @@ import UIKit
 
 /// Displays information about the book, values can be nil and then won't be displayed. If the chapterCount is 0 then that prevent the chapter progres text from being displayed. This will be used in the ContinueReadingView and also in the cells for the Library Table
 final class BookDetailsView: UIStackView {
-    private let title: String?
-    private let author: String?
-    private let currentChapter: Int
-    private let chapterCount: Int
+    private var title: String?
+    private var author: String?
+    private var currentChapter: Int = 0
+    private var chapterCount: Int = 0
     
-    init(title: String?, author: String?, currentChapter: Int, chapterCount: Int) {
-        self.title = title
-        self.author = author
-        self.currentChapter = currentChapter
-        self.chapterCount = chapterCount
-        
+    init() {
         super.init(frame: .zero)
         
         setup()
@@ -22,16 +17,27 @@ final class BookDetailsView: UIStackView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func setup() {
-        axis = .vertical
-        alignment = .leading
-        spacing = 4
-        
+    func configure(title: String?, author: String?, currentChapter: Int = 0, chapterCount: Int = 0) {
+        self.title = title
+        self.author = author
+        self.currentChapter = currentChapter
+        self.chapterCount = chapterCount
+
+        arrangedSubviews.forEach { subview in
+            removeArrangedSubview(subview)
+            subview.removeFromSuperview()
+        }
+
         if let titleLabel = makeTitleLabel() { addArrangedSubview(titleLabel) }
         if let authorLabel = makeAuthorLabel() { addArrangedSubview(authorLabel) }
         if let chapterStack = makeChapterStack() { addArrangedSubview(chapterStack) }
     }
-
+    
+    private func setup() {
+        axis = .vertical
+        alignment = .leading
+        spacing = 4
+    }
     
     private func makeTitleLabel() -> UILabel? {
         guard let title else { return nil }

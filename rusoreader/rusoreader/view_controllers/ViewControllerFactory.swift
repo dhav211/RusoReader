@@ -29,7 +29,25 @@ final class ViewControllerFactory {
         return ReaderViewController(viewModel: readerViewModel)
     }
     
+    func createReaderController(bookToOpenById: Int) -> ReaderViewController? {
+        guard let book = appServices.bookService.getBook(by: bookToOpenById) else { return nil }
+        
+        let readerViewModel = ReaderViewModel(
+            wordService: appServices.wordService,
+            bookService: appServices.bookService,
+            sentenceService: appServices.sentenceService,
+            book: book
+        )
+
+        return ReaderViewController(viewModel: readerViewModel)
+    }
+    
     func createSettingsController() -> SettingsViewController {
         return SettingsViewController()
+    }
+    
+    func createLibraryController() -> LibraryViewController {
+        let libraryViewModel = LibraryViewModel(bookService: appServices.bookService)
+        return LibraryViewController(viewModel: libraryViewModel)
     }
 }
