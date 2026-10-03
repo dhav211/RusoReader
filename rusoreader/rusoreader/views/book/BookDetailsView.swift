@@ -2,10 +2,9 @@ import UIKit
 
 /// Displays information about the book, values can be nil and then won't be displayed. If the chapterCount is 0 then that prevent the chapter progres text from being displayed. This will be used in the ContinueReadingView and also in the cells for the Library Table
 final class BookDetailsView: UIStackView {
-    private var title: String?
-    private var author: String?
-    private var currentChapter: Int = 0
-    private var chapterCount: Int = 0
+    private let titleLabel = UILabel()
+    private let authorLabel = UILabel()
+    private let chapterProgress = ChapterProgressView()
     
     init() {
         super.init(frame: .zero)
@@ -18,75 +17,43 @@ final class BookDetailsView: UIStackView {
     }
     
     func configure(title: String?, author: String?, currentChapter: Int = 0, chapterCount: Int = 0) {
-        self.title = title
-        self.author = author
-        self.currentChapter = currentChapter
-        self.chapterCount = chapterCount
-
-        arrangedSubviews.forEach { subview in
-            removeArrangedSubview(subview)
-            subview.removeFromSuperview()
+        if let title {
+            titleLabel.text = title
+        } else {
+            titleLabel.text?.removeAll()
         }
-
-        if let titleLabel = makeTitleLabel() { addArrangedSubview(titleLabel) }
-        if let authorLabel = makeAuthorLabel() { addArrangedSubview(authorLabel) }
-        if let chapterStack = makeChapterStack() { addArrangedSubview(chapterStack) }
+        
+        if let author {
+            authorLabel.text = author
+        } else {
+            authorLabel.text?.removeAll()
+        }
+        
+        if currentChapter > 0 && chapterCount > 0 {
+            chapterProgress.setProgress(currentChapter: currentChapter, chapterCount: chapterCount)
+        } else {
+            chapterProgress.clear()
+        }
     }
     
     private func setup() {
         axis = .vertical
         alignment = .leading
         spacing = 4
-    }
-    
-    private func makeTitleLabel() -> UILabel? {
-        guard let title else { return nil }
         
-        let label = UILabel()
-        label.text = title
-        label.numberOfLines = 0
+        titleLabel.numberOfLines = 0
         let baseFont = UIFont.preferredFont(forTextStyle: .body)
         if let boldDescriptor = baseFont.fontDescriptor.withSymbolicTraits(.traitBold) {
-            label.font = UIFont(descriptor: boldDescriptor, size: 0)
+            titleLabel.font = UIFont(descriptor: boldDescriptor, size: 0)
         } else {
-            label.font = baseFont
-        }
-        return label
-    }
-    
-    private func makeAuthorLabel() -> UILabel? {
-        guard let author else { return nil }
-        
-        let label = UILabel()
-        label.text = author
-        label.numberOfLines = 0
-        label.font = .preferredFont(forTextStyle: .subheadline)
-        return label
-    }
-    
-    private func makeChapterStack() -> UIStackView? {
-        if chapterCount <= 0 { return nil } // If there aren't any chapters in the book then don't create this stack, or if somehow there is a massive error in the db and it's returning negative chapters
-        
-        let stack = UIStackView()
-        stack.axis = .horizontal
-        stack.spacing = 4
-        
-        let titleLabel = UILabel()
-        titleLabel.text = "Chapter:"
-        titleLabel.font = .preferredFont(forTextStyle: .subheadline)
-        if let currentFont = titleLabel.font,
-           let descriptor = currentFont.fontDescriptor.withSymbolicTraits(.traitBold) {
-            titleLabel.font = UIFont(descriptor: descriptor, size: currentFont.pointSize)
+            titleLabel.font = baseFont
         }
         
-        // Turn the two chapter ints into a readable label
-        let chapterLabel = UILabel()
-        chapterLabel.text = "\(currentChapter) of \(chapterCount)"
-        chapterLabel.font = .preferredFont(forTextStyle: .subheadline)
+        authorLabel.numberOfLines = 0
+        authorLabel.font = .preferredFont(forTextStyle: .subheadline)
         
-        stack.addArrangedSubview(titleLabel)
-        stack.addArrangedSubview(chapterLabel)
-        
-        return stack
+        addArrangedSubview(titleLabel)
+        addArrangedSubview(authorLabel)
+        addArrangedSubview(chapterProgress)
     }
 }
