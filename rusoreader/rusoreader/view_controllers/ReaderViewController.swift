@@ -20,6 +20,7 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
         }
         
         viewModel.setTextSize(to: textSize)
+        viewModel.updateLastOpenedDate()
         
         do {
             try viewModel.setChapter(to: viewModel.currentChapter)

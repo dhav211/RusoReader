@@ -294,4 +294,23 @@ class BookRepository {
             return 0
         }
     }
+    
+    /// Updates the book's last opened date to the current time and date
+    /// - Parameter bookId: The ID of the book that will be updated
+    func updateLastOpenedDate(for bookId: Int) {
+        do {
+            try databaseManager.userDataQueue.write { db in
+                guard var bookToUpdate = try DatabaseBook
+                    .filter(id: Int64(bookId))
+                    .fetchOne(db)
+                else { return }
+                
+                bookToUpdate.date_last_opened = Date.now
+                
+                try bookToUpdate.update(db)
+            }
+        } catch {
+            print("Error updating last opened date: \(error)")
+        }
+    }
 }

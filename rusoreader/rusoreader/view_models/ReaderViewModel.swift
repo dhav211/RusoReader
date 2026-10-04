@@ -65,6 +65,10 @@ class ReaderViewModel {
     func updateProgress(to value: Int) {
         chapterProgressToUpdate = value
     }
+    
+    func updateLastOpenedDate() {
+        bookService.updateLastOpenedDate(for: book)
+    }
 
     var currentTextSize: Float {
         return Float(textSize)

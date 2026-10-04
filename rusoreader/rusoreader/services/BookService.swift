@@ -76,4 +76,8 @@ class BookService {
     func getProgressOnCurrentChapter(from book: Book) -> Int {
         return bookRepo.fetchCurrentChaptersProgress(from: book.id, at: book.currentChapter)
     }
+    
+    func updateLastOpenedDate(for book: Book) {
+        bookRepo.updateLastOpenedDate(for: book.id)
+    }
 }
