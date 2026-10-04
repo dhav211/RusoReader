@@ -26,6 +26,14 @@ final class LibraryViewController: UITableViewController {
         tableView.register(LibraryBookTableViewCell.self, forCellReuseIdentifier: LibraryBookTableViewCell.reuseIdentifier)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        // Update the book data, this will move newly opened books to the top and change chapter progress when book is closed
+        if viewModel.isBookOpen {
+            books = viewModel.updateBooks(books)
+            tableView.reloadData()
+        }
+    }
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return books.count
     }
@@ -45,7 +53,9 @@ final class LibraryViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row <= books.count {
             do {
-                try launcherDelegate?.onBookTapped(id: books[indexPath.row].id)
+                let currentLibraryBook = books[indexPath.row]
+                try launcherDelegate?.onBookTapped(id: currentLibraryBook.id)
+                viewModel.openBook(currentLibraryBook)
             } catch {
                 print("The book couldn't be loaded")
                 // TODO create a ui alert letting the user know the book can't be opened
