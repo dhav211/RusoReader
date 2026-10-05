@@ -5,11 +5,12 @@ protocol ContinueReadingDelegate : AnyObject {
 }
 
 final class ContinueReadingView: UIView {
-    private let book: Book?
+    private var coverImageView = CoverImageView()
+    private var bookDetailsView = BookDetailsView()
+    private var book: Book? = nil
     weak var delegate: ContinueReadingDelegate?
 
-    init(book: Book?) {
-        self.book = book
+    init() {
         super.init(frame: .zero)
         setup()
     }
@@ -18,7 +19,16 @@ final class ContinueReadingView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Setup
+    func configure(for book: Book) {
+        self.book = book
+        coverImageView.configure(imageUrl: book.coverImageUrl, height: 225)
+        bookDetailsView.configure(
+            title: book.name,
+            author: book.author,
+            currentChapter: book.currentChapter,
+            chapterCount: book.numberOfChapters
+        )
+    }
     
     private func setup() {
         translatesAutoresizingMaskIntoConstraints = false
@@ -37,18 +47,8 @@ final class ContinueReadingView: UIView {
         let bookDetailsStack = makeBookDetailsStack()
         tappableView.addSubview(bookDetailsStack)
         
-        let coverImageView = CoverImageView()
-        coverImageView.configure(imageUrl: book?.coverImageUrl, height: 225)
         bookDetailsStack.addArrangedSubview(coverImageView)
-        
-        let bookDetails = BookDetailsView()
-        bookDetails.configure(
-            title: book?.name,
-            author: book?.author,
-            currentChapter: book?.currentChapter ?? 0,
-            chapterCount: book?.numberOfChapters ?? 0
-        )
-        bookDetailsStack.addArrangedSubview(bookDetails)
+        bookDetailsStack.addArrangedSubview(bookDetailsView)
         
         setupConstraints(mainStack: mainStack, tappableView: tappableView, tappableStack: bookDetailsStack)
     }
@@ -104,8 +104,6 @@ final class ContinueReadingView: UIView {
         stack.spacing = 4
         return stack
     }
-    
-    // MARK: - Actions
     
     @objc private func openBook() {
         guard let book else { return }

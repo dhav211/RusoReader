@@ -3,16 +3,16 @@ import Foundation
 final class HomePageViewModel {
     private let bookService: BookService
     
+    var lastOpenedBook: Book? {
+        bookService.getLastReadBook()
+    }
+    
     init(bookService: BookService) {
         self.bookService = bookService
     }
     
     func createBookSelector() -> BookSelectorViewController {
         return BookSelectorViewController(viewModel: BookSelectorViewModel(bookService: bookService))
-    }
-    
-    func createContinueReadingView() -> ContinueReadingView {
-        return ContinueReadingView(book: bookService.getLastReadBook())
     }
     
     func parseBooks(from urls: [URL]) throws {

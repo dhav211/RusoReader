@@ -7,14 +7,13 @@ protocol HomepageDelegate : AnyObject {
 }
 
 class HomePageController: UIViewController, UIDocumentPickerDelegate {
-    private let continueReading: ContinueReadingView
+    private let continueReading = ContinueReadingView()
     private let viewModel: HomePageViewModel
     
     weak var delegate: HomepageDelegate?
     
     init(viewModel: HomePageViewModel) {
         self.viewModel = viewModel
-        self.continueReading = viewModel.createContinueReadingView()
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -36,10 +35,6 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
             continueReading.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8),
             continueReading.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16)
         ])
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
         
         toolbarItems = [
             UIBarButtonItem(image: UIImage(systemName: "books.vertical"), style: .plain, target: self, action: #selector(openLibraryTapped)),
@@ -47,7 +42,14 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
             UIBarButtonItem(image: UIImage(systemName: "gearshape"), style: .plain, target: self, action: #selector(openSettingsTapped))
         ]
         
-        navigationController?.setToolbarHidden(false, animated: animated)
+        navigationController?.setToolbarHidden(false, animated: false)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(false)
+        // Set the continue reading views book to the last read book, this may have change when coming back from the library
+        guard let book = viewModel.lastOpenedBook else { return }
+        continueReading.configure(for: book)
     }
     
     func setContinueReadingDelegate(appCoordinator: AppCoordinator) {
