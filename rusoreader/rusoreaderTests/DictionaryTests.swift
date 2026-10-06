@@ -11,7 +11,11 @@ final class DictionaryTests: XCTestCase {
     var dictionaryService: DictionaryService!
     
     override func setUpWithError() throws {
-        databaseManager = DatabaseManager(createFresh: false)
+        do {
+            databaseManager = DatabaseManager(userDataQueue: try DatabaseQueue())
+        } catch {
+            databaseManager = DatabaseManager(createFresh: true)
+        }
         dictionaryRepo = DictionaryRepository(databaseManager: databaseManager)
         wordRepo = WordRepository(databaseManager: databaseManager)
         sentenceRepo = SentenceRepository(databaseManager: databaseManager)

@@ -26,7 +26,7 @@ final class DatabaseManager {
     convenience init(createFresh: Bool = false) {
         do {
             if createFresh {
-                self.init(userDataQueue: nil)
+                self.init(userDataQueue: try DatabaseQueue())
             } else {
                 let dbUrl: URL = {
                     let fileManager = FileManager.default
