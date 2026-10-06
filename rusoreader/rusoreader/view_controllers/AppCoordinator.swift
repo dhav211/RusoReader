@@ -58,15 +58,6 @@ extension AppCoordinator : LibraryLauncherDelegate {
     }
 }
 
-extension AppCoordinator : BookSelectorDelegate {
-    func onOpenBookTapped(book: Book) {
-        navigationController.pushViewController(
-            viewControllerFactory.createReaderController(bookToOpen: book),
-            animated: true
-        )
-    }
-}
-
 extension AppCoordinator : ContinueReadingDelegate {
     func onTapped(book: Book) {
         navigationController.pushViewController(

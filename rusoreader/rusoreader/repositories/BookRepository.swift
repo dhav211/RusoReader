@@ -141,33 +141,6 @@ class BookRepository {
         }
     }
     
-    /// Used by the BookSelector, this loads just enough information about the book for the user to choose.
-    /// - Returns: A link to every book the user has in the database
-    func getAllBookLinks() -> [BookLink] {
-        do {
-            return try databaseManager.userDataQueue.read { db in
-                let rows = try Row.fetchCursor(db, sql: "SELECT id, name, author, cover_image_url FROM books")
-                
-                var links = [BookLink]()
-                
-                // Loop through every row creating the book links which will be returned
-                while let row = try rows.next() {
-                    links.append(BookLink(
-                        bookId: row["id"] ?? 0,
-                        title: row["name"] ?? "",
-                        author: row["author"] ?? "",
-                        coverImageURL: row["cover_image_url"] ?? ""
-                    ))
-                }
-                
-                return links
-            }
-        } catch {
-            print("Failed to create book links: \(error)")
-            return [BookLink]()
-        }
-    }
-    
     /// Removes a book from the database and deletes the associated cover image from the filesystem
     /// - Parameter id: Id of the book to remove
     func removeBook(by id: Int) throws {

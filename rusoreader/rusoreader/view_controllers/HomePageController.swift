@@ -56,12 +56,12 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
         continueReading.delegate = appCoordinator
     }
     
-    @objc func addBookButtonTapped() {
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.epub])
-        picker.delegate = self
-        picker.allowsMultipleSelection = false
-        present(picker, animated: true)
-    }
+//    @objc func addBookButtonTapped() {
+//        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.epub])
+//        picker.delegate = self
+//        picker.allowsMultipleSelection = false
+//        present(picker, animated: true)
+//    }
     
     @objc func openLibraryTapped() {
         delegate?.onOpenLibraryTapped()
@@ -75,12 +75,12 @@ class HomePageController: UIViewController, UIDocumentPickerDelegate {
         delegate?.onOpenSettingsTapped()
     }
     
-    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        do {
-            try viewModel.parseBooks(from: urls)
-        } catch {
-            print("Failed to parse book: \(error)")
-            // TODO display an alert message letting the user know there was an issue parsing the book
-        }
-    }
+//    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+//        do {
+//            try viewModel.parseBooks(from: urls)
+//        } catch {
+//            print("Failed to parse book: \(error)")
+//            // TODO display an alert message letting the user know there was an issue parsing the book
+//        }
+//    }
 }

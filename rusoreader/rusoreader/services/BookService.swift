@@ -7,10 +7,6 @@ class BookService {
         self.bookRepo = bookRepo
     }
     
-    func getAllBookLinks() -> [BookLink] {
-        return bookRepo.getAllBookLinks()
-    }
-    
     func parseBook(from url: URL) throws {
         if url.startAccessingSecurityScopedResource() {
             defer { url.stopAccessingSecurityScopedResource() }

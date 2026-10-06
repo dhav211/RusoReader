@@ -55,14 +55,6 @@ final class EpubTests: XCTestCase {
         }
     }
     
-    func testBookLinks() throws {
-        try testSaveEpubToDB()
-        
-        let links = bookRepo.getAllBookLinks()
-        
-        XCTAssert(links.isEmpty == false)
-    }
-    
     func testFindBookById() throws {
         try testSaveEpubToDB()
         if let book = try bookRepo.findBookBy(by: 1) {
