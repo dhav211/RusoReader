@@ -17,6 +17,7 @@ class ReaderViewModel {
     private var chapterProgressToUpdate = 0
     private var textSize: CGFloat = 12
     private var paragraphs = [NSMutableAttributedString]()
+    private var lastCellIndices = [Int]()
     let speechSynth: SpeechSynth
 
     init(wordService: WordService, bookService: BookService, sentenceService: SentenceService, book: Book) {
@@ -26,9 +27,27 @@ class ReaderViewModel {
         self.book = book
         self.speechSynth = SpeechSynth()
     }
-
+    
+    /// Save the chapter progress to the database
     func commitProgress() {
-        bookService.updateProgressOnCurrentChapter(from: book, to: chapterProgressToUpdate)
+        if lastCellIndices.isEmpty { return }
+        
+        // Get the lowest index in the the list, we can make a safe assumation this is a decent place to let the user pick back up at
+        let sortedIndices = lastCellIndices.sorted(by: { $0 < $1 })
+        guard let lowestIndex = sortedIndices.first else { return }
+        bookService.updateProgressOnCurrentChapter(from: book, to: lowestIndex)
+    }
+    
+    /// Add an arriving or exiting cell index to a fixed length list, older indices will be removed as newer ones are added
+    /// - Parameter index: The arriving or exiting table cell index
+    func addToLastCellIndices(_ index: Int) {
+        let maxSize = 5
+        lastCellIndices.append(index)
+        
+        // When the list gets bigger than the max size then we will remove the first index
+        if lastCellIndices.count > maxSize {
+            lastCellIndices.remove(at: 0)
+        }
     }
 
     func setChapter(to index: Int) throws {

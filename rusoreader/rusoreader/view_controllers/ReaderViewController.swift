@@ -34,7 +34,7 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func viewDidDisappear(_ animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         viewModel.commitProgress()
     }
     
@@ -91,10 +91,13 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
         return cell
     }
     
-    override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {        
-        if indexPath.row < viewModel.paragraphCount() - 1 {
-            viewModel.updateProgress(to: indexPath.row + 1)
-        }
+    // When a cell arrives and exits we will temporary save the index in the view model and we will use it for resuming the users chapter progress
+    override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        viewModel.addToLastCellIndices(indexPath.row)
+    }
+    
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        viewModel.addToLastCellIndices(indexPath.row)
     }
     
     /// Takes a gesture location and uses it to find the tapped word and ultimately select the bounds of the entire sentence. Once this is finished word will be searched in the repository and then the WordDetailsView modal will pop up onto the screen.
