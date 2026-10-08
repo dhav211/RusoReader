@@ -1,5 +1,9 @@
 import Foundation
 
+enum BookServiceError: Error {
+    case failedToStartAccessingSecurityScopedResource
+}
+
 class BookService {
     private let bookRepo: BookRepository
     
@@ -7,15 +11,19 @@ class BookService {
         self.bookRepo = bookRepo
     }
     
-    func parseBook(from url: URL) throws {
+    /// Extracts the data from a book object, currently supports epub
+    /// - Parameter url: The url on the device to the book
+    /// - Returns: If successful it will return a parsed book, if an error as occured then a nil will be returned.
+    func parseBook(from url: URL) throws -> Book {
         if url.startAccessingSecurityScopedResource() {
             defer { url.stopAccessingSecurityScopedResource() }
             
             let epubParser = EpubParser()
             
-            if let parsedBook = epubParser.parse(from: url) {
-                try bookRepo.saveBook(parsedBook: parsedBook)
-            }
+            let parsedBook = try epubParser.parse(from: url)
+            return try bookRepo.saveBook(parsedBook: parsedBook)
+        } else {
+            throw BookServiceError.failedToStartAccessingSecurityScopedResource
         }
     }
     
@@ -31,8 +39,8 @@ class BookService {
         return bookRepo.getLastReadBook()
     }
     
-    func removeBook(book: Book) throws {
-        try bookRepo.removeBook(by: book.id)
+    func removeBook(by id: Int) throws {
+        try bookRepo.removeBook(by: id)
     }
 
     func update(book: Book) throws {

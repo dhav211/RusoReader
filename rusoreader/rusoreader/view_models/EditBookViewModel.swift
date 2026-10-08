@@ -7,10 +7,6 @@ final class EditBookViewModel {
         self.bookService = bookService
     }
     
-    func deleteBook() throws {
-        try bookService.removeBook(book: book)
-    }
-    
     func updateBook(author: String, title: String) throws {
         var bookToUpdate = book
         bookToUpdate.author = author

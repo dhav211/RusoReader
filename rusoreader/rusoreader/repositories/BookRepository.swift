@@ -3,11 +3,14 @@ import Foundation
 
 enum BookRepositoryError: Error, LocalizedError {
     case notFound(id: Int)
+    case noBookId
     
     var errorDescription: String? {
         switch self {
         case .notFound(let id):
             return "Book with id \(id) was not found"
+        case .noBookId:
+            return "Book doesn't have an ID this means a saving error"
         }
     }
 }
@@ -24,7 +27,7 @@ class BookRepository {
     /// Once a book has been parsed we can save it to the database for retrieval
     /// - Parameter parsedBook: The output from the EbookParser, this will contain the book and the chapters
     /// - Returns: A complete book object, this return will be useful for opening a book immediately after the user as added it
-    func saveBook(parsedBook: ParsedBook) throws {
+    func saveBook(parsedBook: ParsedBook) throws -> Book {
             return try databaseManager.userDataQueue.write { db in
                 // We are creating a url to the saved cover image, this is a different url from the cover image in the epub. If there is no cover image in the book we will just skip past it, the cover image isn't required
                 let coverImageUrl: String = try {
@@ -58,6 +61,17 @@ class BookRepository {
                     try chapter.insert(db)
                     chapters.append(chapter)
                 }
+                
+                guard let bookId = book.id else { throw BookRepositoryError.noBookId }
+                
+                return Book(id: Int(bookId),
+                            name: book.name,
+                            author: book.author,
+                            coverImageUrl: book.cover_image_url,
+                            currentChapter: 1,
+                            numberOfChapters: chapters.count,
+                            dateCreated: book.date_created
+                )
             }
     }
     

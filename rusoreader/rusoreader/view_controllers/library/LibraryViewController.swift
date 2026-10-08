@@ -24,6 +24,24 @@ final class LibraryViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(LibraryBookTableViewCell.self, forCellReuseIdentifier: LibraryBookTableViewCell.reuseIdentifier)
+        let addBookBarButton = viewModel.createAddBookBarButton()
+        addBookBarButton.presentingViewController = self
+        addBookBarButton.onBooksAdded = { [weak self] (book: Book) in
+            self?.books.append(
+                LibraryBook(
+                    id: book.id,
+                    title: book.name,
+                    author: book.author,
+                    sortDate: book.dateCreated,
+                    currentChapter: book.currentChapter,
+                    numberOfChapters: book.numberOfChapters,
+                    coverImageUrl: book.coverImageUrl
+                )
+            )
+            self?.books.sort(by: { $0.sortDate > $1.sortDate })
+            self?.tableView.reloadData()
+        }
+        navigationItem.rightBarButtonItem = addBookBarButton
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -77,8 +95,23 @@ final class LibraryViewController: UITableViewController {
                 editBookController.sheetPresentationController?.detents = [.medium()]
                 self?.present(editBookController, animated: true)
             }
-            let delete = UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { _ in
-                // ...
+            // Since deleting a book is a highly destructive action we should display a bit of warning just in case the user accidently clicks the delete button
+            // This will pop up an alert menu where the user can make the confirmation
+            let delete = UIAction(title: "Delete Book", image: UIImage(systemName: "trash")) { _ in
+                let deleteAlert = UIAlertController(title: "Delete Book", message: "Are you sure you want to delete this book? This action cannot be undone.", preferredStyle: .alert)
+                deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+                deleteAlert.addAction(UIAlertAction(title: "Delete", style: .destructive) { _ in
+                    guard let bookId = self?.books[indexPath.row].id else { return }
+                    do {
+                        try self?.viewModel.deleteBook(bookId: bookId)
+                        self?.books.remove(at: indexPath.row)
+                        self?.tableView.reloadData()
+                    } catch {
+                        print(error)
+                        // TODO display another UI Alert if possible saying there was an issue with deleting the book
+                    }
+                })
+                self?.present(deleteAlert, animated: true)
             }
             return UIMenu(children: [edit, delete])
         }

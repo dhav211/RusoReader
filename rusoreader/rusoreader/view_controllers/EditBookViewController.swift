@@ -42,23 +42,6 @@ class EditBookViewController : UIViewController {
         // The text fields will call the updateSaveButtonState when edited, this will manage the save buttons enabled state
         authorField.onUpdated = updateSaveButtonState
         titleField.onUpdated = updateSaveButtonState
-        
-        // Since deleting a book is a highly destructive action we should display a bit of warning just in case the user accidently clicks the delete button
-        // This will pop up an alert menu where the user can make the confirmation
-        let deleteAction = UIAction(title: "Delete Book") { _ in
-            let deleteAlert = UIAlertController(title: "Delete Book", message: "Are you sure you want to delete this book? This action cannot be undone.", preferredStyle: .alert)
-            deleteAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-            deleteAlert.addAction(UIAlertAction(title: "Delete", style: .destructive) { _ in
-                do {
-                    try self.viewModel.deleteBook()
-                    self.dismiss(animated: true)
-                } catch {
-                    print(error)
-                    // TODO display another UI Alert if possible saying there was an issue with deleting the book
-                }
-            })
-            self.present(deleteAlert, animated: true)
-        }
                 
         NSLayoutConstraint.activate([
             contentStack.centerYAnchor.constraint(equalTo: view.centerYAnchor),

@@ -5,6 +5,7 @@ import ZIPFoundation
 final class EpubParser : EbookParser {
     
     enum EpubParsingError : Error {
+        case fileNotExists(url: String)
         case failedToExtractContent(url: String)
         case failedToUnzip
         case failedToParse
@@ -18,60 +19,53 @@ final class EpubParser : EbookParser {
     /// Parses an epub file from a given URL bath.
     /// - Parameter bookUrl: The path to epub you wish to parse, this will probably be from the document picker
     /// - Returns: A parsed book object is comprised of a book and chapters array, this will hold all the information need to store the book in the database
-    func parse(from bookUrl: URL) -> ParsedBook? {
+    func parse(from bookUrl: URL) throws -> ParsedBook {
         let fileManager = FileManager()
         if fileManager.fileExists(atPath: bookUrl.path) {
-            do {
-                // Establish the structure of the epub by getting the content path and foler
-                let archive = try Archive(url: bookUrl, accessMode: .read)
-                guard let containerXmlText = try extractText(from: archive, with: "META-INF/container.xml") else { throw EpubParsingError.failedToParse }
-                let contentPath = getContentFilePath(in: containerXmlText)
-                
-                // throughout this function we will need the initial folder where the content file is held. Not only is the content file held there but just about every other piece of information required for the epub, such as images and the actual text contents of the chapters
-                let contentFolderPath = {
-                    var path = ""
+            // Establish the structure of the epub by getting the content path and foler
+            let archive = try Archive(url: bookUrl, accessMode: .read)
+            guard let containerXmlText = try extractText(from: archive, with: "META-INF/container.xml") else { throw EpubParsingError.failedToParse }
+            let contentPath = getContentFilePath(in: containerXmlText)
+            
+            // throughout this function we will need the initial folder where the content file is held. Not only is the content file held there but just about every other piece of information required for the epub, such as images and the actual text contents of the chapters
+            let contentFolderPath = {
+                var path = ""
 
-                    // This epub doesn't really contain much of a directory structure, so return an empty string
-                    if !contentPath.contains("/") {
-                        return ""
-                    }
-                    
-                    for char in contentPath {
-                        path.append(char)
-                        if char == "/" {
-                            break;
-                        }
-                    }
-                    return path
-                }()
-                
-                // Once the content file path has been found we can get the actual text from it and begin getting information from the epub
-                guard let contentText = try extractText(from: archive, with: contentPath) else { throw EpubParsingError.failedToParse }
-                
-                // The content file will hold all we need to know about the book, so we will parse it here and keep it in a BookDetails struct
-                var bookDetails = try getBookDetails(from: contentText)
-                
-                // Although the location of the cover image is in the content file, lets first save it to the app and keep that url
-                // The cover image may not exist though, so if it doesn't we will skip past it
-                if let coverImageData = try extractCoverImage(from: archive, with: contentText, contentFolderPath: contentFolderPath) {
-                    bookDetails.coverImage = coverImageData.data
-                    bookDetails.coverImageFileType = coverImageData.fileType
+                // This epub doesn't really contain much of a directory structure, so return an empty string
+                if !contentPath.contains("/") {
+                    return ""
                 }
                 
-                let tocPath = try getTableOfContentsPath(in: contentText)
-                guard let tocText = try extractText(from: archive, with: contentFolderPath + tocPath) else { throw EpubParsingError.noTableOfContents }
-                let chapters = parseChapters(from: archive, tableOfContentsText: tocText, contentFolderPath: contentFolderPath)
-                
-                return ParsedBook(book: bookDetails, chapters: chapters)
-            } catch EpubParsingError.failedToExtractContent(let url) {
-                print("Failed to extract content from \(url)")
-            } catch EpubParsingError.noTableOfContents {
-                print("Failed to find table of contents")
-            } catch {
-                print("\(error)")
+                for char in contentPath {
+                    path.append(char)
+                    if char == "/" {
+                        break;
+                    }
+                }
+                return path
+            }()
+            
+            // Once the content file path has been found we can get the actual text from it and begin getting information from the epub
+            guard let contentText = try extractText(from: archive, with: contentPath) else { throw EpubParsingError.failedToParse }
+            
+            // The content file will hold all we need to know about the book, so we will parse it here and keep it in a BookDetails struct
+            var bookDetails = try getBookDetails(from: contentText)
+            
+            // Although the location of the cover image is in the content file, lets first save it to the app and keep that url
+            // The cover image may not exist though, so if it doesn't we will skip past it
+            if let coverImageData = try extractCoverImage(from: archive, with: contentText, contentFolderPath: contentFolderPath) {
+                bookDetails.coverImage = coverImageData.data
+                bookDetails.coverImageFileType = coverImageData.fileType
             }
+            
+            let tocPath = try getTableOfContentsPath(in: contentText)
+            guard let tocText = try extractText(from: archive, with: contentFolderPath + tocPath) else { throw EpubParsingError.noTableOfContents }
+            let chapters = parseChapters(from: archive, tableOfContentsText: tocText, contentFolderPath: contentFolderPath)
+            
+            return ParsedBook(book: bookDetails, chapters: chapters)
+        } else {
+            throw EpubParsingError.fileNotExists(url: bookUrl.absoluteString)
         }
-        return nil
     }
     
     /// Extracts the text data from the archive with the given addresss in the epub archive

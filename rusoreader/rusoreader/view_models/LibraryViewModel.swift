@@ -39,6 +39,10 @@ final class LibraryViewModel {
         return EditBookViewController(viewModel: editBookViewModel)
     }
     
+    func createAddBookBarButton() -> AddBookBarButton {
+        return AddBookBarButton(bookService: bookService)
+    }
+    
     func getUpdatedLibraryBook(by id: Int) -> LibraryBook? {
         guard let book = bookService.getBook(by: id) else { return nil }
         guard let sortDate = book.dateLastOpened == nil ? book.dateCreated : book.dateLastOpened else { return nil }
@@ -100,5 +104,9 @@ final class LibraryViewModel {
     
     func openBook(_ libraryBook: LibraryBook) {
         currentOpenedBook = libraryBook
+    }
+    
+    func deleteBook(bookId: Int) throws {
+        try bookService.removeBook(by: bookId)
     }
 }
