@@ -237,6 +237,7 @@ class DictionaryRepository {
                 if var entry = try getDatabaseEntry(by: Int64(word.id), from: db) {
                     entry.score = max(0.0, entry.score + scoreChangeAmount)
                     entry.due_date = newDueDate
+                    entry.times_appeared += 1
                     try entry.update(db)
                 }
             }

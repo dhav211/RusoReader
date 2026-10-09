@@ -9,24 +9,16 @@ class ExerciseCoordinator {
     private let dictionaryService: DictionaryService
     private let wordService: WordService
     private let sentenceService: SentenceService
-    private let onLoadNextExercise: () -> Void
-    private let onShowSummary: () -> Void
     private let speechSynth: SpeechSynth
     
-    init(dictionaryService: DictionaryService, wordService: WordService, sentenceService: SentenceService, onLoadNextExercise: @escaping () -> Void, onShowSummary: @escaping () -> Void) {
+    var onLoadNextExercise: (() -> Void)?
+    var onShowSummary: (() -> Void)?
+    
+    init(dictionaryService: DictionaryService, wordService: WordService, sentenceService: SentenceService) {
         self.dictionaryService = dictionaryService
         self.wordService = wordService
         self.sentenceService = sentenceService
-        self.onLoadNextExercise = onLoadNextExercise
-        self.onShowSummary = onShowSummary
         self.speechSynth = SpeechSynth()
-
-        self.exercises =  Self.createExerciseFactories(
-            exerciseWords: dictionaryService.wordsForExercise(), 
-            sentenceService: sentenceService, 
-            wordService: wordService,
-            speechSynth: speechSynth
-        )
     }
     
     
@@ -39,9 +31,9 @@ class ExerciseCoordinator {
     }
     
     /// Create exercises on 10 words, this will create the factories, which hold all the information to create the exercise view controllers
-    /// - Returns: A list of exercise factories which will create the exercise view controllers as they are removed from the list
-    static func createExerciseFactories(exerciseWords: [ExerciseWord], sentenceService: SentenceService, wordService: WordService, speechSynth: SpeechSynth) -> [ExerciseFactory] {
+    func createExercises() {
         var rounds = Array(repeating: [ExerciseFactory](), count: 3)
+        let exerciseWords = dictionaryService.wordsForExercise()
 
         for exerciseWord in exerciseWords {
             let factories: [ExerciseFactory] = {
@@ -66,29 +58,10 @@ class ExerciseCoordinator {
             }
         }
         
-//         return exerciseWords.compactMap { word in
-//             // uncomment this when we are ready to reimplement flash cards
-//             // we will have a spaced repetion algorithm that will choose the words and the exercises
-//             // right now we are just testing the exercises themselves
-// //            if !word.translations.isEmpty {
-// //                let sentence = sentenceService.findSingleSentence(by: word.id)
-// //
-// //                return FlashcardFactory(
-// //                    word: word,
-// //                    sentence: sentence?.text ?? "",
-// //                    flashcardExerciseViewModel: FlashcardExerciseViewModel(word: word, sentence: sentence?.text ?? "", wordService: wordService, sentenceService: sentenceService)
-// //                )
-// //            }
-//             // if word.type != .adverb || word.type != .other { this is for word ending exercises
-//             if wordService.hasMultipleVowels(word) {
-//                 return StressChoiceExerciseFactory(word: word, wordService: wordService)
-//             }
-//             return nil
-//         }
-        return rounds[0].shuffled() + rounds[1].shuffled() + rounds[2].shuffled()
+        exercises = rounds[0].shuffled() + rounds[1].shuffled() + rounds[2].shuffled()
     }
 
-    static private func createExercisesForNew(exerciseWord: ExerciseWord,
+    private func createExercisesForNew(exerciseWord: ExerciseWord,
                                               sentenceService: SentenceService,
                                               wordService: WordService,
                                               speechSynth: SpeechSynth) -> [ExerciseFactory] {
@@ -125,9 +98,9 @@ class ExerciseCoordinator {
 extension ExerciseCoordinator: CompletedExerciseDelegate {
     func next() {
         if exercises.isEmpty {
-            onShowSummary()
+            onShowSummary?()
         } else {
-            onLoadNextExercise()
+            onLoadNextExercise?()
         }
     }
     
