@@ -65,7 +65,7 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
     }
     
     override func viewDidLayoutSubviews() {
-        if shouldScroll && viewModel.paragraphCount() != 0 {
+        if shouldScroll && viewModel.paragraphCount() != 0 && viewModel.paragraphCount() > viewModel.currentProgress {
             shouldScroll = false
             tableView.scrollToRow(
                 at: IndexPath(row: viewModel.currentProgress, section: 0), at: .top,
