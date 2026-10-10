@@ -9,6 +9,10 @@ struct ExerciseWord {
     let id: Int
     let word: Word
     let userLevel: UserLevel
+    
+    var canBeDeclined: Bool {
+        return word.type != .adverb && word.type != .other
+    }
 
     init(word: Word, timesAppeared: Int, score: Double) {
         self.id = word.id

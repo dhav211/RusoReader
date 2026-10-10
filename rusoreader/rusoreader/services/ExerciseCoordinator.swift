@@ -4,6 +4,13 @@ enum ExerciseCoordinatorError: Error {
     case incorrectWordAmountInDictionary
 }
 
+enum ExerciseType {
+    case flashcard
+    case wordEnding
+    case wordEndingMultipleChoice
+    case stressChoice
+}
+
 class ExerciseCoordinator {
     private var exercises = [ExerciseFactory]()
     private let dictionaryService: DictionaryService
@@ -39,16 +46,16 @@ class ExerciseCoordinator {
             let factories: [ExerciseFactory] = {
                 switch exerciseWord.userLevel {
                     case .new:
-                    return createExercisesForNew(exerciseWord: exerciseWord, sentenceService: sentenceService, wordService: wordService, speechSynth: speechSynth)
+                    return createExerciseFactories(for: exerciseWord, types: [.flashcard, .wordEndingMultipleChoice])
     
                     case .unfamiliar:
-                    return createExercisesForNew(exerciseWord: exerciseWord, sentenceService: sentenceService, wordService: wordService, speechSynth: speechSynth)
+                    return createExerciseFactories(for: exerciseWord, types: [.wordEndingMultipleChoice, .wordEnding])
     
                     case .familiar:
-                    return createExercisesForNew(exerciseWord: exerciseWord, sentenceService: sentenceService, wordService: wordService, speechSynth: speechSynth)
+                    return createExerciseFactories(for: exerciseWord, types: [.wordEnding, .stressChoice])
     
                     case .fluent:
-                    return createExercisesForNew(exerciseWord: exerciseWord, sentenceService: sentenceService, wordService: wordService, speechSynth: speechSynth)
+                    return createExerciseFactories(for: exerciseWord, types: [.wordEndingMultipleChoice])
                 }
             }()
 
@@ -60,37 +67,60 @@ class ExerciseCoordinator {
         
         exercises = rounds[0].shuffled() + rounds[1].shuffled() + rounds[2].shuffled()
     }
-
-    private func createExercisesForNew(exerciseWord: ExerciseWord,
-                                              sentenceService: SentenceService,
-                                              wordService: WordService,
-                                              speechSynth: SpeechSynth) -> [ExerciseFactory] {
+    
+    private func createExerciseFactories(for exerciseWord: ExerciseWord, types: [ExerciseType]) -> [ExerciseFactory] {
         var factories = [ExerciseFactory]()
-        if !exerciseWord.word.translations.isEmpty {
-            let sentence = sentenceService.findSingleSentence(by: exerciseWord.word.id)
-            factories.append(
-                FlashcardFactory(
-                    word: exerciseWord.word,
-                    sentence: sentence?.text ?? "",
-                    flashcardExerciseViewModel: FlashcardExerciseViewModel(
-                        word: exerciseWord.word, 
-                        sentence: sentence?.text ?? "", 
-                        wordService: wordService, 
-                        sentenceService: sentenceService
-                    ),
-                    speechSynth: speechSynth
-                )
-            )
+        
+        for type in types {
+            switch type {
+            case .flashcard:
+                if !exerciseWord.word.translations.isEmpty {
+                    let sentence = sentenceService.findSingleSentence(by: exerciseWord.word.id)
+                    factories.append(
+                        FlashcardFactory(
+                            word: exerciseWord.word,
+                            sentence: sentence?.text ?? "",
+                            flashcardExerciseViewModel: FlashcardExerciseViewModel(
+                                word: exerciseWord.word,
+                                sentence: sentence?.text ?? "",
+                                wordService: wordService,
+                                sentenceService: sentenceService
+                            ),
+                            speechSynth: speechSynth
+                        )
+                    )
+                }
+                
+            case .wordEnding:
+                if exerciseWord.canBeDeclined {
+                    factories.append(
+                        WordEndingFactory(
+                            word: exerciseWord.word,
+                            wordService: wordService
+                        )
+                    )
+                }
+            case .wordEndingMultipleChoice:
+                if exerciseWord.canBeDeclined {
+                    factories.append(
+                        WordEndingMultipleChoiceFactory(
+                            word: exerciseWord.word,
+                            wordService: wordService
+                        )
+                    )
+                }
+            case .stressChoice:
+                if wordService.hasMultipleVowels(exerciseWord.word) {
+                    factories.append(
+                        StressChoiceExerciseFactory(
+                            word: exerciseWord.word,
+                            wordService: wordService
+                        )
+                    )
+                }
+            }
         }
-        if exerciseWord.word.type != .adverb && exerciseWord.word.type != .other {
-            factories.append(
-                WordEndingMultipleChoiceFactory(
-                    word: exerciseWord.word, 
-                    wordService: wordService
-                )
-            )
-        }
-
+        
         return factories
     }
 }

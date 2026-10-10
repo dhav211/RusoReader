@@ -31,7 +31,7 @@ class DictionaryRepository {
     ///   - lastSeen: Set the last time the user has seen the word word in exercises or clicking on, defaults to todays date
     ///   - dueDate: Set the date the spaced repetition algorithim will choose the word, defaults to tomorrows date
     func addWord(by wordId: Int,
-        score: Double = 3.0,
+        score: Double = 6.0,
         timesClicked: Int = 1,
         timesAppeared: Int = 0,
         firstSeen: Date = Date.now,
