@@ -119,22 +119,49 @@ class WordService {
         return wordWithoutPunct
     }
     
-    func getWordStem(of word: Word) -> String {
-        let wordChars = Array(word.bare)
-        guard !wordChars.isEmpty else { return "" }
-    
-        for i in 1..<wordChars.count {
-            for wordForm in word.forms {
-                if wordForm.bare.isEmpty { continue }
-                let formChars = Array(wordForm.bare)
-                guard formChars.first == wordChars.first else { continue }
-    
-                if wordChars.count < i || formChars.count < i || formChars[0...i] != wordChars[0...i] {
-                    return String(wordChars[0..<i])  // safe: always sliced from word, always in bounds
-                }
+    /// Finds the stem(s) of a word, can occassionally return multiple stems depending on the word.
+    /// - Parameter word: The word we will find the stems
+    /// - Returns: An array of strings which represent the stem(s) of the given word
+    func getWordStems(of word: Word) -> [String] {
+        var forms = [String]()
+        for form in word.forms {
+            let splitForm = form.bare.split(separator: ",")
+            for splitForm in splitForm {
+                forms.append(String(splitForm))
             }
         }
-        return ""
+        
+        return stems(from: forms)
+    }
+    
+    private func commonPrefix(_ words: [String]) -> String {
+        guard var prefix = words.first else { return "" }
+        for word in words.dropFirst() {
+            while !word.hasPrefix(prefix) {
+                prefix.removeLast()
+                if prefix.isEmpty { return "" }
+            }
+        }
+        return prefix
+    }
+
+    private func stems(from words: [String]) -> [String] {
+        guard !words.isEmpty else { return [] }
+
+        let prefix = commonPrefix(words)
+
+        // Group words by the character that follows the shared prefix.
+        // A word that equals the prefix exactly gets the key nil.
+        let branches = Dictionary(grouping: words) { $0.dropFirst(prefix.count).first }
+
+        // Split only if every branch is a real group (2+ words) and
+        // no word ends right at the prefix.
+        let canSplit = branches.count > 1
+            && !branches.keys.contains(nil)
+            && branches.values.allSatisfy { $0.count >= 2 }
+
+        guard canSplit else { return [prefix] }
+        return branches.values.flatMap { stems(from: $0) }
     }
 
     func getRandomCommaSeperatedWordForm(_ commaSeperatedWordForm: String) -> String {

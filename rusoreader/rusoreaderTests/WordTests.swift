@@ -81,7 +81,7 @@ final class WordTests: XCTestCase {
     
     func testGetStemForЖенщина() throws {
         let word = wordRepo.findMatches(by: [169]).first!
-        let stem = wordService.getWordStem(of: word)
+        let stem = wordService.getWordStems(of: word).first!
         let expected = "женщин"
         
         XCTAssert(stem == expected)
@@ -89,10 +89,34 @@ final class WordTests: XCTestCase {
     
     func testGetStemForВстретиться() throws {
         let word = wordRepo.findMatches(by: [1169]).first!
-        let stem = wordService.getWordStem(of: word)
+        let stem = wordService.getWordStems(of: word).first!
         let expected = "встре"
         
         XCTAssert(stem == expected)
+    }
+    
+    func testGetStemForЧастица() throws {
+        let word = wordRepo.findMatches(by: [5409]).first!
+        let stem = wordService.getWordStems(of: word).first!
+        let expected = "частиц"
+        
+        XCTAssert(stem == expected)
+    }
+    
+    func testGetStemsForРебёнок() throws {
+        let word = wordRepo.findMatches(by: [173]).first!
+        let stems = wordService.getWordStems(of: word).sorted()
+        let expected = ["ребён", "дет", "ребят"].sorted()
+        
+        XCTAssert(stems == expected)
+    }
+    
+    func testGetStemsForЧеловек() throws {
+        let word = wordRepo.findMatches(by: [34]).first!
+        let stems = wordService.getWordStems(of: word).sorted()
+        let expected = ["человек", "люд"].sorted()
+        
+        XCTAssert(stems == expected)
     }
 
     func testWordWithAccentMarkSize() throws {
