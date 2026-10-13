@@ -23,6 +23,19 @@ struct Word {
         self.translations = translations
     }
     
+    init() {
+        self.id = 0
+        self.bare = ""
+        self.accented = ""
+        self.type = .other
+        self.level = ""
+        self.ranking = 0
+        self.noun = nil
+        self.verb = nil
+        self.forms = [WordForm]()
+        self.translations = [String]()
+    }
+    
     enum WordType : String {
         case noun = "noun"
         case verb = "verb"

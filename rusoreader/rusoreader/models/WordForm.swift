@@ -3,6 +3,18 @@ struct WordForm {
     let accented: String
     let form: Form
 
+    init(bare: String, accented: String, form: Form) {
+        self.bare = bare
+        self.accented = accented
+        self.form = form
+    }
+    
+    init() {
+        self.bare = ""
+        self.accented = ""
+        self.form = .error
+    }
+    
     var formText: String {
         switch form {
             case .adjectiveFemaleAccusative:
