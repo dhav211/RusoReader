@@ -1,5 +1,5 @@
 import UIKit
-class WordEndingExerciseView : UIViewController, Exercise {
+class WordEndingExerciseView : UIViewController, UITextFieldDelegate, Exercise {
     private let viewModel: WordEndingExerciseViewModel
     private let banner: ExerciseBanner
     private let exerciseArea: UIView
@@ -18,8 +18,8 @@ class WordEndingExerciseView : UIViewController, Exercise {
         self.completionBanner = ExerciseCompletionBanner()
         super.init(nibName: nil, bundle: nil)
 
-        self.submitButton.setClickHandler {
-            self.submit()
+        self.submitButton.setClickHandler { [weak self] in
+            self?.submit()
         }
     }
     
@@ -28,6 +28,13 @@ class WordEndingExerciseView : UIViewController, Exercise {
     }
     
     override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        inputField.delegate = self
+        inputField.returnKeyType = .done
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tap)
         view.backgroundColor = .systemBackground
         
         exerciseArea.translatesAutoresizingMaskIntoConstraints = false
@@ -56,7 +63,6 @@ class WordEndingExerciseView : UIViewController, Exercise {
         inputField.addTarget(self, action: #selector(didEditInputField), for: .editingChanged)
         inputStack.addArrangedSubview(inputField)
         
-
         view.addSubview(submitButton)
         
         NSLayoutConstraint.activate([
@@ -84,17 +90,25 @@ class WordEndingExerciseView : UIViewController, Exercise {
     
     private func submit() {
         view.endEditing(true)
+        submitButton.isHidden = true
         guard let answer = inputField.text else { return }
         let result = viewModel.calculateResult(answer)
         completionDelegate?.grade(result: result)
         
         // Take the users inputed answer then compare it to the actual answer while bolding and underlining incorrect letters
-        let attributedAnswer = result.grade != .correct ? NSMutableAttributedString(string: viewModel.word.bare) : nil
+        let attributedAnswer = result.grade != .correct
+            ? NSMutableAttributedString(
+                string: viewModel.findClosestWordFormVariation(
+                    to: viewModel.cleanAnswerInput(answer)
+                )
+            )
+            : nil
         // we are grabbing the default text so we can get a bold font point size here in the attributed string
         let defaultFont = UIFont.systemFont(ofSize: UIFont.labelFontSize)
-
+        let highlightedDifference = viewModel.createHightlightedDifferenceInAnswer(answer: answer)
+        
         if let attributedAnswer {
-            for affectedIndex in viewModel.createHightlightedDifferenceInAnswer(answer: answer) {
+            for affectedIndex in highlightedDifference {
                 attributedAnswer.addAttributes(
                     [
                         .underlineStyle: NSUnderlineStyle.single.rawValue,
@@ -109,7 +123,15 @@ class WordEndingExerciseView : UIViewController, Exercise {
             self?.completionDelegate?.next()
         }
     }
+    
+    // Handles when the user hits the return key on the keyboard
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        submit()
+        textField.resignFirstResponder()  // dismiss keyboard
+        return true
+    }
 
+    // When the user edits the answer field, this will enable and disable the submit button depending on if there is any text in the answer field
     @objc private func didEditInputField() {
         guard let inputText = inputField.text else { return }
         if inputText.count > 0 {
@@ -117,5 +139,10 @@ class WordEndingExerciseView : UIViewController, Exercise {
         } else {
             submitButton.disable()
         }
+    }
+    
+    @objc func dismissKeyboard() {
+        //Causes the view (or one of its embedded text fields) to resign the first responder status.
+        view.endEditing(true)
     }
 }

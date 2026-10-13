@@ -16,33 +16,55 @@ final class WordEndingExerciseViewModel : ExerciseViewModel {
     /// - Returns: The grade the user will see and the associated score which will affect the spaced repetion algorithim
     func calculateResult(_ answer: String) -> ExerciseResult {
         // we will trim and lowercase the input so the user won't be dinged for accidently clicking space or capitializing a letter
-        let checkable = answer.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        let stem = wordService.getWordStem(of: word)
+        let checkable = cleanAnswerInput(answer)
+        let stems = wordService.getWordStems(of: word)
         
-        // first we will isolate the ending of the word as this is what this exercise is testing
-        guard let endingIndex = wordForm.bare.index(wordForm.bare.startIndex, offsetBy: stem.count, limitedBy: wordForm.bare.endIndex) else {
-            return ExerciseResult(word: word, grade: .error, score: 0)
+        var results = [ExerciseResult.Grade]()
+        
+        for stem in stems {
+            for splitForm in wordForm.bare.split(separator: ",") {
+                // first we will isolate the ending of the word as this is what this exercise is testing
+                guard let endingIndex = splitForm.index(splitForm.startIndex, offsetBy: stem.count, limitedBy: splitForm.endIndex) else {
+                    //return ExerciseResult(word: word, grade: .error, score: 0)
+                    results.append(.error)
+                    continue
+                }
+                let ending = splitForm[endingIndex..<splitForm.endIndex]
+                
+                if !checkable.hasSuffix(ending) {
+                    //return ExerciseResult(word: word, grade: .incorrect, score: 1)
+                    results.append(.incorrect)
+                    continue
+                }
+                
+                // now we will check the stem, in this exercise its not as important so we can be a letter or two off depending on word length
+                let checkableStem = String(checkable[checkable.startIndex..<checkable.index(checkable.endIndex, offsetBy: -ending.count)])
+                let differenceTolerance = max(checkableStem.count / 10, 1)
+                let difference = StringComparasion.compare(stem, checkableStem)
+                
+                // an exact match is considered correct with full points
+                if difference == 0 {
+                    results.append(.correct)
+                    // if it's within tolerance points are still rewarded but let the user know they weren't fully correct
+                } else if difference > 0 && difference <= differenceTolerance {
+                    results.append(.almost)
+                    // out of tolerance means the exercise was wrong, points will be affected and user must try again
+                } else {
+                    results.append(.incorrect)
+                }
+            }
         }
-        let ending = wordForm.bare[endingIndex..<wordForm.bare.endIndex]
-        
-        if !checkable.hasSuffix(ending) {
-            return ExerciseResult(word: word, grade: .incorrect, score: 1)
-        }
-        
-        // now we will check the stem, in this exercise its not as important so we can be a letter or two off depending on word length
-        let checkableStem = String(checkable[checkable.startIndex..<checkable.index(checkable.endIndex, offsetBy: -ending.count)])
-        let differenceTolerance = max(checkableStem.count / 10, 1)
-        let difference = StringComparasion.compare(stem, checkableStem)
-        
-        // an exact match is considered correct with full points
-        if difference == 0 {
+
+        // check the results array to see if we succeded or failed in the exercise
+        // this is in a particular order or operations, we first must check if there are any correct results, then move down.
+        if results.contains(.correct) {
             return ExerciseResult(word: word, grade: .correct, score: -1)
-        // if it's within tolerance points are still rewarded but let the user know they weren't fully correct
-        } else if difference > 0 && difference <= differenceTolerance {
+        } else if results.contains(.almost) {
             return ExerciseResult(word: word, grade: .almost, score: -0.5)
-        // out of tolerance means the exercise was wrong, points will be affected and user must try again
-        } else {
+        } else if results.contains(.incorrect) {
             return ExerciseResult(word: word, grade: .incorrect, score: 1)
+        } else {
+            return ExerciseResult(word: word, grade: .error, score: 0)
         }
     }
     
@@ -51,7 +73,7 @@ final class WordEndingExerciseViewModel : ExerciseViewModel {
     /// - Returns: An array of ints which show which letters are different, this will be used to create an AttributedString with bold and underlines
     func createHightlightedDifferenceInAnswer(answer: String) -> [Int] {
         var editedAnswer = Array(answer.trim().lowercased())
-        let correctAnswer = Array(wordForm.bare)
+        let correctAnswer = wordForm.bare.contains(",") ? Array(findClosestWordFormVariation(to: answer)) : Array(wordForm.bare)
         var affectedIndices = [Int]()
         
         // loop through the correct answer array, on each step we will check to see if the letters at the i index are the same
@@ -99,6 +121,20 @@ final class WordEndingExerciseViewModel : ExerciseViewModel {
         
         return affectedIndices
     }
+    
+    func findClosestWordFormVariation(to answer: String) -> String {
+        typealias WordFormComparasion = (wordForm: String, comparasionDistance: Int)
+        let wordFormComparasions: [WordFormComparasion] = wordForm.bare.split(separator: ",").map {
+            let compared = String($0)
+            return (wordForm: compared, comparasionDistance: StringComparasion.compare(answer, compared))
+        }
+        
+        return wordFormComparasions.sorted(by: { $0.comparasionDistance < $1.comparasionDistance }).first?.wordForm ?? wordForm.bare
+    }
+    
+    func cleanAnswerInput(_ answer: String) -> String {
+        return answer.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 
     var accentedBaseFormText: String {
         return wordService.addStress(to: word.accented)
@@ -110,5 +146,9 @@ final class WordEndingExerciseViewModel : ExerciseViewModel {
 
     var formText: String {
         return wordForm.formText
+    }
+    
+    var wordFormBare: String {
+        return wordForm.bare
     }
 }

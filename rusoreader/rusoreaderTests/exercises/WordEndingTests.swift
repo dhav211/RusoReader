@@ -74,6 +74,20 @@ final class WordEndingTests: XCTestCase {
         let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "женщине", accented: "же'нщине", form: .nounSingularDative), wordService: wordService)
         XCTAssert(sut.calculateResult( "жинщене").grade == .incorrect)
     }
+    
+    func testРебёнкаPrepositionalPluralNoun() throws {
+        let word = wordRepo.findMatches(by: [173]).first!
+        
+        let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "детях,ребятах", accented: "де'тях,ребя'тах", form: .nounPluralPrepositional), wordService: wordService)
+        XCTAssert(sut.calculateResult("детях").grade == .correct)
+    }
+    
+    func testРебёнкаPrepositionalPluralNounSecondForm() throws {
+        let word = wordRepo.findMatches(by: [173]).first!
+        
+        let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "детях,ребятах", accented: "ребёнка", form: .nounPluralPrepositional), wordService: wordService)
+        XCTAssert(sut.calculateResult("ребятах").grade == .correct)
+    }
 
     func testHighlightedDifferenceForAllWrong() throws {
         let word = wordRepo.findMatches(by: [173]).first!
@@ -87,6 +101,13 @@ final class WordEndingTests: XCTestCase {
         
         let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "ребёнка", accented: "ребёнка", form: .nounSingularAccusative), wordService: wordService)
         XCTAssert(sut.createHightlightedDifferenceInAnswer(answer: "рибёнка") == [1])
+    }
+    
+    func testHighlightedDifferenceForДетьмиAndДетями() throws {
+        let word = wordRepo.findMatches(by: [173]).first!
+        
+        let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "детьми,ребятами", accented: "детьми',ребя'тами", form: .nounPluralInstrumental), wordService: wordService)
+        XCTAssert(sut.createHightlightedDifferenceInAnswer(answer: "детями") == [3])
     }
     
     func testHighlightedDifferenceWithMissingLetter() throws {
@@ -150,5 +171,15 @@ final class WordEndingTests: XCTestCase {
         
         let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "более", accented: "бо'лее", form: .nounSingularAccusative), wordService: wordService)
         XCTAssert(sut.createHightlightedDifferenceInAnswer(answer: "боле") == [4])
+    }
+    
+    func testCleanAnswerBlank() throws {
+        let sut = WordEndingExerciseViewModel(word: Word(), wordForm: WordForm(), wordService: wordService)
+        XCTAssert(sut.cleanAnswerInput("") == "")
+    }
+    
+    func testCleanAnswerSpaces() throws {
+        let sut = WordEndingExerciseViewModel(word: Word(), wordForm: WordForm(), wordService: wordService)
+        XCTAssert(sut.cleanAnswerInput("   ") == "")
     }
 }
