@@ -153,5 +153,15 @@ final class WordTests: XCTestCase {
         let sut = wordService.getRandomCommaSeperatedWordForm("testtesty")
         XCTAssert(sut == "testtesty")
     }
+    
+    func testTranslationTestForSingleTranslationWord() {
+        let sut = wordService.findMatches(from: [299]).first!
+        XCTAssert(sut.translationText == "early")
+    }
+    
+    func testTranslationTestFor3TranslationWord() {
+        let sut = wordService.findMatches(from: [262]).first!
+        XCTAssert(sut.translationText == "name, first name\nreputation\nnoun")
+    }
 }
 

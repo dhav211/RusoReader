@@ -10,6 +10,30 @@ struct Word {
     let forms: [WordForm]
     let translations: [String]
     
+    /// The top 3 translations for a word in a formatted string
+    var translationText: String {
+        var text = ""
+        var i = 0
+        let max = 3 // We will avoid anything over the third translation as it may begin to cause formatting issues
+        
+        for translation in translations {
+            if i < max {
+                text.append("\(translation)\n")
+            } else {
+                break
+            }
+            
+            i += 1
+        }
+        
+        // Remove the last new line character from the string
+        if !text.isEmpty {
+            text.removeLast()
+        }
+        
+        return text
+    }
+    
     init(id: Int, bare: String, accented: String, type: WordType, level: String, ranking: Int, noun: Noun?, verb: Verb?, forms: [WordForm], translations: [String]) {
         self.id = id
         self.bare = bare
