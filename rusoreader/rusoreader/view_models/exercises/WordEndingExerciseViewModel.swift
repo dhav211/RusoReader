@@ -16,13 +16,16 @@ final class WordEndingExerciseViewModel : ExerciseViewModel {
     /// - Returns: The grade the user will see and the associated score which will affect the spaced repetion algorithim
     func calculateResult(_ answer: String) -> ExerciseResult {
         // we will trim and lowercase the input so the user won't be dinged for accidently clicking space or capitializing a letter
-        let checkable = cleanAnswerInput(answer)
-        let stems = wordService.getWordStems(of: word)
+        let checkable = cleanAnswerInput(answer.replacingOccurrences(of: "ё", with: "е"))
+        let stems = wordService
+            .getWordStems(of: word)
+            .map { return $0.replacingOccurrences(of: "ё", with: "е") } // Remove the ё so users don't get it wrong for not using it
+        let splitForms = wordForm.bare.split(separator: ",").map({ return $0.replacingOccurrences(of: "ё", with: "е") })
         
         var results = [ExerciseResult.Grade]()
         
         for stem in stems {
-            for splitForm in wordForm.bare.split(separator: ",") {
+            for splitForm in splitForms {
                 // first we will isolate the ending of the word as this is what this exercise is testing
                 guard let endingIndex = splitForm.index(splitForm.startIndex, offsetBy: stem.count, limitedBy: splitForm.endIndex) else {
                     //return ExerciseResult(word: word, grade: .error, score: 0)
@@ -72,8 +75,13 @@ final class WordEndingExerciseViewModel : ExerciseViewModel {
     /// - Parameter answer: The user's input from a text field
     /// - Returns: An array of ints which show which letters are different, this will be used to create an AttributedString with bold and underlines
     func createHightlightedDifferenceInAnswer(answer: String) -> [Int] {
-        var editedAnswer = Array(answer.trim().lowercased())
-        let correctAnswer = wordForm.bare.contains(",") ? Array(findClosestWordFormVariation(to: answer)) : Array(wordForm.bare)
+        // We will need to replace any ё with a e for the user's sake
+        var editedAnswer = Array(cleanAnswerInput(answer).replacingOccurrences(of: "ё", with: "е"))
+        // There exists words that have multiple forms, if we do run across one just check to see which version the user was closest to and compare it to that
+        // We may run into issues here but regardless the user's answer was wrong
+        let correctAnswer = wordForm.bare.contains(",")
+            ? Array(findClosestWordFormVariation(to: answer.replacingOccurrences(of: "ё", with: "е")))
+            : Array(wordForm.bare.replacingOccurrences(of: "ё", with: "е"))
         var affectedIndices = [Int]()
         
         // loop through the correct answer array, on each step we will check to see if the letters at the i index are the same

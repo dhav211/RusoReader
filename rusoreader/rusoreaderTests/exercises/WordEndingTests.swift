@@ -40,6 +40,14 @@ final class WordEndingTests: XCTestCase {
         XCTAssert(sut.calculateResult( "ребёнка").grade == .correct)
     }
     
+    func testРебёнкаWithoutЁ() throws {
+        let word = wordRepo.findMatches(by: [173]).first!
+        
+        let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "ребёнка", accented: "ребёнка", form: .nounSingularAccusative), wordService: wordService)
+        XCTAssert(sut.calculateResult( "ребенка").grade == .correct)
+    }
+    
+    
     func testDativeSingluarNounWithWhiteSpace() throws {
         let word = wordRepo.findMatches(by: [169]).first!
         
@@ -122,6 +130,13 @@ final class WordEndingTests: XCTestCase {
         
         let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "ребёнка", accented: "ребёнка", form: .nounSingularAccusative), wordService: wordService)
         XCTAssert(sut.createHightlightedDifferenceInAnswer(answer: "реббёнка") == [3])
+    }
+    
+    func testNoHighlightedDifferenceWithoutЁ() throws {
+        let word = wordRepo.findMatches(by: [173]).first!
+        
+        let sut = WordEndingExerciseViewModel(word: word, wordForm: WordForm(bare: "ребёнка", accented: "ребёнка", form: .nounSingularAccusative), wordService: wordService)
+        XCTAssert(sut.createHightlightedDifferenceInAnswer(answer: "ребенка") == [])
     }
     
     func testHighlightedDifferenceWithExtraLetterAndMissingLetter() throws {
