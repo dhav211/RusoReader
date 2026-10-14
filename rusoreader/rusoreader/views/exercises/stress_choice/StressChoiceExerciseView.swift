@@ -1,16 +1,9 @@
 import UIKit
 
-class StressChoiceExerciseView : UIViewController, Exercise, MultipleChoiceButtonGroupDelegate {
+class StressChoiceExerciseView : MultipleChoiceExerciseViewController, MultipleChoiceButtonGroupDelegate {
     private let viewModel: StressChoiceExerciseViewModel
-    private let banner: ExerciseBanner
-    private let exerciseArea: UIView
     private let playSound: PlaySoundView
-    private let multipleChoiceGroup: MultipleChoiceButtonGroup
-    private let submitButton: SubmitButton
-    private let completionBanner: ExerciseCompletionBanner
     private var orientation: PhoneOrientation = .portrait
-    
-    weak var completionDelegate: CompletedExerciseDelegate?
 
     private lazy var portraitConstraints = [
         multipleChoiceGroup.centerXAnchor.constraint(equalTo: exerciseArea.centerXAnchor),
@@ -28,17 +21,14 @@ class StressChoiceExerciseView : UIViewController, Exercise, MultipleChoiceButto
     
     init(viewModel: StressChoiceExerciseViewModel) {
         self.viewModel = viewModel
-        self.banner = ExerciseBanner(text: "Choose the correct stress variation")
-        self.exerciseArea = UIView()
-        self.submitButton = SubmitButton()
-        self.completionBanner = ExerciseCompletionBanner()
         self.playSound = PlaySoundView(textToSpeak: viewModel.correctStressedForm)
-        self.multipleChoiceGroup = MultipleChoiceButtonGroup(
-            choiceData: viewModel.stressedWordChoices.map { choice in
-                return MultipleChoiceButtonData(buttonText: choice.1, isCorrect: choice.0 == viewModel.word.accented)
-            }
+        
+        super.init(
+            banner: ExerciseBanner(text: "Choose the correct stress variation"),
+            multipleChoiceGroup: MultipleChoiceButtonGroup(),
+            submitButton: SubmitButton(),
+            completionBanner: ExerciseCompletionBanner()
         )
-        super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
@@ -51,66 +41,53 @@ class StressChoiceExerciseView : UIViewController, Exercise, MultipleChoiceButto
         orientation = PhoneOrientation.set(isViewInPortrait: size.height > size.width)
         setInteractiveElementConstraints()
     }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        print("exerciseArea:", exerciseArea.frame)
-        print("multipleChoiceGroup:", multipleChoiceGroup.frame)
-        print("playSound:", playSound.frame)
-    }
     
     override func viewDidLoad() {
+        super.viewDidLoad()
+        setup()
+    }
+    
+    override func setup() {
+        super.setup()
+        
         view.backgroundColor = .systemBackground
         orientation = PhoneOrientation.set(isViewInPortrait: traitCollection.verticalSizeClass == .regular &&
                               traitCollection.horizontalSizeClass == .compact)
         
         exerciseArea.translatesAutoresizingMaskIntoConstraints = false
         
-        view.addSubview(banner)
-        view.addSubview(exerciseArea)
-        addChild(completionBanner)
-        view.addSubview(completionBanner.view)
-        view.addSubview(submitButton)
-        completionBanner.didMove(toParent: self)
+        multipleChoiceGroup.setChoices(
+            choiceData: viewModel.stressedWordChoices.map { choice in
+                return MultipleChoiceButtonData(buttonText: choice.1, isCorrect: choice.0 == viewModel.word.accented)
+            }
+        )
 
-        let multipleChoiceGroupWidth = min((UIScreen.main.bounds.width) * 0.75, 300)
         exerciseArea.addSubview(playSound)
-        exerciseArea.addSubview(multipleChoiceGroup)
         multipleChoiceGroup.delegate = self
         setInteractiveElementConstraints()
 
-        submitButton.setClickHandler(onSubmit: onSubmit)
+        if let submitButton {
+            submitButton.setClickHandler(onSubmit: onSubmit)
+        }
         
         NSLayoutConstraint.activate([
-            banner.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            banner.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            banner.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            exerciseArea.topAnchor.constraint(equalTo: banner.bottomAnchor),
-            exerciseArea.bottomAnchor.constraint(equalTo: view.keyboardLayoutGuide.topAnchor),
-            exerciseArea.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            exerciseArea.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             playSound.widthAnchor.constraint(equalToConstant: 64),
             playSound.heightAnchor.constraint(equalToConstant: 64),
-            multipleChoiceGroup.widthAnchor.constraint(equalToConstant: multipleChoiceGroupWidth),
-            submitButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -32),
-            submitButton.widthAnchor.constraint(equalToConstant: multipleChoiceGroupWidth),
-            submitButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            completionBanner.view.heightAnchor.constraint(equalToConstant: 200),
-            completionBanner.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            completionBanner.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            completionBanner.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
     }
 
     func onMultipleChoiceButtonSelected(isCorrect: Bool) {
         viewModel.isTheCorrectButtonChosen = isCorrect
-        submitButton.enable()
+        if let submitButton {
+            submitButton.enable()
+        }
     }
     
     private func onSubmit() {
         let result = viewModel.calculateResult(viewModel.isTheCorrectButtonChosen)
         let attributedAnswer = result.grade == .incorrect ? NSAttributedString(string: viewModel.correctStressedForm) : nil
         completionDelegate?.grade(result: result)
+        guard let completionBanner else { return }
         completionBanner.open(exerciseResult: result, actualAnswer: attributedAnswer) { [weak self] in
             self?.completionDelegate?.next()
         }

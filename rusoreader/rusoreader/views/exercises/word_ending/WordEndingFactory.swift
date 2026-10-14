@@ -12,7 +12,7 @@ class WordEndingFactory : ExerciseFactory {
         self.wordForm = RandomWordFormSelector.getRandomWordFormForExercise(from: word)
     }
     
-    func createExercise() -> (any Exercise)? {
+    func createExercise() -> ExerciseViewController? {
         guard let wordForm = wordForm else { return nil }
         return WordEndingExerciseView(viewModel: WordEndingExerciseViewModel(word: word, wordForm: wordForm, wordService: wordService))
     }

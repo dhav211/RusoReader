@@ -1,26 +1,24 @@
 import UIKit
-class WordEndingExerciseView : UIViewController, UITextFieldDelegate, Exercise {
+class WordEndingExerciseView : ExerciseViewController, UITextFieldDelegate {
     private let viewModel: WordEndingExerciseViewModel
-    private let banner: ExerciseBanner
-    private let exerciseArea: UIView
     private let inputField: UITextField
-    private let submitButton: SubmitButton
-    private let completionBanner: ExerciseCompletionBanner
-    
-    weak var completionDelegate: CompletedExerciseDelegate?
     
     init(viewModel: WordEndingExerciseViewModel) {
         self.viewModel = viewModel
-        self.banner = ExerciseBanner(text: "Write the word in the correct ending")
-        self.exerciseArea = UIView()
         self.inputField = UITextField()
-        self.submitButton = SubmitButton()
-        self.completionBanner = ExerciseCompletionBanner()
-        super.init(nibName: nil, bundle: nil)
-
-        self.submitButton.setClickHandler { [weak self] in
-            self?.submit()
+        
+        super.init(
+            banner: ExerciseBanner(text: "Write the word in the correct ending"),
+            submitButton: SubmitButton(),
+            completionBanner: ExerciseCompletionBanner()
+        )
+        
+        if let submitButton = self.submitButton {
+            submitButton.setClickHandler { [weak self] in
+                self?.submit()
+            }
         }
+        
     }
     
     required init?(coder: NSCoder) {
@@ -30,67 +28,35 @@ class WordEndingExerciseView : UIViewController, UITextFieldDelegate, Exercise {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        inputField.delegate = self
-        inputField.returnKeyType = .done
+        setup()
+    }
+    
+    override func setup() {
+        super.setup()
+        
+        let informationStack = WordEndingInformationView(accentedWord: viewModel.accentedBaseFormText, wordFormText: viewModel.formText)
+        exerciseArea.addSubview(informationStack)
+        
+        let inputStack = createInputStack()
+        inputStack.addArrangedSubview(inputField)
+        
+        setupInputField()
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tap)
         view.backgroundColor = .systemBackground
         
-        exerciseArea.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(banner)
-        view.addSubview(exerciseArea)
-        addChild(completionBanner)
-        view.addSubview(completionBanner.view)
-        completionBanner.didMove(toParent: self)
-        
-        let informationStack = WordEndingInformationView(accentedWord: viewModel.accentedBaseFormText, wordFormText: viewModel.formText)
-        exerciseArea.addSubview(informationStack)
-        
-        let inputStack = UIStackView()
-        inputStack.axis = .vertical
-        inputStack.alignment = .fill
-        inputStack.spacing = 4
-        inputStack.translatesAutoresizingMaskIntoConstraints = false
-        exerciseArea.addSubview(inputStack)
-        
-        let inputStackWidth = min((UIScreen.main.bounds.width) * 0.75, 300)
-        
-        inputField.borderStyle = .roundedRect
-        inputField.textColor = .label
-        inputField.backgroundColor = .secondarySystemBackground
-        inputField.addTarget(self, action: #selector(didEditInputField), for: .editingChanged)
-        inputStack.addArrangedSubview(inputField)
-        
-        view.addSubview(submitButton)
-        
         NSLayoutConstraint.activate([
-            banner.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            banner.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            banner.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            exerciseArea.topAnchor.constraint(equalTo: banner.bottomAnchor),
-            exerciseArea.bottomAnchor.constraint(equalTo: view.keyboardLayoutGuide.topAnchor),
-            exerciseArea.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            exerciseArea.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             informationStack.topAnchor.constraint(equalTo: exerciseArea.topAnchor, constant: 8),
             informationStack.centerXAnchor.constraint(equalTo: exerciseArea.centerXAnchor),
-            inputStack.widthAnchor.constraint(equalToConstant: inputStackWidth),
-            inputStack.centerYAnchor.constraint(equalTo: exerciseArea.centerYAnchor),
-            inputStack.centerXAnchor.constraint(equalTo: exerciseArea.centerXAnchor),
-            submitButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -32),
-            submitButton.widthAnchor.constraint(equalToConstant: inputStackWidth),
-            submitButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            completionBanner.view.heightAnchor.constraint(equalToConstant: 200),
-            completionBanner.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            completionBanner.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            completionBanner.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
     }
     
     private func submit() {
         view.endEditing(true)
-        submitButton.isHidden = true
+        if let submitButton {
+            submitButton.isHidden = true
+        }
         guard let answer = inputField.text else { return }
         let result = viewModel.calculateResult(answer)
         completionDelegate?.grade(result: result)
@@ -118,6 +84,7 @@ class WordEndingExerciseView : UIViewController, UITextFieldDelegate, Exercise {
             }
         }
         
+        guard let completionBanner else { return }
         
         completionBanner.open(exerciseResult: result, actualAnswer: attributedAnswer) { [weak self] in
             self?.completionDelegate?.next()
@@ -133,7 +100,9 @@ class WordEndingExerciseView : UIViewController, UITextFieldDelegate, Exercise {
 
     // When the user edits the answer field, this will enable and disable the submit button depending on if there is any text in the answer field
     @objc private func didEditInputField() {
+        guard let submitButton else { return }
         guard let inputText = inputField.text else { return }
+        
         if inputText.count > 0 {
             submitButton.enable()
         } else {
@@ -144,5 +113,34 @@ class WordEndingExerciseView : UIViewController, UITextFieldDelegate, Exercise {
     @objc func dismissKeyboard() {
         //Causes the view (or one of its embedded text fields) to resign the first responder status.
         view.endEditing(true)
+    }
+    
+    private func createInputStack() -> UIStackView {
+        let inputStack = UIStackView()
+        inputStack.axis = .vertical
+        inputStack.alignment = .fill
+        inputStack.spacing = 4
+        inputStack.translatesAutoresizingMaskIntoConstraints = false
+        exerciseArea.addSubview(inputStack)
+        
+        let inputStackWidth = min((UIScreen.main.bounds.width) * 0.75, 300)
+        
+        NSLayoutConstraint.activate([
+            inputStack.widthAnchor.constraint(equalToConstant: inputStackWidth),
+            inputStack.centerYAnchor.constraint(equalTo: exerciseArea.centerYAnchor),
+            inputStack.centerXAnchor.constraint(equalTo: exerciseArea.centerXAnchor),
+        ])
+        
+        return inputStack
+    }
+    
+    private func setupInputField() {
+        inputField.borderStyle = .roundedRect
+        inputField.textColor = .label
+        inputField.backgroundColor = .secondarySystemBackground
+        inputField.addTarget(self, action: #selector(didEditInputField), for: .editingChanged)
+        
+        inputField.delegate = self
+        inputField.returnKeyType = .done
     }
 }

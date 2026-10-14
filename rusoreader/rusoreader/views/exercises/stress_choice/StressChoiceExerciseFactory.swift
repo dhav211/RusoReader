@@ -11,7 +11,7 @@ final class StressChoiceExerciseFactory: ExerciseFactory {
         self.incorrectStressedWordChoices = Self.createIncorrectStressedWordChoices(for: word, wordService: wordService)
     }
     
-    func createExercise() -> (any Exercise)? {
+    func createExercise() -> ExerciseViewController? {
         return StressChoiceExerciseView(
             viewModel: StressChoiceExerciseViewModel(word: word, wordService: wordService, incorrectStressVariations: incorrectStressedWordChoices)
         )

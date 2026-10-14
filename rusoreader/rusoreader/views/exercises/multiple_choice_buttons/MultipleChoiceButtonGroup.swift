@@ -5,31 +5,33 @@ protocol MultipleChoiceButtonGroupDelegate : AnyObject {
 }
 
 final class MultipleChoiceButtonGroup: UIStackView {
-    let choices: [MultipleChoiceButton]
+    var choices = [MultipleChoiceButton]()
     var currentSelectedButton: MultipleChoiceButton?
     weak var delegate: MultipleChoiceButtonGroupDelegate?
 
-    init(choiceData: [MultipleChoiceButtonData]) {
-        self.choices = choiceData.map { data in
-            return MultipleChoiceButton(buttonText: data.buttonText, isCorrect: data.isCorrect)
-        }
-
+    init() {
         super.init(frame: .zero)
 
         translatesAutoresizingMaskIntoConstraints = false
         axis = .vertical
         spacing = 8
+    }
 
+    required init(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setChoices(choiceData: [MultipleChoiceButtonData]) {
+        choices = choiceData.map { data in
+            return MultipleChoiceButton(buttonText: data.buttonText, isCorrect: data.isCorrect)
+        }
+        
         for choice in choices {
             choice.setClickHandler { [weak self] in
                 self?.manageButtonStates(choice)
             }
             addArrangedSubview(choice)
         }
-    }
-
-    required init(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 
     /// When a button is clicked a previous one will need be deactived and the currently clicked one will then become the selected. Any exercise that

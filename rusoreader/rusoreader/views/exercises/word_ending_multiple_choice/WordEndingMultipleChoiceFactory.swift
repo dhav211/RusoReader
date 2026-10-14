@@ -22,7 +22,7 @@ final class WordEndingMultipleChoiceFactory: ExerciseFactory {
         return !wordFormChoices.isEmpty;
     }
     
-    func createExercise() -> (any Exercise)? {
+    func createExercise() -> ExerciseViewController? {
         guard let correctWordForm = correctWordForm else { return nil }
         if wordFormChoices.count <= 1 { return nil }
         return WordEndingMultipleChoiceView(

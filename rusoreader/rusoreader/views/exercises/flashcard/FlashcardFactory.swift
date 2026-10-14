@@ -11,7 +11,7 @@ class FlashcardFactory: ExerciseFactory {
         self.speechSynth = speechSynth
     }
     
-    func createExercise() -> (any Exercise)? {
+    func createExercise() -> ExerciseViewController? {
         return FlashcardExerciseView(viewModel: flashcardExerciseViewModel, speechSynth: speechSynth)
     }
 }

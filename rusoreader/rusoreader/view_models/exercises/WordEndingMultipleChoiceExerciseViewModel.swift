@@ -6,11 +6,11 @@
      private let wordService: WordService
 
     init(word: Word, correctWordForm: WordForm, wordFormChoices: [String], wordService: WordService) {
-         self.word = word
-         self.correctWordForm = correctWordForm
-         self.wordFormChoices = wordFormChoices
-         self.wordService = wordService
-         self.isTheCorrectButtonChosen = false
+        self.word = word
+        self.correctWordForm = correctWordForm
+        self.wordFormChoices = wordFormChoices
+        self.wordService = wordService
+        self.isTheCorrectButtonChosen = false
     }
 
     /// The button data from the selected multiple choice button

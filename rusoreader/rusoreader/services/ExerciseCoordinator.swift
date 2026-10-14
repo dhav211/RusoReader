@@ -30,9 +30,9 @@ class ExerciseCoordinator {
     
     
     /// Pop the first exercise factory from the exercise array and from here we will turn it into an exercise view controller
-    var nextExercise: Exercise? {
+    var nextExercise: ExerciseViewController? {
         guard let exerciseFactory = exercises.first else { return nil}
-        guard var exercise = exerciseFactory.createExercise() else { return nil }
+        guard let exercise = exerciseFactory.createExercise() else { return nil }
         exercise.completionDelegate = self
         return exercise
     }

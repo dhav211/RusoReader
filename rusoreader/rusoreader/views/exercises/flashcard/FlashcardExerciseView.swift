@@ -4,17 +4,15 @@ import UIKit
 ///
 /// This view controller displays a flashcard with a word on the front and translations with an example sentence on the back.
 /// Users can flip the card to reveal the answer and rate their knowledge of the word.
-class FlashcardExerciseView : UIViewController, Exercise {
+class FlashcardExerciseView : ExerciseViewController {
     private let viewModel: FlashcardExerciseViewModel
     private let speechSynth: SpeechSynth
     
-    weak var completionDelegate: CompletedExerciseDelegate?
     
     private var card: UIView
     private var front: FlashcardFront
     private var back: FlashcardBack
     private var rating: FlashcardRating
-    private var banner: ExerciseBanner
 
     private var frontCardConstraints = [NSLayoutConstraint]()
     private var backCardConstraints = [NSLayoutConstraint]()
@@ -34,9 +32,10 @@ class FlashcardExerciseView : UIViewController, Exercise {
             ),
         )
         self.rating = FlashcardRating()
-        self.banner = ExerciseBanner(text: "Do you know this word?")
         
-        super.init(nibName: nil, bundle: nil)
+        super.init(
+            banner: ExerciseBanner(text: "Do you know this word?")
+        )
     }
     
     required init?(coder: NSCoder) {
@@ -59,12 +58,16 @@ class FlashcardExerciseView : UIViewController, Exercise {
     }
     
     override func viewDidLoad() {
-        view.backgroundColor = .systemBackground
+        super.viewDidLoad()
+        setup()
+    }
+    
+    override func setup() {
+        super.setup()
         
         // The card view will hold the initial sizing so we can set constraints based on this
         card.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(banner)
-        view.addSubview(card)
+        exerciseArea.addSubview(card)
         card.addSubview(front)
         
         // set the closures for the front of card
@@ -75,8 +78,8 @@ class FlashcardExerciseView : UIViewController, Exercise {
             banner.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             banner.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             banner.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            card.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
-            card.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
+            card.centerXAnchor.constraint(equalTo: exerciseArea.centerXAnchor),
+            card.centerYAnchor.constraint(equalTo: exerciseArea.centerYAnchor),
             card.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.7),
             card.heightAnchor.constraint(equalToConstant: UIScreen.main.bounds.width * 0.7),
             front.topAnchor.constraint(equalTo: card.topAnchor),
@@ -124,17 +127,17 @@ class FlashcardExerciseView : UIViewController, Exercise {
             }
         }, completion: { [weak self] _ in // Once the animation has finished we will create the rating buttons
             if let rating = self?.rating {
-                self?.view.addSubview(rating)
+                self?.exerciseArea.addSubview(rating)
                 rating.setup(isPortrait: isPortrait, constraints: flashcardRatingConstraints)
                 // This is janky but the rating view itself needs a size for the buttons to actually be clickable
                 // We could add this to flashcard rating constraints, and that would be logical but this works for the time being
                 // aka forever
-                if let view = self?.view {
+                if let exerciseArea = self?.exerciseArea {
                     NSLayoutConstraint.activate([
-                        rating.topAnchor.constraint(equalTo: view.topAnchor),
-                        rating.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-                        rating.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                        rating.rightAnchor.constraint(equalTo: view.rightAnchor)
+                        rating.topAnchor.constraint(equalTo: exerciseArea.topAnchor),
+                        rating.bottomAnchor.constraint(equalTo: exerciseArea.bottomAnchor),
+                        rating.leadingAnchor.constraint(equalTo: exerciseArea.leadingAnchor),
+                        rating.rightAnchor.constraint(equalTo: exerciseArea.rightAnchor)
                     ])
                 }
             }
