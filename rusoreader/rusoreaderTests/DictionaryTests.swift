@@ -203,7 +203,7 @@ final class DictionaryTests: XCTestCase {
         dictionaryRepo.addWord(by: 112)
         dictionaryRepo.addWord(by: 199)
 
-        let neverBeforeSeenWords = dictionaryRepo.getNeverBeforeSeenWords(limit: 3)
+        let neverBeforeSeenWords = dictionaryRepo.getNeverBeforeSeenWords(3)
         XCTAssert(neverBeforeSeenWords.count == 3)
     }
 

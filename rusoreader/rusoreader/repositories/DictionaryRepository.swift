@@ -13,7 +13,7 @@ class DictionaryRepository {
     var count: Int {
         do {
             return try databaseManager.userDataQueue.read { db in
-                return try DatabaseDictionaryWord.fetchAll(db).count
+                return try DatabaseDictionaryWord.fetchCount(db)
             }
         } catch {
             return 0
@@ -143,13 +143,19 @@ class DictionaryRepository {
             return []
         }
     }
-
-    func getNeverBeforeSeenWords(limit: Int = 5) -> [DictionaryEntry] {
+    
+    /// Grab random words from dictionary with limit
+    /// - Parameter limit: Number of words fetched, defaults to 5
+    /// - Returns: A random array of words from the dictionary
+    func getRandom(_ limit: Int = 5) -> [DictionaryEntry] {
         do {
             return try databaseManager.userDataQueue.read { db in
-                let neverSeenWords = try DatabaseDictionaryWord.fetchAll(db).compactMap { dbEntry in
-                    return dbEntry.times_appeared == 0
-                        ? DictionaryEntry(
+                try DatabaseDictionaryWord
+                    .order(sql: "RANDOM()")
+                    .limit(limit)
+                    .fetchAll(db)
+                    .map { dbEntry in
+                        DictionaryEntry(
                             wordId: Int(dbEntry.id),
                             firstSeen: dbEntry.first_seen,
                             lastSeen: dbEntry.last_seen,
@@ -157,31 +163,61 @@ class DictionaryRepository {
                             score: Float(dbEntry.score),
                             timesClicked: Int(dbEntry.times_clicked),
                             timesAppeared: Int(dbEntry.times_appeared))
-                        : nil
                 }
-                let returnCount = min(neverSeenWords.count, limit);
-                return Array(neverSeenWords.shuffled()[0..<returnCount])
             }
         } catch {
             print("Error: \(error)")
             return []
         }
     }
-
-    func getAllDueWords() -> [DictionaryEntry] {
+    
+    /// Grab 5 never before seen words from the dictionary
+    /// - Parameter limit: Number of words fetched, defaults to 5
+    /// - Returns: An array of words random never before seen in exercises
+    func getNeverBeforeSeenWords(_ limit: Int = 5) -> [DictionaryEntry] {
         do {
             return try databaseManager.userDataQueue.read { db in
-                return try DatabaseDictionaryWord.fetchAll(db).compactMap { dbEntry in
-                    return dbEntry.due_date < Date.now
-                        ? DictionaryEntry(
+                try DatabaseDictionaryWord
+                    .filter(DatabaseDictionaryWord.Columns.timesAppeared == 0)
+                    .order(sql: "RANDOM()")
+                    .limit(limit)
+                    .fetchAll(db)
+                    .map { dbEntry in
+                        DictionaryEntry(
                             wordId: Int(dbEntry.id),
                             firstSeen: dbEntry.first_seen,
                             lastSeen: dbEntry.last_seen,
                             dueForReview: dbEntry.due_date,
                             score: Float(dbEntry.score),
                             timesClicked: Int(dbEntry.times_clicked),
-                            timesAppeared: Int(dbEntry.times_appeared))
-                        : nil
+                            timesAppeared: Int(dbEntry.times_appeared)
+                        )
+                }
+            }
+        } catch {
+            print("Error: \(error)")
+            return []
+        }
+    }
+    
+    /// Find all words that are marked for overdue and should be on exercises
+    /// - Returns: All overdue words in dictionary
+    func getAllDueWords() -> [DictionaryEntry] {
+        do {
+            return try databaseManager.userDataQueue.read { db in
+                try DatabaseDictionaryWord
+                    .filter(DatabaseDictionaryWord.Columns.dueDate < Date.now)
+                    .fetchAll(db)
+                    .map { dbEntry in
+                        DictionaryEntry(
+                            wordId: Int(dbEntry.id),
+                            firstSeen: dbEntry.first_seen,
+                            lastSeen: dbEntry.last_seen,
+                            dueForReview: dbEntry.due_date,
+                            score: Float(dbEntry.score),
+                            timesClicked: Int(dbEntry.times_clicked),
+                            timesAppeared: Int(dbEntry.times_appeared)
+                        )
                 }
             }
         } catch {

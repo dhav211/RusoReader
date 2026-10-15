@@ -15,5 +15,7 @@ extension DatabaseDictionaryWord : FetchableRecord, TableRecord {
     static let databaseTableName = "user_dictionary"
     enum Columns {
         static let id = Column(CodingKeys.id)
+        static let timesAppeared = Column(CodingKeys.times_appeared)
+        static let dueDate = Column(CodingKeys.due_date)
     }
 }
