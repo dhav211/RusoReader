@@ -1,6 +1,6 @@
 import UIKit
 
-class TranslationMultipleChoiceExerciseView: MultipleChoiceExerciseViewController, MultipleChoiceButtonGroupDelegate {
+class TranslationMultipleChoiceExerciseView: MultipleChoiceExerciseViewController {
     private let viewModel: TranslationMultipleChoiceExerciseViewModel
     
     init(viewModel: TranslationMultipleChoiceExerciseViewModel) {
@@ -47,17 +47,11 @@ class TranslationMultipleChoiceExerciseView: MultipleChoiceExerciseViewControlle
             wordLabel.centerXAnchor.constraint(equalTo: exerciseArea.centerXAnchor)
         ])
     }
-
-    func onMultipleChoiceButtonSelected(isCorrect: Bool) {
-        guard let submitButton else { return }
-        viewModel.isTheCorrectButtonChosen = isCorrect
-        submitButton.enable()
-    }
     
     private func onSubmit() {
         guard let completionBanner else { return }
         
-        let result = viewModel.calculateResult(viewModel.isTheCorrectButtonChosen)
+        let result = viewModel.calculateResult(isTheCorrectButtonChosen)
         //let attributedAnswer = result.grade == .incorrect ? NSAttributedString(string: viewModel.correctWordForm.bare) : nil
         completionDelegate?.grade(result: result)
         completionBanner.open(exerciseResult: result, actualAnswer: nil) { [weak self] in

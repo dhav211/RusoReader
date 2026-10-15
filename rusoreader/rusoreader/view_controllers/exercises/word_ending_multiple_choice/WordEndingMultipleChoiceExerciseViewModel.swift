@@ -2,7 +2,6 @@
      let word: Word
      let correctWordForm: WordForm
      let wordFormChoices: [MultipleChoiceButtonData]
-     var isTheCorrectButtonChosen: Bool
      private let wordService: WordService
 
     init(word: Word, correctWordForm: WordForm, wordFormChoices: [String], wordService: WordService) {
@@ -12,7 +11,6 @@
             return MultipleChoiceButtonData(buttonText: choice, isCorrect: choice == correctWordForm.bare)
         }
         self.wordService = wordService
-        self.isTheCorrectButtonChosen = false
     }
 
     /// The button data from the selected multiple choice button

@@ -1,6 +1,6 @@
 import UIKit
 
-class WordEndingMultipleChoiceView : MultipleChoiceExerciseViewController, MultipleChoiceButtonGroupDelegate {
+class WordEndingMultipleChoiceView : MultipleChoiceExerciseViewController {
     private let viewModel: WordEndingMultipleChoiceExerciseViewModel
     
     init(viewModel: WordEndingMultipleChoiceExerciseViewModel) {
@@ -42,17 +42,11 @@ class WordEndingMultipleChoiceView : MultipleChoiceExerciseViewController, Multi
             informationStack.centerXAnchor.constraint(equalTo: exerciseArea.centerXAnchor)
         ])
     }
-
-    func onMultipleChoiceButtonSelected(isCorrect: Bool) {
-        guard let submitButton else { return }
-        viewModel.isTheCorrectButtonChosen = isCorrect
-        submitButton.enable()
-    }
     
     private func onSubmit() {
         guard let completionBanner else { return }
         
-        let result = viewModel.calculateResult(viewModel.isTheCorrectButtonChosen)
+        let result = viewModel.calculateResult(isTheCorrectButtonChosen)
         let attributedAnswer = result.grade == .incorrect ? NSAttributedString(string: viewModel.correctWordForm.bare) : nil
         completionDelegate?.grade(result: result)
         completionBanner.open(exerciseResult: result, actualAnswer: attributedAnswer) { [weak self] in

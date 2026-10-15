@@ -1,7 +1,6 @@
  final class StressChoiceExerciseViewModel: ExerciseViewModel {
      let word: Word
      let stressedWordChoices: [MultipleChoiceButtonData]
-     var isTheCorrectButtonChosen: Bool
      private let wordService: WordService
 
     init(word: Word, wordService: WordService, incorrectStressVariations: [String]) {
@@ -11,7 +10,6 @@
         self.stressedWordChoices = combinedChoices
             .sorted().map { return ($0, wordService.addStress(to: $0)) }
             .map { return MultipleChoiceButtonData(buttonText: $0.1, isCorrect: $0.0 == word.accented) }
-        self.isTheCorrectButtonChosen = false
         self.wordService = wordService
     }
 

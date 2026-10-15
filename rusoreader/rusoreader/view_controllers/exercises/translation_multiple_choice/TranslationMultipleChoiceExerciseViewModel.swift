@@ -2,7 +2,6 @@ final class TranslationMultipleChoiceExerciseViewModel: ExerciseViewModel {
     let word: Word
     let translationChoices: [MultipleChoiceButtonData]
     let questionWord: String
-    var isTheCorrectButtonChosen: Bool
     
     init(word: Word, questionWord: String, translationChoices: [(String, Int)]) {
         self.word = word
@@ -10,7 +9,6 @@ final class TranslationMultipleChoiceExerciseViewModel: ExerciseViewModel {
         self.translationChoices = translationChoices.map { choice in
             return MultipleChoiceButtonData(buttonText: choice.0, isCorrect: choice.1 == word.id)
         }
-        self.isTheCorrectButtonChosen = false
     }
     
     func calculateResult(_ answer: Bool) -> ExerciseResult {

@@ -1,6 +1,6 @@
 import UIKit
 
-class StressChoiceExerciseView : MultipleChoiceExerciseViewController, MultipleChoiceButtonGroupDelegate {
+class StressChoiceExerciseView : MultipleChoiceExerciseViewController {
     private let viewModel: StressChoiceExerciseViewModel
     private let playSound: PlaySoundView
     private var orientation: PhoneOrientation = .portrait
@@ -70,16 +70,9 @@ class StressChoiceExerciseView : MultipleChoiceExerciseViewController, MultipleC
             playSound.heightAnchor.constraint(equalToConstant: 64),
         ])
     }
-
-    func onMultipleChoiceButtonSelected(isCorrect: Bool) {
-        viewModel.isTheCorrectButtonChosen = isCorrect
-        if let submitButton {
-            submitButton.enable()
-        }
-    }
     
     private func onSubmit() {
-        let result = viewModel.calculateResult(viewModel.isTheCorrectButtonChosen)
+        let result = viewModel.calculateResult(isTheCorrectButtonChosen)
         let attributedAnswer = result.grade == .incorrect ? NSAttributedString(string: viewModel.correctStressedForm) : nil
         completionDelegate?.grade(result: result)
         guard let completionBanner else { return }

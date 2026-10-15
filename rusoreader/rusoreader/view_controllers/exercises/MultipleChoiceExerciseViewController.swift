@@ -1,7 +1,8 @@
 import UIKit
 
-class MultipleChoiceExerciseViewController: ExerciseViewController {
+class MultipleChoiceExerciseViewController: ExerciseViewController, MultipleChoiceButtonGroupDelegate {
     public var multipleChoiceGroup: MultipleChoiceButtonGroup
+    public var isTheCorrectButtonChosen: Bool
     
     init(
         banner: ExerciseBanner,
@@ -10,6 +11,7 @@ class MultipleChoiceExerciseViewController: ExerciseViewController {
         completionBanner: ExerciseCompletionBanner? = nil
     ) {
         self.multipleChoiceGroup = multipleChoiceGroup
+        self.isTheCorrectButtonChosen = false
         super.init(banner: banner, submitButton: submitButton, completionBanner: completionBanner)
     }
     
@@ -30,5 +32,13 @@ class MultipleChoiceExerciseViewController: ExerciseViewController {
             multipleChoiceGroup.centerYAnchor.constraint(equalTo: exerciseArea.centerYAnchor),
             multipleChoiceGroup.centerXAnchor.constraint(equalTo: exerciseArea.centerXAnchor),
         ])
+    }
+    
+    /// Called when a multiple choice button is clicked, this will send a boolean value over to determine if the user has selected the correct answer. This function remains the same for every multiple choice exercise.
+    /// - Parameter isCorrect: <#isCorrect description#>
+    final func onMultipleChoiceButtonSelected(isCorrect: Bool) {
+        guard let submitButton else { return }
+        isTheCorrectButtonChosen = isCorrect
+        submitButton.enable()
     }
 }
