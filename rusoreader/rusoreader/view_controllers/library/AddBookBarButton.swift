@@ -25,7 +25,9 @@ final class AddBookBarButton: UIBarButtonItem, UIDocumentPickerDelegate {
             onBooksAdded?(createdBook)
         } catch {
             print("Failed to parse book: \(error)")
-            // TODO display an alert message letting the user know there was an issue parsing the book
+            guard let presentingViewController else { return }
+            let alert = UIAlertController.error(message: "Failed to add book")
+            presentingViewController.present(alert, animated: true)
         }
     }
     

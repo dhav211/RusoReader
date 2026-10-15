@@ -65,7 +65,8 @@ class EditBookViewController : UIViewController {
             dismiss(animated: true)
         } catch {
             print(error)
-            // TODO Don't just eat this error whe need to display a UI alert letting the user know that book couldn't be updated
+            let alert = UIAlertController.error(message: "Failed to edit book")
+            self.present(alert, animated: true)
         }
     }
     

@@ -25,8 +25,11 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
         do {
             try viewModel.setChapter(to: viewModel.currentChapter)
         } catch {
-            // TODO create a UI Alert controller for displaying error messages, then on confirm it should dismiss this controller
             print(error.localizedDescription)
+            let alert = UIAlertController.error(message: "Failed to load chapter") { [weak self] in
+                self?.dismiss(animated: false)
+            }
+            self.present(alert, animated: true)
         }
     }
     
@@ -168,8 +171,11 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
             currentSelections = Set<CurrentSelectionRange>()
             tableView.reloadData()
         } catch {
-            // TODO create a UI Alert controller for displaying error messages, then on confirm it should dismiss this controller
             print(error.localizedDescription)
+            let alert = UIAlertController.error(message: "Failed to load chapter") { [weak self] in
+                self?.dismiss(animated: false)
+            }
+            self.present(alert, animated: true)
         }
     }
     

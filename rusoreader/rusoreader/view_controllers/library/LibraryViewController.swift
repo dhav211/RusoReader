@@ -75,8 +75,9 @@ final class LibraryViewController: UITableViewController {
                 try launcherDelegate?.onBookTapped(id: currentLibraryBook.id)
                 viewModel.openBook(currentLibraryBook)
             } catch {
-                print("The book couldn't be loaded")
-                // TODO create a ui alert letting the user know the book can't be opened
+                print("Error: \(error)")
+                let alert = UIAlertController.error(message: "Failed to load book")
+                self.present(alert, animated: true)
             }
         }
     }
@@ -108,7 +109,8 @@ final class LibraryViewController: UITableViewController {
                         self?.tableView.reloadData()
                     } catch {
                         print(error)
-                        // TODO display another UI Alert if possible saying there was an issue with deleting the book
+                        let alert = UIAlertController.error(message: "Failed to delete book")
+                        self?.present(alert, animated: true)
                     }
                 })
                 self?.present(deleteAlert, animated: true)
