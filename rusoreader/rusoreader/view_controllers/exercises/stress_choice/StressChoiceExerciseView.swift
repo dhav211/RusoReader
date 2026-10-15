@@ -19,9 +19,9 @@ class StressChoiceExerciseView : MultipleChoiceExerciseViewController {
         playSound.trailingAnchor.constraint(equalTo: multipleChoiceGroup.leadingAnchor, constant: -64)
     ]
     
-    init(viewModel: StressChoiceExerciseViewModel) {
+    init(viewModel: StressChoiceExerciseViewModel, speechSynth: SpeechSynth) {
         self.viewModel = viewModel
-        self.playSound = PlaySoundView(textToSpeak: viewModel.correctStressedForm)
+        self.playSound = PlaySoundView(textToSpeak: viewModel.correctStressedForm, speechSynth: speechSynth)
         
         super.init(
             banner: ExerciseBanner(text: "Choose the correct stress variation"),

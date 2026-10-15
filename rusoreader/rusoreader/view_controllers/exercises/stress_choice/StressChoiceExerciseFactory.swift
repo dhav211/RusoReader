@@ -3,17 +3,20 @@ final class StressChoiceExerciseFactory: ExerciseFactory {
     var attempts: Int
     let incorrectStressedWordChoices: [String]
     private let wordService: WordService
+    private let speechSynth: SpeechSynth
     
-    init(word: Word, wordService: WordService) {
+    init(word: Word, wordService: WordService, speechSynth: SpeechSynth) {
         self.word = word
         self.attempts = 0
         self.wordService = wordService
+        self.speechSynth = speechSynth
         self.incorrectStressedWordChoices = Self.createIncorrectStressedWordChoices(for: word, wordService: wordService)
     }
     
     func createExercise() -> ExerciseViewController? {
         return StressChoiceExerciseView(
-            viewModel: StressChoiceExerciseViewModel(word: word, wordService: wordService, incorrectStressVariations: incorrectStressedWordChoices)
+            viewModel: StressChoiceExerciseViewModel(word: word, wordService: wordService, incorrectStressVariations: incorrectStressedWordChoices),
+            speechSynth: speechSynth
         )
     }
 

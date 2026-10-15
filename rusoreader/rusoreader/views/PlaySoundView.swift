@@ -4,8 +4,8 @@ final class PlaySoundView: UIImageView {
     private let speechSynth: SpeechSynth
     private let textToSpeak: String
 
-    init(textToSpeak: String) {
-        self.speechSynth = SpeechSynth()
+    init(textToSpeak: String, speechSynth: SpeechSynth) {
+        self.speechSynth = speechSynth
         self.textToSpeak = textToSpeak
         super.init(frame: .zero)
         image = UIImage(systemName: "speaker.wave.2.fill")

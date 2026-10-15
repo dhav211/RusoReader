@@ -56,7 +56,7 @@ class ExerciseCoordinator {
                     return createExerciseFactories(for: exerciseWord, types: [.wordEnding, .stressChoice, .translationMultipleChoice])
     
                     case .fluent:
-                    return createExerciseFactories(for: exerciseWord, types: [.wordEnding, .translationMultipleChoice]) // TODO remove the multiple choice opitions
+                    return createExerciseFactories(for: exerciseWord, types: [.wordEnding])
                 }
             }()
 
@@ -72,8 +72,8 @@ class ExerciseCoordinator {
     private func createExerciseFactories(for exerciseWord: ExerciseWord, types: [ExerciseType]) -> [ExerciseFactory] {
         var factories = [ExerciseFactory]()
         
-        // We will only create 2 types of exercises for each word, so shuffle the types and then return the first 2 elements
-        for type in types.shuffled()[0..<2] {
+        // We will only create 2 types of exercises for each word, so shuffle the types and then return the first 2 elements, if there is less than 2 types we will just choose them all
+        for type in types.shuffled()[0..<min(2, types.count)] {
             switch type {
             case .flashcard:
                 if !exerciseWord.word.translations.isEmpty {
@@ -116,7 +116,8 @@ class ExerciseCoordinator {
                     factories.append(
                         StressChoiceExerciseFactory(
                             word: exerciseWord.word,
-                            wordService: wordService
+                            wordService: wordService,
+                            speechSynth: speechSynth
                         )
                     )
                 }
