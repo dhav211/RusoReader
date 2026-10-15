@@ -34,6 +34,12 @@ struct Word {
         return text
     }
     
+    /// The very first translation, if translation is seperated by commas then tranlsation before first comma will be returned. Will return blank if any nil values are hit
+    var firstTranslation: String {
+        guard let first = translations.first else { return "" }
+        return String(first.split(separator: ",").first ?? "")
+    }
+    
     init(id: Int, bare: String, accented: String, type: WordType, level: String, ranking: Int, noun: Noun?, verb: Verb?, forms: [WordForm], translations: [String]) {
         self.id = id
         self.bare = bare

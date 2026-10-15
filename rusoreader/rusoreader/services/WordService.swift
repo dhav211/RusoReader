@@ -21,6 +21,10 @@ class WordService {
         return wordRepo.findMatches(by: ids.map { return Int64($0)})
     }
     
+    func findRandom(by type: Word.WordType, limit: Int = 5) -> [Word] {
+        return wordRepo.findRandom(by: type, limit: limit)
+    }
+    
     /// Returns a maximum of 25 random sentences which contain the word owned by this word id
     /// - Parameter wordId: The id of the word we are getting sentences
     /// - Returns: A max limit of 25 random sentences containing the given word id

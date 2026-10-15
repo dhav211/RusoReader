@@ -12,6 +12,8 @@ class DictionaryService {
     /// The total number of entries added to the dictionary
     var count: Int { dictionaryRepo.count }
     
+    /// Returns every word in the dictionary, we use the word object as the dictionary just stores the word id
+    /// - Returns: Every word that has been added to the user's dictionary
     func getAllWords() -> [Word] {
         let wordIds = dictionaryRepo.getAll().map { entry in
             return entry.wordId
@@ -19,7 +21,20 @@ class DictionaryService {
         
         return wordService.findMatches(from: wordIds)
     }
-
+    
+    /// Returns a limited amount random Word objects from user's dictionary
+    /// - Parameter limit: A set amount to limit the random size
+    /// - Returns: Random array of words that have been added to the user's dictionary
+    func getRandomWords(_ limit: Int = 5) -> [Word] {
+        let wordIds = dictionaryRepo.getRandom(limit).map { entry in
+            return entry.wordId
+        }
+        
+        return wordService.findMatches(from: wordIds)
+    }
+    
+    /// Finds a maximum of 7 words for exercises, if not enough words exist in the user's dictionary this function will add random words to the dictionary and then return them.
+    /// - Returns: Words from user's dictionary with familiary level attached for lesson generation.
     func wordsForExercise() -> [ExerciseWord] {
         var chosenWords = Set<ExerciseWord>()
         

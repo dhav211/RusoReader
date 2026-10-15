@@ -9,6 +9,7 @@ enum ExerciseType {
     case wordEnding
     case wordEndingMultipleChoice
     case stressChoice
+    case translationMultipleChoice
 }
 
 class ExerciseCoordinator {
@@ -49,13 +50,13 @@ class ExerciseCoordinator {
                     return createExerciseFactories(for: exerciseWord, types: [.flashcard, .wordEndingMultipleChoice])
     
                     case .unfamiliar:
-                    return createExerciseFactories(for: exerciseWord, types: [.wordEndingMultipleChoice, .wordEnding])
+                    return createExerciseFactories(for: exerciseWord, types: [.wordEndingMultipleChoice, .wordEnding, .translationMultipleChoice])
     
                     case .familiar:
-                    return createExerciseFactories(for: exerciseWord, types: [.wordEnding, .stressChoice])
+                    return createExerciseFactories(for: exerciseWord, types: [.wordEnding, .stressChoice, .translationMultipleChoice])
     
                     case .fluent:
-                    return createExerciseFactories(for: exerciseWord, types: [.wordEndingMultipleChoice])
+                    return createExerciseFactories(for: exerciseWord, types: [.wordEnding, .translationMultipleChoice]) // TODO remove the multiple choice opitions
                 }
             }()
 
@@ -71,7 +72,8 @@ class ExerciseCoordinator {
     private func createExerciseFactories(for exerciseWord: ExerciseWord, types: [ExerciseType]) -> [ExerciseFactory] {
         var factories = [ExerciseFactory]()
         
-        for type in types {
+        // We will only create 2 types of exercises for each word, so shuffle the types and then return the first 2 elements
+        for type in types.shuffled()[0..<2] {
             switch type {
             case .flashcard:
                 if !exerciseWord.word.translations.isEmpty {
@@ -114,6 +116,17 @@ class ExerciseCoordinator {
                     factories.append(
                         StressChoiceExerciseFactory(
                             word: exerciseWord.word,
+                            wordService: wordService
+                        )
+                    )
+                }
+            case .translationMultipleChoice:
+                // Do some things and append it to the factories
+                if !exerciseWord.word.translations.isEmpty {
+                    factories.append(
+                        TranslationMultipleChoiceExerciseFactory(
+                            word: exerciseWord.word,
+                            dictionaryService: dictionaryService,
                             wordService: wordService
                         )
                     )

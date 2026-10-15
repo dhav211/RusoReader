@@ -163,5 +163,17 @@ final class WordTests: XCTestCase {
         let sut = wordService.findMatches(from: [262]).first!
         XCTAssert(sut.translationText == "name, first name\nreputation\nnoun")
     }
+    
+    func testGet5RandomNouns() throws {
+        let sut = wordService.findRandom(by: .noun, limit: 5)
+        
+        XCTAssert(sut.count == 5)
+        
+        for word in sut {
+            if word.type != .noun {
+                XCTFail("\(word.bare) is not a noun")
+            }
+        }
+    }
 }
 

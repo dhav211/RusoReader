@@ -96,6 +96,28 @@ class WordRepository {
             return []
         }
     }
+    
+    func findRandom(by type: Word.WordType, limit: Int) -> [Word] {
+        do {
+            return try databaseManager.wordQueue.read { db in
+                let request = DatabaseWord
+                    .order(sql: "RANDOM()")
+                    .filter(DatabaseWord.Columns.type == type.rawValue)
+                    .filter(DatabaseWord.Columns.id <= 5000)
+                    .limit(limit)
+                    .including(optional: DatabaseWord.noun)
+                    .including(optional: DatabaseWord.verb)
+                    .including(all: DatabaseWord.translations)
+                    .including(all: DatabaseWord.wordForms.forKey("wordForms"))
+                    .asRequest(of: FetchedWordInfo.self)
+                
+                return createWords(from: try FetchedWordInfo.fetchAll(db, request))
+            }
+        } catch {
+            print("Error: \(error)")
+            return []
+        }
+    }
 
     /// Takes a list of `FetchedWordInfo` objects and returns a new array of `Word` objects.
     ///
