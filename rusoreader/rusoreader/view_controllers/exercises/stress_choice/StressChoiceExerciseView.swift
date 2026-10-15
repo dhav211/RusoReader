@@ -50,17 +50,12 @@ class StressChoiceExerciseView : MultipleChoiceExerciseViewController, MultipleC
     override func setup() {
         super.setup()
         
-        view.backgroundColor = .systemBackground
         orientation = PhoneOrientation.set(isViewInPortrait: traitCollection.verticalSizeClass == .regular &&
                               traitCollection.horizontalSizeClass == .compact)
         
         exerciseArea.translatesAutoresizingMaskIntoConstraints = false
         
-        multipleChoiceGroup.setChoices(
-            choiceData: viewModel.stressedWordChoices.map { choice in
-                return MultipleChoiceButtonData(buttonText: choice.1, isCorrect: choice.0 == viewModel.word.accented)
-            }
-        )
+        multipleChoiceGroup.setChoices(choiceData: viewModel.stressedWordChoices)
 
         exerciseArea.addSubview(playSound)
         multipleChoiceGroup.delegate = self

@@ -1,14 +1,16 @@
  final class WordEndingMultipleChoiceExerciseViewModel: ExerciseViewModel {
      let word: Word
      let correctWordForm: WordForm
-     let wordFormChoices: [String]
+     let wordFormChoices: [MultipleChoiceButtonData]
      var isTheCorrectButtonChosen: Bool
      private let wordService: WordService
 
     init(word: Word, correctWordForm: WordForm, wordFormChoices: [String], wordService: WordService) {
         self.word = word
         self.correctWordForm = correctWordForm
-        self.wordFormChoices = wordFormChoices
+        self.wordFormChoices = wordFormChoices.map { choice in
+            return MultipleChoiceButtonData(buttonText: choice, isCorrect: choice == correctWordForm.bare)
+        }
         self.wordService = wordService
         self.isTheCorrectButtonChosen = false
     }

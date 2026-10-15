@@ -25,11 +25,7 @@ class WordEndingMultipleChoiceView : MultipleChoiceExerciseViewController, Multi
     override func setup() {
         super.setup()
         
-        multipleChoiceGroup.setChoices(
-            choiceData: viewModel.wordFormChoices.map { choice in
-                return MultipleChoiceButtonData(buttonText: choice, isCorrect: choice == viewModel.correctWordForm.bare)
-            }
-        )
+        multipleChoiceGroup.setChoices(choiceData: viewModel.wordFormChoices)
         
         let informationStack = WordEndingInformationView(accentedWord: viewModel.accentedBaseFormText, wordFormText: viewModel.correctWordFormText)
         exerciseArea.addSubview(informationStack)
