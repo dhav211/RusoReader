@@ -60,29 +60,11 @@ class WordEndingExerciseView : ExerciseViewController, UITextFieldDelegate {
         guard let answer = inputField.text else { return }
         let result = viewModel.calculateResult(answer)
         completionDelegate?.grade(result: result)
-        
+
         // Take the users inputed answer then compare it to the actual answer while bolding and underlining incorrect letters
         let attributedAnswer = result.grade != .correct
-            ? NSMutableAttributedString(
-                string: viewModel.findClosestWordFormVariation(
-                    to: viewModel.cleanAnswerInput(answer)
-                )
-            )
+            ? NSAttributedString.highlightedAnswer(from: viewModel.cleanAnswerInput(answer), wordForm: viewModel.wordForm)
             : nil
-        // we are grabbing the default text so we can get a bold font point size here in the attributed string
-        let defaultFont = UIFont.systemFont(ofSize: UIFont.labelFontSize)
-        let highlightedDifference = viewModel.createHightlightedDifferenceInAnswer(answer: answer)
-        
-        if let attributedAnswer {
-            for affectedIndex in highlightedDifference {
-                attributedAnswer.addAttributes(
-                    [
-                        .underlineStyle: NSUnderlineStyle.single.rawValue,
-                        .font: UIFont.boldSystemFont(ofSize: defaultFont.pointSize)
-                    ],
-                    range: NSRange(location: affectedIndex, length: 1))
-            }
-        }
         
         guard let completionBanner else { return }
         

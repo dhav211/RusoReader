@@ -7,6 +7,7 @@ final class StressChoiceTests: XCTestCase {
     private var wordService: WordService!
     private var sentenceRepo: SentenceRepository!
     private var dictionaryRepo: DictionaryRepository!
+    private var speechSynth: SpeechSynth!
     
     
     override func setUpWithError() throws {
@@ -15,6 +16,7 @@ final class StressChoiceTests: XCTestCase {
         sentenceRepo = SentenceRepository(databaseManager: databaseManager)
         dictionaryRepo = DictionaryRepository(databaseManager: databaseManager)
         wordService = WordService(wordRepo: wordRepo, sentenceRepo: sentenceRepo, dictionaryRepo: dictionaryRepo)
+        speechSynth = SpeechSynth()
     }
     
     override func tearDownWithError() throws {
@@ -23,12 +25,13 @@ final class StressChoiceTests: XCTestCase {
         dictionaryRepo = nil
         databaseManager = nil
         wordService = nil
+        speechSynth = nil
     }
     
     func test3Vowel() throws {
         let word = wordRepo.findMatches(by: [34]).first!
         
-        let sut = StressChoiceExerciseFactory(word: word, wordService: wordService)
+        let sut = StressChoiceExerciseFactory(word: word, wordService: wordService, speechSynth: speechSynth)
         let expected = ["че'ловек", "чело'век"]
 
         XCTAssert(sut.incorrectStressedWordChoices.sorted() == expected.sorted())
@@ -37,7 +40,7 @@ final class StressChoiceTests: XCTestCase {
     func testWordWithЁ() throws {
         let word = wordRepo.findMatches(by: [479]).first!
         
-        let sut = StressChoiceExerciseFactory(word: word, wordService: wordService)
+        let sut = StressChoiceExerciseFactory(word: word, wordService: wordService, speechSynth: speechSynth)
         let expected = ["зе'лёный", "зелёны'й"]
 
         XCTAssert(sut.incorrectStressedWordChoices.sorted() == expected.sorted())
@@ -46,7 +49,7 @@ final class StressChoiceTests: XCTestCase {
     func testWordWithVowelAtEnd() throws {
         let word = wordRepo.findMatches(by: [153]).first!
         
-        let sut = StressChoiceExerciseFactory(word: word, wordService: wordService)
+        let sut = StressChoiceExerciseFactory(word: word, wordService: wordService, speechSynth: speechSynth)
         let expected = ["зе'мля"]
 
         XCTAssert(sut.incorrectStressedWordChoices.sorted() == expected.sorted())
@@ -55,7 +58,7 @@ final class StressChoiceTests: XCTestCase {
     func testWordWithoutVowels() throws {
         let word = Word(id: 0, bare: "ссср", accented: "ссср", type: .noun, level: "A1", ranking: 0, noun: nil, verb: nil, forms: [WordForm](), translations: [String]())
         
-        let sut = StressChoiceExerciseFactory(word: word, wordService: wordService)
+        let sut = StressChoiceExerciseFactory(word: word, wordService: wordService, speechSynth: speechSynth)
         let expected = [String]()
 
         XCTAssert(sut.incorrectStressedWordChoices.sorted() == expected.sorted())
