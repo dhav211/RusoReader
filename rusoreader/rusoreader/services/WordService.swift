@@ -185,4 +185,25 @@ class WordService {
         }
         .count > 1
     }
+    
+    /// Compares two strings, a returns a grade depending on how different they are.
+    /// - Parameters:
+    ///   - userAnswer: The answer the user submitted
+    ///   - actualAnswer: The answer which it is compared to
+    /// - Returns: A passing, failing, or almost grade.
+    func gradeWord(userAnswer: String, actualAnswer: String) -> ExerciseResult.Grade {
+        let differenceTolerance = max(actualAnswer.count / 10, 1)
+        let difference = StringComparasion.compare(actualAnswer, userAnswer)
+        
+        // an exact match is considered correct with full points
+        if difference == 0 {
+            return .correct
+            // if it's within tolerance points are still rewarded but let the user know they weren't fully correct
+        } else if difference > 0 && difference <= differenceTolerance {
+            return .almost
+            // out of tolerance means the exercise was wrong, points will be affected and user must try again
+        } else {
+            return .incorrect
+        }
+    }
 }

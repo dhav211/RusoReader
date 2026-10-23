@@ -204,4 +204,3 @@ final class WordTests: XCTestCase {
         XCTAssert(wordService.gradeWord(userAnswer: "ааатопримечательность", actualAnswer: "достопримечательность") == .incorrect)
     }
 }
-
