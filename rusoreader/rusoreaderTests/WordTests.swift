@@ -175,5 +175,33 @@ final class WordTests: XCTestCase {
             }
         }
     }
+    
+    func testGradeWordExactMatchIsCorrect() throws {
+        XCTAssert(wordService.gradeWord(userAnswer: "собака", actualAnswer: "собака") == .correct)
+    }
+    
+    func testGradeWordSingleLetterSubstitutionIsAlmost() throws {
+        // "собака" (dog) has 6 letters, giving a tolerance of 1, so a single substituted letter should be "almost"
+        XCTAssert(wordService.gradeWord(userAnswer: "собаку", actualAnswer: "собака") == .almost)
+        XCTAssert(wordService.gradeWord(userAnswer: "сабака", actualAnswer: "собака") == .almost)
+    }
+    
+    func testGradeWordDifferentWordIsIncorrect() throws {
+        XCTAssert(wordService.gradeWord(userAnswer: "кошка", actualAnswer: "собака") == .incorrect)
+    }
+    
+    func testGradeWordEmptyUserAnswerIsIncorrect() throws {
+        XCTAssert(wordService.gradeWord(userAnswer: "", actualAnswer: "собака") == .incorrect)
+    }
+    
+    func testGradeWordLongWordWithinToleranceIsAlmost() throws {
+        // "достопримечательность" (landmark) has 21 letters, giving a tolerance of 2
+        XCTAssert(wordService.gradeWord(userAnswer: "аастопримечательность", actualAnswer: "достопримечательность") == .almost)
+    }
+    
+    func testGradeWordLongWordOutOfToleranceIsIncorrect() throws {
+        // one letter past the tolerance of 2 should push the grade to incorrect
+        XCTAssert(wordService.gradeWord(userAnswer: "ааатопримечательность", actualAnswer: "достопримечательность") == .incorrect)
+    }
 }
 

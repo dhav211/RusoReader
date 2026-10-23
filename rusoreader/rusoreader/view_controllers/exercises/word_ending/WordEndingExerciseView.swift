@@ -1,11 +1,11 @@
 import UIKit
 class WordEndingExerciseView : ExerciseViewController, UITextFieldDelegate {
     private let viewModel: WordEndingExerciseViewModel
-    private let inputField: UITextField
+    private let answerField: AnswerTextFieldView
     
     init(viewModel: WordEndingExerciseViewModel) {
         self.viewModel = viewModel
-        self.inputField = UITextField()
+        self.answerField = AnswerTextFieldView()
         
         super.init(
             banner: ExerciseBanner(text: "Write the word in the correct ending"),
@@ -36,19 +36,25 @@ class WordEndingExerciseView : ExerciseViewController, UITextFieldDelegate {
         
         let informationStack = WordEndingInformationView(accentedWord: viewModel.accentedBaseFormText, wordFormText: viewModel.formText)
         exerciseArea.addSubview(informationStack)
+        exerciseArea.addSubview(answerField)
         
-        let inputStack = createInputStack()
-        inputStack.addArrangedSubview(inputField)
-        
-        setupInputField()
+        answerField.translatesAutoresizingMaskIntoConstraints = false
+        answerField.setup(
+            width: min((UIScreen.main.bounds.width) * 0.75, 300),
+            onEdited: { [weak self] in self?.didEditInputField() }
+        )
+        answerField.delegate = self
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tap)
         view.backgroundColor = .systemBackground
         
+        
         NSLayoutConstraint.activate([
             informationStack.topAnchor.constraint(equalTo: exerciseArea.topAnchor, constant: 8),
             informationStack.centerXAnchor.constraint(equalTo: exerciseArea.centerXAnchor),
+            answerField.centerYAnchor.constraint(equalTo: exerciseArea.centerYAnchor),
+            answerField.centerXAnchor.constraint(equalTo: exerciseArea.centerXAnchor),
         ])
     }
     
@@ -57,7 +63,7 @@ class WordEndingExerciseView : ExerciseViewController, UITextFieldDelegate {
         if let submitButton {
             submitButton.isHidden = true
         }
-        guard let answer = inputField.text else { return }
+        guard let answer = answerField.cleanedText else { return }
         let result = viewModel.calculateResult(answer)
         completionDelegate?.grade(result: result)
 
@@ -81,9 +87,9 @@ class WordEndingExerciseView : ExerciseViewController, UITextFieldDelegate {
     }
 
     // When the user edits the answer field, this will enable and disable the submit button depending on if there is any text in the answer field
-    @objc private func didEditInputField() {
+    private func didEditInputField() {
         guard let submitButton else { return }
-        guard let inputText = inputField.text else { return }
+        guard let inputText = answerField.cleanedText else { return }
         
         if inputText.count > 0 {
             submitButton.enable()
@@ -95,34 +101,5 @@ class WordEndingExerciseView : ExerciseViewController, UITextFieldDelegate {
     @objc func dismissKeyboard() {
         //Causes the view (or one of its embedded text fields) to resign the first responder status.
         view.endEditing(true)
-    }
-    
-    private func createInputStack() -> UIStackView {
-        let inputStack = UIStackView()
-        inputStack.axis = .vertical
-        inputStack.alignment = .fill
-        inputStack.spacing = 4
-        inputStack.translatesAutoresizingMaskIntoConstraints = false
-        exerciseArea.addSubview(inputStack)
-        
-        let inputStackWidth = min((UIScreen.main.bounds.width) * 0.75, 300)
-        
-        NSLayoutConstraint.activate([
-            inputStack.widthAnchor.constraint(equalToConstant: inputStackWidth),
-            inputStack.centerYAnchor.constraint(equalTo: exerciseArea.centerYAnchor),
-            inputStack.centerXAnchor.constraint(equalTo: exerciseArea.centerXAnchor),
-        ])
-        
-        return inputStack
-    }
-    
-    private func setupInputField() {
-        inputField.borderStyle = .roundedRect
-        inputField.textColor = .label
-        inputField.backgroundColor = .secondarySystemBackground
-        inputField.addTarget(self, action: #selector(didEditInputField), for: .editingChanged)
-        
-        inputField.delegate = self
-        inputField.returnKeyType = .done
     }
 }
