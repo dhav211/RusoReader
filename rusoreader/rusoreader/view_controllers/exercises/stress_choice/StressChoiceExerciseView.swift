@@ -64,11 +64,6 @@ class StressChoiceExerciseView : MultipleChoiceExerciseViewController {
         if let submitButton {
             submitButton.setClickHandler(onSubmit: onSubmit)
         }
-        
-        NSLayoutConstraint.activate([
-            playSound.widthAnchor.constraint(equalToConstant: 64),
-            playSound.heightAnchor.constraint(equalToConstant: 64),
-        ])
     }
     
     private func onSubmit() {
