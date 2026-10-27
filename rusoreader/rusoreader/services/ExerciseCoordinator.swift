@@ -10,6 +10,7 @@ enum ExerciseType {
     case wordEndingMultipleChoice
     case stressChoice
     case translationMultipleChoice
+    case typeSpeech
 }
 
 class ExerciseCoordinator {
@@ -53,10 +54,10 @@ class ExerciseCoordinator {
                     return createExerciseFactories(for: exerciseWord, types: [.wordEndingMultipleChoice, .wordEnding, .translationMultipleChoice])
     
                     case .familiar:
-                    return createExerciseFactories(for: exerciseWord, types: [.wordEnding, .stressChoice, .translationMultipleChoice])
+                    return createExerciseFactories(for: exerciseWord, types: [.wordEnding, .stressChoice, .translationMultipleChoice, .typeSpeech])
     
                     case .fluent:
-                    return createExerciseFactories(for: exerciseWord, types: [.wordEnding])
+                    return createExerciseFactories(for: exerciseWord, types: [.wordEnding, .typeSpeech])
                 }
             }()
 
@@ -122,7 +123,6 @@ class ExerciseCoordinator {
                     )
                 }
             case .translationMultipleChoice:
-                // Do some things and append it to the factories
                 if !exerciseWord.word.translations.isEmpty {
                     factories.append(
                         TranslationMultipleChoiceExerciseFactory(
@@ -132,6 +132,15 @@ class ExerciseCoordinator {
                         )
                     )
                 }
+            case .typeSpeech:
+                factories.append(
+                    TypeSpeechExerciseFactory(
+                        word: exerciseWord.word,
+                        wordForm: RandomWordFormSelector.getRandomWordFormForExercise(from: exerciseWord.word),
+                        wordService: wordService,
+                        speechSynth: speechSynth
+                    )
+                )
             }
         }
         
