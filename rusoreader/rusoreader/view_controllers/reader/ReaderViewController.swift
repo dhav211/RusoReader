@@ -5,6 +5,7 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
     private var currentSelections = Set<CurrentSelectionRange>()
     private var shouldScroll: Bool = true
     private let viewModel: ReaderViewModel
+    private var orientation: PhoneOrientation = .error
     
     init(viewModel: ReaderViewModel) {
         self.viewModel = viewModel
@@ -43,6 +44,9 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        orientation = PhoneOrientation.set(isViewInPortrait: traitCollection.verticalSizeClass == .regular &&
+                              traitCollection.horizontalSizeClass == .compact)
 
         navigationController?.hidesBarsOnSwipe = true
         view.backgroundColor = .systemBackground
@@ -86,12 +90,23 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
         if let paragraph = viewModel.getParagraph(at: indexPath.row) {
             cell.setText(with: paragraph)
             cell.setIndex(to: indexPath.row)
+            cell.setMargins(to: orientation == .portrait ? .phonePortrait : .phoneLandscape)
             cell.onTextClicked = { [weak self] paragraphView, location, index in
                 self?.textClicked(in: paragraphView, at: location, from: index)
             }
         }
         
         return cell
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
+        orientation = PhoneOrientation.set(isViewInPortrait: size.height > size.width)
+        let cells = tableView.visibleCells as! [ParagraphCellView]
+        
+        for cell in cells {
+            // TODO this should handle ipad state
+            cell.setMargins(to: orientation == .portrait ? .phonePortrait : .phoneLandscape)
+        }
     }
     
     // When a cell arrives and exits we will temporary save the index in the view model and we will use it for resuming the users chapter progress
