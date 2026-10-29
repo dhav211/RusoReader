@@ -60,7 +60,7 @@ final class EpubParser : EbookParser {
             
             let tocPath = try getTableOfContentsPath(in: contentText)
             guard let tocText = try extractText(from: archive, with: contentFolderPath + tocPath) else { throw EpubParsingError.noTableOfContents }
-            let chapters = parseChapters(from: archive, tableOfContentsText: tocText, contentFolderPath: contentFolderPath)
+            let chapters = parseChapters(from: archive, tableOfContentsText: tocText, contentText: contentText, contentFolderPath: contentFolderPath)
             
             return ParsedBook(book: bookDetails, chapters: chapters)
         } else {
@@ -138,57 +138,125 @@ final class EpubParser : EbookParser {
     /// - Parameters:
     ///   - archive: The zip foundation archive object for the epub we are parsing
     ///   - tableOfContentsText: A parsed version of the table of contents which will be used to search for the chapter text files
+    ///   - contentText: The parsed version of the content.opf or whatever the epub chose to name the file, this will be used as backup for finding the changes if the toc.ncx is missing or empty
     ///   - contentFolderPath: We need the path to the content folder so we can successfully pull up the chapter text files to parse
     /// - Returns: An array of the chapters, which hold all the information of the chapter, which would be title, text, and index
-    private func parseChapters(from archive: Archive, tableOfContentsText: String, contentFolderPath: String) -> [ChapterDetails] {
+    private func parseChapters(from archive: Archive, tableOfContentsText: String, contentText: String, contentFolderPath: String) -> [ChapterDetails] {
         do {
-            let parsedToc = try SwiftSoup.parse(tableOfContentsText)
             var chapters = [String:ChapterDetails]()
-            let navPoints = try parsedToc.getElementsByTag("navPoint")
+            
+            // There may be a chance there was no toc.ncx, so the navPoints may be nil all together
+            let navPoints: Elements? = {
+                do {
+                    let parsedToc = try SwiftSoup.parse(tableOfContentsText)
+                    return try parsedToc.getElementsByTag("navPoint")
+                } catch {
+                    return nil
+                }
+            }()
+            
+            // If the navPoints don't exist then we can parse the content file (ex: content.opf), however don't waste the energy to parse if not needed
+            let parsedContent: Document? = {
+                do {
+                    if let navPoints, !navPoints.isEmpty() {
+                        return nil
+                    }
+                    
+                    return try SwiftSoup.parse(contentText)
+                } catch {
+                    return nil
+                }
+            }()
+            
+            // If the toc.ncx is missing or empty the navPoints will be nil, this will be our back up for finding the chapters
+            let spine: Elements? = {
+                do {
+                    guard let parsedContent else { return nil }
+                    guard let spine = try parsedContent.getElementsByTag("spine").first() else { return nil }
+                    return spine.children()
+                } catch {
+                    return nil
+                }
+            }()
+            
             var currentIndex = 0
             
-            for navPoint in navPoints {
-                guard let title = try navPoint.getElementsByTag("navLabel").first()?
-                    .getElementsByTag("text").first()?
-                    .text() else { continue }
-
-                let pathWithId = try navPoint.getElementsByTag("content")
-                    .first()?.attr("src")
-                    .split(separator: "#")
+            // This tuple will the information to find the
+            typealias ChapterIndex = (title: String, path: String, id: String)
+            var chapterIndices = [ChapterIndex]()
             
-                guard let chapterFileName = pathWithId?.first else { continue }
-                let idPath = pathWithId?.last ?? ""
-                let chapterUrl = ("\(contentFolderPath)\(String(chapterFileName))")
+            if let navPoints, !navPoints.isEmpty() { // The toc.ncx file has pointers to the chapters
+                for navPoint in navPoints {
+                    guard let title = try navPoint.getElementsByTag("navLabel").first()?
+                        .getElementsByTag("text").first()?
+                        .text() else { continue }
+                    
+                    let pathWithId = try navPoint.getElementsByTag("content")
+                        .first()?.attr("src")
+                        .split(separator: "#")
+                    
+                    guard let chapterFileName = pathWithId?.first else { continue }
+                    
+                    let idPathCount = pathWithId?.count ?? 0
+                    let idPath = idPathCount > 1 ? pathWithId?.last ?? "" : ""
+                    
+                    chapterIndices.append(ChapterIndex(title: title, path: String(chapterFileName), id: String(idPath)))
+                }
+            } else if let spine, let parsedContent { // The toc.ncx doesn't have pointers to the chapters so we need to use the spine in the content.opf
+                let manifest = try parsedContent.getElementsByTag("manifest").first()
+                let manifestItems = try manifest?.getElementsByTag("item")
+                
+                // The dictionary will be used for easy access of chapter file addresses, use the id as a key and the file adress as a value
+                var chapterAddresses = [String:String]()
+                
+                guard let manifestItems else { return [ChapterDetails]() }
+                
+                // The manifest will contain the file address and id for each chapter however they will not be in order
+                for manifestItem in manifestItems {
+                    let chapterId = try manifestItem.attr("id")
+                    let chapterHref = try manifestItem.attr("href")
+                    
+                    chapterAddresses[chapterId] = chapterHref
+                }
+                
+                // To put the chapters in order will loop through the spine, which just contains the id
+                var chapterIndex = 1
+                
+                // We are not so much concerned about chapters that aren't actually chapters, as this may be a whole thing to format that we aren't prepared for, lets just skip them
+                let itemsToSkip = ["cover.xhtml", "titlepage.xhtml", "title.xhtml", "copyright.xhtml", "imprint.xhtml", "dedication.xhtml", "epigraph.xhtml", "toc.xhtml", "nav.xhtml", "contents.xhtml", "preface.xhtml", "foreword.xhtml", "introduction.xhtml", "annotation.xhtml", "afterword.xhtml", "acknowledgments.xhtml", "about.xhtml", "notes.xhtml", "footnotes.xhtml", "appendix.xhtml", "colophon.xhtml", "ads.xhtml"]
+                
+                // The items in the spine are in the correct order, however they will not contain the name of the chapter so we will have to just increment the chapter number, which may not always be correct
+                for child in spine {
+                    let idRef = try child.attr("idref")
+                    let address = chapterAddresses[idRef]
+                    
+                    guard let address else { continue }
+                    if itemsToSkip.contains(address) { continue }
+                    
+                    chapterIndices.append(ChapterIndex(title: "Chapter \(chapterIndex)", path: address, id: idRef))
+                    
+                    chapterIndex += 1
+                }
+            } else {
+                return [ChapterDetails]()
+            }
+            
+            // Finally we have the location and order of the chapter files, we can parse the text within the chapters and create the chapter objects
+            for chapterIndex in chapterIndices {
+                let chapterUrl = ("\(contentFolderPath)\(chapterIndex.path)")
                 
                 if !chapters.keys.contains(chapterUrl) {
                     guard let chapterText = try extractText(from: archive, with: chapterUrl) else { continue }
                     let parsedChapterText = try SwiftSoup.parse(chapterText)
                     var text = ""
 
-                    let idSpans = try parsedChapterText.select("span") 
-
-                    if idSpans.count > 0 {
-                        for span in idSpans {
-                            let spanSelector = try span.cssSelector()
-    
-                            if spanSelector == "#\(String(idPath))" {
-                                let paragraphs = span.children().filter { $0.tagName() == "p" }
-                                
-                                for paragraph in paragraphs {
-                                    text.append("\(try paragraph.text())\n")
-                                }
-                            }
-                        }
-                        
-                        chapters["\(chapterUrl)#\(idPath)"] = (ChapterDetails(index: currentIndex, title: title, text: text))
-                    } else {
-                        let paragraphs = try parsedChapterText.select("p")
-                        for paragraph in paragraphs {
-                            text.append("\(try paragraph.text())\n")
-                        }
-                        
-                        chapters[chapterUrl] = (ChapterDetails(index: currentIndex, title: title, text: text))
+                    let paragraphs = try parsedChapterText.select("p")
+                    for paragraph in paragraphs {
+                        text.append("\(try paragraph.text())\n")
                     }
+                    
+                    chapters[chapterUrl] = (ChapterDetails(index: currentIndex, title: chapterIndex.title, text: text))
+                
                     currentIndex += 1
                 }
             }
@@ -196,6 +264,7 @@ final class EpubParser : EbookParser {
                 return chapterDetail
             }
         } catch {
+            print("\(error)")
             return [ChapterDetails]()
         }
     }
