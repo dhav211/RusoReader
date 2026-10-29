@@ -28,51 +28,51 @@ class BookRepository {
     /// - Parameter parsedBook: The output from the EbookParser, this will contain the book and the chapters
     /// - Returns: A complete book object, this return will be useful for opening a book immediately after the user as added it
     func saveBook(parsedBook: ParsedBook) throws -> Book {
-            return try databaseManager.userDataQueue.write { db in
-                // We are creating a url to the saved cover image, this is a different url from the cover image in the epub. If there is no cover image in the book we will just skip past it, the cover image isn't required
-                let coverImageUrl: String = try {
-                    if let coverImage = parsedBook.book.coverImage {
-                        let uniqueId = { // There is a chance that book a book won't contain an isbn or a uuid, we can check for that here
-                            if !parsedBook.book.isbn.isEmpty {
-                                return parsedBook.book.isbn
-                            } else if !parsedBook.book.uuid.isEmpty {
-                                return parsedBook.book.uuid
-                            } else {
-                                return UUID().uuidString
-                            }
-                        }()
-                        let fileName = "\(uniqueId)-cover-image\(parsedBook.book.coverImageFileType)"
-                        try fileStore.save(data: coverImage, fileName: fileName)
-                        return fileName
-                    } else {
-                        return ""
-                    }
-                }()
-                
-                // The rest of this method is saving the parsed book into the database. The book needs to be inserted first so the chapters can get the generated ID for foreign keys
-                
-                var book = DatabaseBook(name: parsedBook.book.title, author: parsedBook.book.author, cover_image_url: coverImageUrl, current_chapter: 0, isbn: parsedBook.book.isbn, uuid: parsedBook.book.uuid)
-                
-                try book.insert(db)
-                
-                var chapters = [DatabaseChapter]()
-                for parsedChapter in parsedBook.chapters {
-                    var chapter = DatabaseChapter(name: parsedChapter.title, position: Int64(parsedChapter.index), current_user_progress: 0, text: parsedChapter.text, book_id: book.id ?? 0)
-                    try chapter.insert(db)
-                    chapters.append(chapter)
+        return try databaseManager.userDataQueue.write { db in
+            // We are creating a url to the saved cover image, this is a different url from the cover image in the epub. If there is no cover image in the book we will just skip past it, the cover image isn't required
+            let coverImageUrl: String = try {
+                if let coverImage = parsedBook.book.coverImage {
+                    let uniqueId = { // There is a chance that book a book won't contain an isbn or a uuid, we can check for that here
+                        if !parsedBook.book.isbn.isEmpty {
+                            return parsedBook.book.isbn
+                        } else if !parsedBook.book.uuid.isEmpty {
+                            return parsedBook.book.uuid
+                        } else {
+                            return UUID().uuidString
+                        }
+                    }()
+                    let fileName = "\(uniqueId)-cover-image\(parsedBook.book.coverImageFileType)"
+                    try fileStore.save(data: coverImage, fileName: fileName)
+                    return fileName
+                } else {
+                    return ""
                 }
-                
-                guard let bookId = book.id else { throw BookRepositoryError.noBookId }
-                
-                return Book(id: Int(bookId),
-                            name: book.name,
-                            author: book.author,
-                            coverImageUrl: book.cover_image_url,
-                            currentChapter: 1,
-                            numberOfChapters: chapters.count,
-                            dateCreated: book.date_created
-                )
+            }()
+            
+            // The rest of this method is saving the parsed book into the database. The book needs to be inserted first so the chapters can get the generated ID for foreign keys
+            
+            var book = DatabaseBook(name: parsedBook.book.title, author: parsedBook.book.author, cover_image_url: coverImageUrl, current_chapter: 0, isbn: parsedBook.book.isbn, uuid: parsedBook.book.uuid)
+            
+            try book.insert(db)
+            
+            var chapters = [DatabaseChapter]()
+            for parsedChapter in parsedBook.chapters {
+                var chapter = DatabaseChapter(name: parsedChapter.title, position: Int64(parsedChapter.index), current_user_progress: 0, text: parsedChapter.text, book_id: book.id ?? 0)
+                try chapter.insert(db)
+                chapters.append(chapter)
             }
+            
+            guard let bookId = book.id else { throw BookRepositoryError.noBookId }
+            
+            return Book(id: Int(bookId),
+                        name: book.name,
+                        author: book.author,
+                        coverImageUrl: book.cover_image_url,
+                        currentChapter: 1,
+                        numberOfChapters: chapters.count,
+                        dateCreated: book.date_created
+            )
+        }
     }
     
     /// Find a collection of books with the same title, this method is possibly never used. It was created for my testing of accessing books
@@ -163,7 +163,7 @@ class BookRepository {
                 .filter(id: Int64(id))
                 .including(all: DatabaseBook.chapters)
                 .fetchOne(db)
-            else { throw BookRepositoryError.notFound(id: id) }
+                    else { throw BookRepositoryError.notFound(id: id) }
             
             if let coverImage = bookToRemove.cover_image_url {
                 do {
@@ -182,7 +182,7 @@ class BookRepository {
             guard var bookToUpdate = try DatabaseBook
                 .filter(id: Int64(id))
                 .fetchOne(db)
-            else { return }
+                    else { return }
             
             bookToUpdate.current_chapter = Int64(chapter)
             
@@ -198,7 +198,7 @@ class BookRepository {
             guard var bookToUpdate = try DatabaseBook
                 .filter(id: Int64(book.id))
                 .fetchOne(db)
-            else { return }
+                    else { return }
             
             bookToUpdate.author = book.author
             bookToUpdate.name = book.name
@@ -231,8 +231,8 @@ class BookRepository {
             while let row = try rows.next() {
                 indices.append(
                     TableOfContentIndex(
-                        title: row["name"] ?? "", 
-                        index: row["position"] ?? 0, 
+                        title: row["name"] ?? "",
+                        index: row["position"] ?? 0,
                         id: row["id"] ?? 0,
                         isHeader: String(row["text"]).count == 0
                     )
@@ -242,14 +242,14 @@ class BookRepository {
             return indices
         }
     }
-
+    
     func fetchChapter(from bookId: Int, at index: Int) throws -> Chapter? {
         return try databaseManager.userDataQueue.read { db -> Chapter? in
             guard let dbChapter = try DatabaseChapter
                 .filter(DatabaseChapter.Columns.bookId == bookId)
                 .filter(DatabaseChapter.Columns.position == index)
                 .fetchOne(db)
-            else { return nil }
+                    else { return nil }
             
             return Chapter(name: dbChapter.name, index: index, currentUserProgress: Int(dbChapter.current_user_progress), text: dbChapter.text)
         }
@@ -262,7 +262,7 @@ class BookRepository {
                     .filter(DatabaseChapter.Columns.bookId == bookId)
                     .filter(DatabaseChapter.Columns.position == chapterIndex)
                     .fetchOne(db)
-                else { return }
+                        else { return }
                 dbChapter.current_user_progress = Int64(updatedProgress)
                 try dbChapter.save(db)
             }
@@ -294,7 +294,7 @@ class BookRepository {
                 guard var bookToUpdate = try DatabaseBook
                     .filter(id: Int64(bookId))
                     .fetchOne(db)
-                else { return }
+                        else { return }
                 
                 bookToUpdate.date_last_opened = Date.now
                 
@@ -303,5 +303,46 @@ class BookRepository {
         } catch {
             print("Error updating last opened date: \(error)")
         }
+    }
+    
+    /// Checks to see if a book exists in the database by checking for the isbn or uuid
+    /// - Parameters:
+    ///   - isbn: An unique identifier supplied by the ebook
+    ///   - uuid: An unique identifer supplied by the ebook
+    /// - Returns: If either the ISBN  or UUID is found in the database, this will return true, if neither or found, then false
+    func isBookAdded(isbn: String, uuid: String) -> Bool {
+        if isbn.isEmpty && uuid.isEmpty { // If neither exist then just assume the book is unique
+            return false
+        }
+        
+        if !isbn.isEmpty {
+            do {
+                let hasIsbn = try databaseManager.userDataQueue.read { db in
+                    try DatabaseBook
+                        .filter(DatabaseBook.Columns.isbn)
+                        .fetchCount(db) > 0
+                }
+                
+                if hasIsbn { return true }
+            } catch {
+                print("Error searching for ISBN")
+            }
+        }
+        
+        if !uuid.isEmpty {
+            do {
+                let hasUuid = try databaseManager.userDataQueue.read { db in
+                    try DatabaseBook
+                        .filter(DatabaseBook.Columns.uuid)
+                        .fetchCount(db) > 0
+                }
+                
+                if hasUuid { return true }
+            } catch {
+                print("Error searching for UUID")
+            }
+        }
+        
+        return false
     }
 }

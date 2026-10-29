@@ -23,6 +23,10 @@ final class AddBookBarButton: UIBarButtonItem, UIDocumentPickerDelegate {
             guard let url = urls.first else { return }
             let createdBook = try bookService.parseBook(from: url)
             onBooksAdded?(createdBook)
+        } catch BookServiceError.bookAlreadyAdded(let bookTitle) {
+            guard let presentingViewController else { return }
+            let alert = UIAlertController.error(message: "\(bookTitle) is already added")
+            presentingViewController.present(alert, animated: true)
         } catch {
             print("Failed to parse book: \(error)")
             guard let presentingViewController else { return }

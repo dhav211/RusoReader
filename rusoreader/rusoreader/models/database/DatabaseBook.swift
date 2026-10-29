@@ -40,6 +40,8 @@ extension DatabaseBook : FetchableRecord, TableRecord {
         static let name = Column(CodingKeys.name)
         static let lastOpened = Column(CodingKeys.date_last_opened)
         static let created = Column(CodingKeys.date_created)
+        static let isbn = Column(CodingKeys.isbn)
+        static let uuid = Column(CodingKeys.uuid)
     }
     
     static let chapters = hasMany(DatabaseChapter.self)

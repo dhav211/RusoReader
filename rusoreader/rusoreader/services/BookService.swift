@@ -2,6 +2,7 @@ import Foundation
 
 enum BookServiceError: Error {
     case failedToStartAccessingSecurityScopedResource
+    case bookAlreadyAdded(bookTitle: String)
 }
 
 class BookService {
@@ -21,6 +22,11 @@ class BookService {
             let epubParser = EpubParser()
             
             let parsedBook = try epubParser.parse(from: url)
+            
+            if bookRepo.isBookAdded(isbn: parsedBook.book.isbn, uuid: parsedBook.book.uuid) {
+                throw BookServiceError.bookAlreadyAdded(bookTitle: parsedBook.book.title)
+            }
+            
             return try bookRepo.saveBook(parsedBook: parsedBook)
         } else {
             throw BookServiceError.failedToStartAccessingSecurityScopedResource
