@@ -1,4 +1,5 @@
 import UIKit
+import UniformTypeIdentifiers
 
 final class AddBookBarButton: UIBarButtonItem, UIDocumentPickerDelegate {
     
@@ -36,7 +37,11 @@ final class AddBookBarButton: UIBarButtonItem, UIDocumentPickerDelegate {
     }
     
         @objc private func onTapped() {
-            let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.epub])
+            let fb2Type = UTType("com.yourapp.fb2")
+                ?? UTType(filenameExtension: "fb2")
+                ?? .data
+            
+            let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.epub, fb2Type])
             picker.delegate = self
             picker.allowsMultipleSelection = false
             presentingViewController?.present(picker, animated: true)

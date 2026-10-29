@@ -3,6 +3,7 @@ import Foundation
 enum BookServiceError: Error {
     case failedToStartAccessingSecurityScopedResource
     case bookAlreadyAdded(bookTitle: String)
+    case failedToParse
 }
 
 class BookService {
@@ -18,10 +19,20 @@ class BookService {
     func parseBook(from url: URL) throws -> Book {
         if url.startAccessingSecurityScopedResource() {
             defer { url.stopAccessingSecurityScopedResource() }
+
+            let parsedBook: ParsedBook? = try {
+                if url.path().hasSuffix(".epub") {
+                    let epubParser = EpubParser()
+                    return try epubParser.parse(from: url)
+                } else if url.path().hasSuffix(".fb2") {
+                    let fb2Parser = Fb2Parser()
+                    return try fb2Parser.parse(from: url)
+                }
+                
+                return nil
+            }()
             
-            let epubParser = EpubParser()
-            
-            let parsedBook = try epubParser.parse(from: url)
+            guard let parsedBook else { throw BookServiceError.failedToParse }
             
             if bookRepo.isBookAdded(isbn: parsedBook.book.isbn, uuid: parsedBook.book.uuid) {
                 throw BookServiceError.bookAlreadyAdded(bookTitle: parsedBook.book.title)
