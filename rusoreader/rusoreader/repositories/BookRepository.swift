@@ -166,7 +166,11 @@ class BookRepository {
             else { throw BookRepositoryError.notFound(id: id) }
             
             if let coverImage = bookToRemove.cover_image_url {
-                try fileStore.deleteItem(fileName: coverImage)
+                do {
+                    try fileStore.deleteItem(fileName: coverImage)
+                } catch {
+                    print("Cover image couldn't be deleted, it probably doesn't exist")
+                }
             }
             
             try bookToRemove.delete(db)
