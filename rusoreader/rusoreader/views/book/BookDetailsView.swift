@@ -29,8 +29,8 @@ final class BookDetailsView: UIStackView {
             authorLabel.text?.removeAll()
         }
         
-        if currentChapter > 0 && chapterCount > 0 {
-            chapterProgress.setProgress(currentChapter: currentChapter, chapterCount: chapterCount)
+        if currentChapter >= 0 && chapterCount > 0 {
+            chapterProgress.setProgress(currentChapter: currentChapter == 0 ? 1 : currentChapter, chapterCount: chapterCount)
         } else {
             chapterProgress.clear()
         }
