@@ -319,7 +319,7 @@ class BookRepository {
             do {
                 let hasIsbn = try databaseManager.userDataQueue.read { db in
                     try DatabaseBook
-                        .filter(DatabaseBook.Columns.isbn)
+                        .filter(DatabaseBook.Columns.isbn == isbn)
                         .fetchCount(db) > 0
                 }
                 
@@ -333,7 +333,7 @@ class BookRepository {
             do {
                 let hasUuid = try databaseManager.userDataQueue.read { db in
                     try DatabaseBook
-                        .filter(DatabaseBook.Columns.uuid)
+                        .filter(DatabaseBook.Columns.uuid == uuid)
                         .fetchCount(db) > 0
                 }
                 
