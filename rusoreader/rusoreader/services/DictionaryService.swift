@@ -19,7 +19,7 @@ class DictionaryService {
             return entry.wordId
         }
         
-        return wordService.findMatches(from: wordIds)
+        return wordService.findMatchesNoAsync(from: wordIds)
     }
     
     /// Returns a limited amount random Word objects from user's dictionary
@@ -30,7 +30,7 @@ class DictionaryService {
             return entry.wordId
         }
         
-        return wordService.findMatches(from: wordIds)
+        return wordService.findMatchesNoAsync(from: wordIds)
     }
     
     /// Finds a maximum of 7 words for exercises, if not enough words exist in the user's dictionary this function will add random words to the dictionary and then return them.
@@ -56,7 +56,7 @@ class DictionaryService {
             : [DictionaryEntry]()
 
         // The exercise words need an associated word to generate sentences, so fetch the words with ids from the dictionary entries
-        var words = wordService.findMatches(from: Array(allOverDueWords + weakestDictionaryWords).map { return $0.wordId })
+        var words = wordService.findMatchesNoAsync(from: Array(allOverDueWords + weakestDictionaryWords).map { return $0.wordId })
 
         // Here we begin constructing the exercise words by finding word id matches with the words and the dictionary entries
         for entry in Array(randomOverDueWords + weakestDictionaryWords) {
@@ -77,7 +77,7 @@ class DictionaryService {
             let chosenWordIds = chosenWords.map { $0.id }
             let requiredNumberOfWords = 5 - chosenWords.count
             // Grab the words from the word db, but only the bare needed amount
-            let words = wordService.findMatches(from: Array(randomIds.filter({ !chosenWordIds.contains($0) })[0..<requiredNumberOfWords]))
+            let words = wordService.findMatchesNoAsync(from: Array(randomIds.filter({ !chosenWordIds.contains($0) })[0..<requiredNumberOfWords]))
 
             // We will just add them to the dictionary so we won't have to go through this process again
             dictionaryRepo.addWords(by: words.map { return $0.id })

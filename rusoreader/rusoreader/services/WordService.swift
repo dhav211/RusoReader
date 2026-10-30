@@ -12,13 +12,18 @@ class WordService {
     /// Find any word objects from a word form, for example the word form собаки would return the base form of собака
     /// - Parameter wordForm: A declined or conjungated form a word
     /// - Returns: The base form of a word, may return multiples as word forms can have multiple base forms
-    func findMatches(from wordForm: String) -> [Word] {
+    func findMatches(from wordForm: String) async -> [Word] {
         let ids = wordRepo.findWordIDs(by: wordForm)
-        return wordRepo.findMatches(by: ids)
+        return await wordRepo.findMatches(by: ids)
     }
     
-    func findMatches(from ids: [Int]) -> [Word] {
-        return wordRepo.findMatches(by: ids.map { return Int64($0)})
+    func findMatches(from ids: [Int]) async -> [Word] {
+        return await wordRepo.findMatches(by: ids.map { return Int64($0)})
+    }
+    
+    // TODO this is a temp method make it go away
+    func findMatchesNoAsync(from ids: [Int]) -> [Word] {
+        return wordRepo.findMatchesNoAsync(by: ids.map { return Int64($0)})
     }
     
     func findRandom(by type: Word.WordType, limit: Int = 5) -> [Word] {

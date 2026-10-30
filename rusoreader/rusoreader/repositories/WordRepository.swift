@@ -13,7 +13,20 @@ class WordRepository {
     /// - Parameters:
     ///   - wordIds: The IDs of words to find matches for, as an array of `[Int64]`.
     /// - Returns: An array of `[Word]` objects representing the matched words. If an error occurs during the fetch or transformation, an empty array is returned and an error message is printed.
-    func findMatches(by wordIds: [Int64]) -> [Word] {
+    func findMatches(by wordIds: [Int64]) async -> [Word] {
+        do {
+            return try await databaseManager.wordQueue.read { db in
+                let wordInfos = fetchWordInfos(by: wordIds, in: db)
+                return createWords(from: wordInfos)
+            }
+        } catch {
+            print("Error: \(error)")
+            return []
+        }
+    }
+    
+    // TODO this is a temp method make it go away
+    func findMatchesNoAsync(by wordIds: [Int64]) -> [Word] {
         do {
             return try databaseManager.wordQueue.read { db in
                 let wordInfos = fetchWordInfos(by: wordIds, in: db)

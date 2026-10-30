@@ -120,9 +120,16 @@ class ReaderViewModel {
         return paragraphs.count
     }
 
-    func buildWordDetailsViewModel(for word: String) -> WordDetailsViewModel? {
-        // TODO this shouldn't just get the first match but eventually this will load a page vew controller for the user to swipe through
-        guard let matches = wordService.findMatches(from: word).first else { return nil }
-        return WordDetailsViewModel(word: matches, wordService: wordService, sentenceService: sentenceService)
+//    func buildWordDetailsViewModel(for word: String) -> WordDetailsViewModel? {
+//        // TODO this shouldn't just get the first match but eventually this will load a page vew controller for the user to swipe through
+//        guard let matches = wordService.findMatches(from: word).first else { return nil }
+//        return WordDetailsViewModel(word: matches, wordService: wordService, sentenceService: sentenceService)
+//    }
+    
+    func buildWordDetailsViewController(with word: String) -> WordDetailsViewController {
+        return WordDetailsViewController(
+            viewModel: WordDetailsViewModel(searchTerm: word, wordService: wordService, sentenceService: sentenceService),
+            speechSynth: speechSynth
+        )
     }
 }

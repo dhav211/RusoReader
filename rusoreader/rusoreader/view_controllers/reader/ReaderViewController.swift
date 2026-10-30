@@ -147,11 +147,9 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
             }
             
             // If we have matches we can open the modal to show the details on the word
-            if let wordDetailsViewModel = viewModel.buildWordDetailsViewModel(for: String(textView.text[wordRange])) {
-                let wordDetails = WordDetailsView(viewModel: wordDetailsViewModel, speechSynth: viewModel.speechSynth)
-                wordDetails.modalPresentationStyle = .pageSheet
-                self.present(wordDetails, animated: true)
-            }
+            let wordDetailsViewControler = viewModel.buildWordDetailsViewController(with: String(textView.text[wordRange]))
+            wordDetailsViewControler.modalPresentationStyle = .pageSheet
+            self.present(wordDetailsViewControler, animated: true)
             
             // We are adding this selection so we can keep track of which words are highlighted
             currentSelections.insert(CurrentSelectionRange(index: index, selectionRange: selectionRange))
