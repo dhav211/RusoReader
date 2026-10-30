@@ -248,13 +248,9 @@ final class EpubParser : EbookParser {
                 if !chapters.keys.contains(chapterUrl) {
                     guard let chapterText = try extractText(from: archive, with: chapterUrl) else { continue }
                     let parsedChapterText = try SwiftSoup.parse(chapterText)
-                    var text = ""
+                    guard let body = parsedChapterText.body() else { continue }
+                    let text = try extractChapterText(from: body)
 
-                    let paragraphs = try parsedChapterText.select("p")
-                    for paragraph in paragraphs {
-                        text.append("\(try paragraph.text())\n")
-                    }
-                    
                     chapters[chapterUrl] = (ChapterDetails(index: currentIndex, title: chapterIndex.title, text: text))
                 
                     currentIndex += 1
@@ -267,6 +263,30 @@ final class EpubParser : EbookParser {
             print("\(error)")
             return [ChapterDetails]()
         }
+    }
+    
+    /// Recursively walks an HTML element's child nodes to build the plain-text contents of a chapter
+    /// - Parameter element: The root element (e.g. a chapter's body) whose text should be extracted
+    /// - Returns: The concatenated text of the element, with `<br>` tags converted to newlines, block-level
+    ///   tags (`p`, `div`) followed by a trailing newline, and heading/title tags skipped entirely
+    private func extractChapterText(from element: Element) throws -> String {
+        var result = ""
+        for node in element.getChildNodes() {
+            if let textNode = node as? TextNode {
+                result += textNode.text().trimmingCharacters(in: .whitespacesAndNewlines)
+            } else if let el = node as? Element {
+                // For formatting reason ignore any tags that may indicate that it's a chapter title
+                if ["h1", "h2", "h3", "title"].contains(el.tagName()) { continue }
+                if el.tagName() == "br" {
+                    result += "\n"
+                } else {
+                    // recurse into <span>, <div>, <i>, etc.
+                    result += try extractChapterText(from: el).trimmingCharacters(in: .whitespacesAndNewlines)
+                    if ["p", "div"].contains(el.tagName()) { result += "\n" }
+                }
+            }
+        }
+        return result
     }
     
     /// Extracts the data from the epub archive at the given path
