@@ -19,6 +19,7 @@ final class Fb2Parser: EbookParser {
         }
     }
     
+    /// Treats the FB2 file as an XML and parses all required information from file to create readable book
     private final class XMLBookParser: NSObject, XMLParserDelegate {
         private struct FB2Author {
             var firstName: String = ""
@@ -95,6 +96,8 @@ final class Fb2Parser: EbookParser {
                 if coverImage == nil { break }
                 if coverImage?.imageName == nil {
                     var imageName = attributeDict["l:href"] ?? ""
+                    
+                    // It seems fb2 likes to add a # before the image, so lets just drop it for easier searching later
                     if imageName.hasPrefix("#") {
                         imageName.removeFirst()
                     }
@@ -113,6 +116,7 @@ final class Fb2Parser: EbookParser {
                     coverImage?.fileType = {
                         let contentType = attributeDict["content-type"]
                         
+                        // Convert the content-type text into a typical filename ending
                         switch contentType?.lowercased() {
                         case "image/jpeg", "image/jpg":
                             return "jpg"
@@ -155,27 +159,30 @@ final class Fb2Parser: EbookParser {
             case "lang":
                 if let language, !language.isEmpty { break }
                 language? = text
-            case "section":
+            case "section": // Chapter section has finished, so add it to the chapter details list and prepare for the next chapter
                 if let currentChapter {
                     chapters.append(ChapterDetails(index: chapterIndex, title: currentChapter.title ?? "", text: currentChapter.text))
                 }
                 currentChapter = nil
                 chapterIndex += 1
-            case "title":
+            case "title": // when the title section is finished, we will set this bool flag to true so then we will know to add the text to the chapter text and not the chapter title text
                 currentChapter?.isTitleSet = true
             case "p":
                 guard let isTitleSet = currentChapter?.isTitleSet else { break }
                 guard let isTitleEmpty = currentChapter?.title?.isEmpty else { break }
                 
+                // Since the chapter text and title are both held in paragraph tags we will have to rely on the bool flag to know where to add the text
                 if isTitleSet {
                     currentChapter?.text.append("\(text)\n")
                 } else if currentChapter?.title != nil {
+                    // occasinally the chapter titles will be multiple lines long, this will ensure they are a single line and seperated by a dash
                     if !isTitleEmpty {
                         currentChapter?.title?.append(" - ")
                     }
                     currentChapter?.title?.append(text)
                 }
             case "binary":
+                // Since we are only concerned about the cover image only, if it's already set then just move on
                 if coverImage?.data != nil { break }
                 coverImage?.data = Data(base64Encoded: text, options: .ignoreUnknownCharacters)
             default:
