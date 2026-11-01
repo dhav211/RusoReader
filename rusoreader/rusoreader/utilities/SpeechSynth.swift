@@ -62,14 +62,14 @@ final class SpeechSynth {
     }
     
     /// Set the first found with highest quality voice as the user default. This should happen in the SceneDelegate
-    static func setDefaultVoice() {
+    static func getDefaultVoice() -> [String:String] {
         // Grabs all russian downloaded voices
         let voices = AVSpeechSynthesisVoice.speechVoices()
             .filter { $0.language == "ru-RU" }
             .sorted { $0.quality.rawValue > $1.quality.rawValue }
         
-        guard let voice = voices.first else { return }
+        guard let voice = voices.first else { return [:] }
 
-        
+        return [voice.identifier: voice.name]
     }
 }

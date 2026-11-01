@@ -53,7 +53,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
         
         if UserDefaults.standard.dictionary(forKey: "defaultVoice") == nil {
-            SpeechSynth.setDefaultVoice()
+            UserDefaultsManager.defaultVoice = SpeechSynth.getDefaultVoice()
         }
     }
 
