@@ -7,7 +7,7 @@ enum FB2ParsingError : Error {
 }
 
 final class Fb2Parser: EbookParser {
-    func parse(from bookUrl: URL) throws -> ParsedBook {
+    func parse(from bookUrl: URL) async throws -> ParsedBook {
         let parser = XMLParser(contentsOf: bookUrl)
         let delegate = XMLBookParser()
         parser?.delegate = delegate

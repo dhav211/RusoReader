@@ -19,7 +19,7 @@ final class EpubParser : EbookParser {
     /// Parses an epub file from a given URL bath.
     /// - Parameter bookUrl: The path to epub you wish to parse, this will probably be from the document picker
     /// - Returns: A parsed book object is comprised of a book and chapters array, this will hold all the information need to store the book in the database
-    func parse(from bookUrl: URL) throws -> ParsedBook {
+    func parse(from bookUrl: URL) async throws -> ParsedBook {
         let fileManager = FileManager()
         if fileManager.fileExists(atPath: bookUrl.path) {
             // Establish the structure of the epub by getting the content path and foler

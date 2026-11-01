@@ -16,17 +16,17 @@ class BookService {
     /// Extracts the data from a book object, currently supports epub
     /// - Parameter url: The url on the device to the book
     /// - Returns: If successful it will return a parsed book, if an error as occured then a nil will be returned.
-    func parseBook(from url: URL) throws -> Book {
+    func parseBook(from url: URL) async throws -> Book {
         if url.startAccessingSecurityScopedResource() {
             defer { url.stopAccessingSecurityScopedResource() }
 
-            let parsedBook: ParsedBook? = try {
+            let parsedBook: ParsedBook? = try await {
                 if url.path().hasSuffix(".epub") {
                     let epubParser = EpubParser()
-                    return try epubParser.parse(from: url)
+                    return try await epubParser.parse(from: url)
                 } else if url.path().hasSuffix(".fb2") {
                     let fb2Parser = Fb2Parser()
-                    return try fb2Parser.parse(from: url)
+                    return try await fb2Parser.parse(from: url)
                 }
                 
                 return nil
