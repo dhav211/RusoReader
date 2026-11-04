@@ -92,6 +92,16 @@ class ReaderViewModel {
     var currentTextSize: Float {
         return Float(textSize)
     }
+    
+    /// Runs the TTS engine to read the supplied text
+    /// - Parameter text: The text which the speech synth will read
+    func readText(_ text: String) {
+        do {
+            try speechSynth.speak(content: text, rate: 0.5) // TODO grab the speed from the user defaults
+        } catch {
+            print("Failed to run TTS: \(error)")
+        }
+    }
 
     /// Change the font size is every paragraphs AttributedString
     /// - Parameter newSize: The new size of the text

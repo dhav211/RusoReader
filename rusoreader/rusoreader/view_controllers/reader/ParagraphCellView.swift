@@ -13,6 +13,7 @@ class ParagraphCellView : UITableViewCell {
     private var leadingConstraint: NSLayoutConstraint? = nil
     private var trailingConstraint: NSLayoutConstraint? = nil
     
+    var onLongPressed: ((Int, String) -> Void)? // Sends the index and a text as arguments
     var onTextClicked: ((ParagraphView, CGPoint, Int) -> Void)?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -34,6 +35,9 @@ class ParagraphCellView : UITableViewCell {
         
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
         addGestureRecognizer(tapRecognizer)
+        
+        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
+        addGestureRecognizer(longPressRecognizer)
     }
     
     required init?(coder: NSCoder) {
@@ -75,5 +79,10 @@ class ParagraphCellView : UITableViewCell {
     
     @objc func handleTap(_ gesture: UITapGestureRecognizer) {
         onTextClicked?(paragraphView, gesture.location(in: self), index)
+    }
+    
+    @objc func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began else { return }
+        onLongPressed?(index, paragraphView.text)
     }
 }

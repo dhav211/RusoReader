@@ -7,10 +7,19 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
     private let viewModel: ReaderViewModel
     private var orientation: PhoneOrientation = .error
     
+    private lazy var readAlongToolbar: ReadAlongToolbar? = { [weak self] in
+        guard let viewController = self, let speechSynth = self?.viewModel.speechSynth else { return nil }
+        
+        let toolbar = ReadAlongToolbar(speechSynth: speechSynth, viewController: viewController)
+        
+        return toolbar
+    }()
+    
     init(viewModel: ReaderViewModel) {
         self.viewModel = viewModel
+        
         super.init(nibName: nil, bundle: nil)
-
+        
         // The user defaults can hold the default text size, this will return 0 if it's never been saved
         var textSize = UserDefaultsManager.textSize
 
@@ -94,6 +103,12 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
             cell.onTextClicked = { [weak self] paragraphView, location, index in
                 self?.textClicked(in: paragraphView, at: location, from: index)
             }
+            // When the user long presses a paragaph, activate the read along toolbar and begin the TTS engine
+            cell.onLongPressed = { [weak self] index, text in
+                guard let toolbar = self?.readAlongToolbar else { return }
+                toolbar.enable()
+                self?.viewModel.readText(text)
+            }
         }
         
         return cell
@@ -138,7 +153,6 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
         let selectionRange = SelectionRange(text: textView.text, characterIndex: charIndex)
         
         if let wordRange = Range(selectionRange.wordRange, in: textView.text) {
-            //textView.highlightSelection(selectionRange: selectionRange)
             if let selectedParagraph = viewModel.getParagraph(at: index) {
                 selectedParagraph.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: selectionRange.wordRange)
                 selectedParagraph.addAttribute(.underlineColor, value: UIColor.blue, range: selectionRange.wordRange)
@@ -150,6 +164,9 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
             let wordDetailsViewControler = viewModel.buildWordDetailsViewController(with: String(textView.text[wordRange]))
             wordDetailsViewControler.modalPresentationStyle = .pageSheet
             self.present(wordDetailsViewControler, animated: true)
+            
+            // If the toolbar is open, this will disable it, stopping the reading and closing the toolbar
+            readAlongToolbar?.enable()
             
             // We are adding this selection so we can keep track of which words are highlighted
             currentSelections.insert(CurrentSelectionRange(index: index, selectionRange: selectionRange))

@@ -2,8 +2,8 @@ import UIKit
 import AVFAudio
 
 final class ReadAlongToolbar: SpeechSynthObserver {
-    private let speechSynth: SpeechSynth
-    private let viewController: UIViewController
+    private weak var speechSynth: SpeechSynth?
+    private weak var viewController: ReaderViewController?
     private var isEnabled: Bool = false
     
     private lazy var images: [String:UIImage?] = {
@@ -32,16 +32,18 @@ final class ReadAlongToolbar: SpeechSynthObserver {
     }()
     
     
-    init(speechSynth: SpeechSynth, viewController: UIViewController) {
+    init(speechSynth: SpeechSynth, viewController: ReaderViewController) {
         self.speechSynth = speechSynth
         self.viewController = viewController
     
+        // The observer handles the function calls for the AVSpeechSynthsizerDelegate, as this and the reader will need to conform to it
         speechSynth.addObserver(self)
         
         viewController.navigationController?.setToolbarHidden(true, animated: false)
     }
     
     deinit {
+        guard let speechSynth else { return }
         speechSynth.removeObserver(self)
     }
     
@@ -52,8 +54,8 @@ final class ReadAlongToolbar: SpeechSynthObserver {
     func enable() {
         isEnabled.toggle()
         
-        // There may be times when the toolbar should be removed but not controlled
-        guard let navigationController = viewController.navigationController else { return }
+        // There may be times when the toolbar should be removed but the delegate functions won't be called to remove it, we will handle those cases here
+        guard let viewController, let navigationController = viewController.navigationController, let speechSynth else { return }
         if !isEnabled {
             if !navigationController.isToolbarHidden { navigationController.setToolbarHidden(true, animated: false) }
             if speechSynth.isSpeaking { speechSynth.stop() }
@@ -61,15 +63,19 @@ final class ReadAlongToolbar: SpeechSynthObserver {
     }
     
     @objc private func pause() {
+        guard let speechSynth else { return }
         speechSynth.pause()
     }
     
     @objc private func stop() {
+        guard let speechSynth else { return }
         speechSynth.stop()
     }
     
+    // The following functions are delegate functions from AVSpeechSynthsizerDelegate, they will manage the tool bar buttons state as the speech synth is running
+    
     func didSpeechSynthStart() {
-        guard let navigationController = viewController.navigationController else { return }
+        guard let viewController, let navigationController = viewController.navigationController else { return }
         
         if isEnabled {
             viewController.setToolbarItems(pauseToolbarItems, animated: false)
@@ -78,7 +84,7 @@ final class ReadAlongToolbar: SpeechSynthObserver {
     }
     
     func didSpeechSynthFinish() {
-        guard let navigationController = viewController.navigationController else { return }
+        guard let viewController, let navigationController = viewController.navigationController else { return }
         
         if isEnabled {
             navigationController.setToolbarHidden(true, animated: true)
@@ -87,12 +93,14 @@ final class ReadAlongToolbar: SpeechSynthObserver {
     }
     
     func didSpeechSynthPause() {
+        guard let viewController else { return }
         if isEnabled {
             viewController.setToolbarItems(playToolbarItems, animated: false)
         }
     }
     
     func  didSpeechSynthContinue() {
+        guard let viewController else { return }
         if isEnabled {
             viewController.setToolbarItems(pauseToolbarItems, animated: false)
         }
