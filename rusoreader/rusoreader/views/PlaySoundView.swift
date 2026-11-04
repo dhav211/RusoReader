@@ -1,4 +1,5 @@
 import UIKit
+import AVFAudio
 
 final class PlaySoundView: UIImageView {
     private let speechSynth: SpeechSynth
@@ -31,7 +32,7 @@ final class PlaySoundView: UIImageView {
     
     @objc private func didTap(_ sender: UITapGestureRecognizer) {
         do {
-            try speechSynth.speak(content: textToSpeak)
+            try speechSynth.speak(content: textToSpeak, rate: AVSpeechUtteranceDefaultSpeechRate)
         } catch {
             // TODO This needs to open a ui alert letting the user know there was an error
             print("!!!")

@@ -1,4 +1,5 @@
 import UIKit
+import AVFAudio
 
 final class SpeakableLabel: UILabel {
     private let speechSynth: SpeechSynth
@@ -22,7 +23,7 @@ final class SpeakableLabel: UILabel {
 
     @objc private func didTap(_ sender: UITapGestureRecognizer) {        
         do {
-            try speechSynth.speak(content: textToSpeak)
+            try speechSynth.speak(content: textToSpeak, rate: AVSpeechUtteranceDefaultSpeechRate)
         } catch {
             // This needs to open a ui alert letting the user know there was an error
             print("!!!")

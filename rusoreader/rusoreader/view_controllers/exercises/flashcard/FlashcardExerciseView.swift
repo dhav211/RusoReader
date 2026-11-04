@@ -1,4 +1,5 @@
 import UIKit
+import AVFAudio
 
 /// A view controller that presents a flashcard-based language learning exercise.
 ///
@@ -146,7 +147,7 @@ class FlashcardExerciseView : ExerciseViewController {
     
     private func runTTS() {
         do {
-            try speechSynth.speak(content: viewModel.getWordText())
+            try speechSynth.speak(content: viewModel.getWordText(), rate: AVSpeechUtteranceDefaultSpeechRate)
         } catch {
             print("Couldn't run tts: \(error)")
         }
