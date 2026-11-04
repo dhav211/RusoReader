@@ -106,7 +106,7 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
             // When the user long presses a paragaph, activate the read along toolbar and begin the TTS engine
             cell.onLongPressed = { [weak self] index, text in
                 guard let toolbar = self?.readAlongToolbar else { return }
-                toolbar.enable()
+                toolbar.isEnabled = true
                 self?.viewModel.readText(text)
             }
         }
@@ -166,7 +166,7 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
             self.present(wordDetailsViewControler, animated: true)
             
             // If the toolbar is open, this will disable it, stopping the reading and closing the toolbar
-            readAlongToolbar?.enable()
+            readAlongToolbar?.isEnabled = false
             
             // We are adding this selection so we can keep track of which words are highlighted
             currentSelections.insert(CurrentSelectionRange(index: index, selectionRange: selectionRange))
@@ -180,6 +180,9 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
         tableOfContents.modalPresentationStyle = .pageSheet
         tableOfContents.delegate = self
         self.present(tableOfContents, animated: true)
+        
+        // Disable the read along toolbar, which will stop the speech synth and close the toolbar
+        readAlongToolbar?.isEnabled = false
     }
 
     /// A modal that only covers half the screen and will let the user change some basic settings
@@ -189,6 +192,9 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
         settings.modalPresentationStyle = .pageSheet
         settings.sheetPresentationController?.detents = [.medium()]
         self.present(settings, animated: true)
+        
+        // Disable the read along toolbar, which will stop the speech synth and close the toolbar
+        readAlongToolbar?.isEnabled = false
     }
     
     /// Set the reader view's text with the selected chapter's text, this will also be a point to reset any possible values the reader view has accumluated

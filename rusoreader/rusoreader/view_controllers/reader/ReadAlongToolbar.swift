@@ -4,7 +4,16 @@ import AVFAudio
 final class ReadAlongToolbar: SpeechSynthObserver {
     private weak var speechSynth: SpeechSynth?
     private weak var viewController: ReaderViewController?
-    private var isEnabled: Bool = false
+    var isEnabled: Bool = false {
+        didSet {
+            // There may be times when the toolbar should be removed but the delegate functions won't be called to remove it, we will handle those cases here
+            guard let viewController, let navigationController = viewController.navigationController, let speechSynth else { return }
+            if !isEnabled {
+                if !navigationController.isToolbarHidden { navigationController.setToolbarHidden(true, animated: true) }
+                if speechSynth.isSpeaking { speechSynth.stop() }
+            }
+        }
+    }
     
     private lazy var images: [String:UIImage?] = {
         let pauseImage = UIImage(systemName: "pause.circle.fill")
@@ -51,17 +60,6 @@ final class ReadAlongToolbar: SpeechSynthObserver {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func enable() {
-        isEnabled.toggle()
-        
-        // There may be times when the toolbar should be removed but the delegate functions won't be called to remove it, we will handle those cases here
-        guard let viewController, let navigationController = viewController.navigationController, let speechSynth else { return }
-        if !isEnabled {
-            if !navigationController.isToolbarHidden { navigationController.setToolbarHidden(true, animated: false) }
-            if speechSynth.isSpeaking { speechSynth.stop() }
-        }
-    }
-    
     @objc private func pause() {
         guard let speechSynth else { return }
         speechSynth.pause()
@@ -84,12 +82,7 @@ final class ReadAlongToolbar: SpeechSynthObserver {
     }
     
     func didSpeechSynthFinish() {
-        guard let viewController, let navigationController = viewController.navigationController else { return }
-        
-        if isEnabled {
-            navigationController.setToolbarHidden(true, animated: true)
-            enable()
-        }
+        isEnabled = false
     }
     
     func didSpeechSynthPause() {
