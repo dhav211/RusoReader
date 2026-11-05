@@ -18,6 +18,7 @@ class ReaderViewModel {
     private var textSize: CGFloat = 12
     private var paragraphs = [NSMutableAttributedString]()
     private var lastCellIndices = [Int]()
+    
     let speechSynth: SpeechSynth
 
     init(wordService: WordService, bookService: BookService, sentenceService: SentenceService, book: Book) {
@@ -129,12 +130,6 @@ class ReaderViewModel {
     func paragraphCount() -> Int {
         return paragraphs.count
     }
-
-//    func buildWordDetailsViewModel(for word: String) -> WordDetailsViewModel? {
-//        // TODO this shouldn't just get the first match but eventually this will load a page vew controller for the user to swipe through
-//        guard let matches = wordService.findMatches(from: word).first else { return nil }
-//        return WordDetailsViewModel(word: matches, wordService: wordService, sentenceService: sentenceService)
-//    }
     
     func buildWordDetailsViewController(with word: String) -> WordDetailsViewController {
         return WordDetailsViewController(
