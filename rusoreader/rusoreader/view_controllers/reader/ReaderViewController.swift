@@ -109,6 +109,7 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
                 toolbar.isEnabled = true
                 self?.viewModel.readText(text)
             }
+            viewModel.speechSynth.addObserver(cell)
         }
         
         return cell
@@ -127,6 +128,14 @@ class ReaderViewController: UITableViewController, TableOfContentsDelegate, Read
     // When a cell arrives and exits we will temporary save the index in the view model and we will use it for resuming the users chapter progress
     override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         viewModel.addToLastCellIndices(indexPath.row)
+        
+        guard let cell = cell as? ParagraphCellView else { return }
+        
+        if cell.isBeingReadAloud {
+            viewModel.speechSynth.stop()
+        }
+        
+        viewModel.speechSynth.removeObserver(cell)
     }
     
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {

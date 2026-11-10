@@ -12,6 +12,8 @@ class ParagraphCellView : UITableViewCell {
     private var index = 0
     private var leadingConstraint: NSLayoutConstraint? = nil
     private var trailingConstraint: NSLayoutConstraint? = nil
+    private let readAlongHighlighter = ReadAlongHighlighter()
+    private(set) var isBeingReadAloud: Bool = false
     
     var onLongPressed: ((Int, String) -> Void)? // Sends the index and a text as arguments
     var onTextClicked: ((ParagraphView, CGPoint, Int) -> Void)?
@@ -69,6 +71,10 @@ class ParagraphCellView : UITableViewCell {
         return paragraphView.text
     }
     
+    func getAttributedText() -> NSAttributedString {
+        return paragraphView.attributedText
+    }
+    
     func setIndex(to value: Int) {
         index = value
     }
@@ -83,6 +89,30 @@ class ParagraphCellView : UITableViewCell {
     
     @objc func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
         guard gesture.state == .began else { return }
+        isBeingReadAloud = true
         onLongPressed?(index, paragraphView.text)
+    }
+}
+
+extension ParagraphCellView: SpeechSynthObserver {
+    func didSpeechSynthStart() {
+        readAlongHighlighter.clearAttributes()
+    }
+    
+    func didSpeechSynthFinish() {
+        guard isBeingReadAloud else { return }
+        let mutableText: NSMutableAttributedString = NSMutableAttributedString(attributedString: paragraphView.attributedText)
+        readAlongHighlighter.removeHighlights(from: mutableText)
+        paragraphView.attributedText = mutableText
+        isBeingReadAloud = false
+    }
+    
+    func willSpeechSynthSpeakRange(range: NSRange) {
+        guard isBeingReadAloud else { return }
+        
+        let highlightedRange = SelectionRange(text: paragraphView.text, characterIndex: range.location)
+        let mutableText: NSMutableAttributedString = NSMutableAttributedString(attributedString: paragraphView.attributedText)
+        readAlongHighlighter.highlightText(to: mutableText, selectionRange: highlightedRange)
+        paragraphView.attributedText = mutableText
     }
 }

@@ -3,7 +3,7 @@ import UIKit
 class ParagraphView: UITextView {
     init() {
         let storage = NSTextStorage()
-        let manager = NSLayoutManager()
+        let manager = HighlightLayoutManager()
         let container = NSTextContainer()
         
         storage.addLayoutManager(manager)
